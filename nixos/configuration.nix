@@ -17,7 +17,7 @@
   networking.hostName = "nixThink"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
   
-  programs.hyprland.enable = true;
+  # programs.hyprland.enable = true;
 
   # Opzionale ma consigliato
   environment.sessionVariables = {
@@ -58,7 +58,7 @@
   # Configure keymap in X11
   services.xserver.xkb = {
     layout = "gb";
-    variant = "";
+    variant = "it";
   };
 
   # Configure console keymap
@@ -92,7 +92,7 @@
     description = "noya";
     extraGroups = ["sudoers" "networkmanager" "wheel" ];
     packages = with pkgs; [
-    #  thunderbird
+       thunderbird
     ];
   };
 
@@ -108,23 +108,20 @@
     neovim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
     wget
     gcc
-    waybar
-    hyprpaper
+  # waybar
+  # hyprpaper
     wl-clipboard
     kitty
     fastfetch
     nerd-fonts.hack
     python311
     python311Packages.pip
-    wireshark
-    wayland
+  # wayland
     nmap
     htop
     git
-    rofi
+  # rofi
     nautilus
-    docker
-    docker-compose
     ];
  
   # Some programs need SUID wrappers, can be configured further or are
