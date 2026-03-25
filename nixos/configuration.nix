@@ -48,17 +48,17 @@
     LC_TELEPHONE = "it_IT.UTF-8";
     LC_TIME = "it_IT.UTF-8";
   };
-
   # Enable the X11 windowing system.
-  # services.xserver.enable = true;
+  services.xserver.enable = true;
 
-   services.displayManager.sddm.enable = true;
-   services.displayManager.sddm.wayland.enable = true;
+  # Enable the Cinnamon Desktop Environment.
+  services.xserver.displayManager.lightdm.enable = true;
+  services.xserver.desktopManager.cinnamon.enable = true;
 
   # Configure keymap in X11
   services.xserver.xkb = {
     layout = "gb";
-    variant = "it";
+    variant = "";
   };
 
   # Configure console keymap
@@ -86,15 +86,27 @@
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
 
+  services.ollama = {
+    enable = true;
+    # Se hai una GPU NVIDIA, scommenta la riga sotto
+    # acceleration = "cuda"; 
+    # Imposta l'ascolto su tutte le interfacce per farlo vedere a Docker
+    host = "0.0.0.0";
+  };
+
+  virtualisation.docker.enable = true;
+
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.noya = {
     isNormalUser = true;
     description = "noya";
-    extraGroups = ["sudoers" "networkmanager" "wheel" ];
+    extraGroups = ["sudoers" "networkmanager" "wheel" "docker" ];
     packages = with pkgs; [
        thunderbird
     ];
   };
+
+  networking.firewall.allowedTCPPorts = [ 11434 3000 8080 ];
 
   # Install firefox.
   programs.firefox.enable = true;
@@ -110,7 +122,7 @@
     gcc
   # waybar
   # hyprpaper
-    wl-clipboard
+  # wl-clipboard
     kitty
     fastfetch
     nerd-fonts.hack
@@ -122,8 +134,12 @@
     git
   # rofi
     nautilus
+    ollama
+    docker-compose # Utile se vorrai automatizzare
+    curl
     ];
- 
+
+
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
   # programs.mtr.enable = true;
