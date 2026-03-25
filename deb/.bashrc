@@ -123,3 +123,7 @@ export PS1='\[\033[35m\]\t \[\033[37m\]\u\[\033[38;5;213m\]@\h \[\033[33m\]\w\[\
 alias jarvis='OLLAMA_API_BASE=http://127.0.0.1:11434 aider --model ollama/qwen2.5-coder:1.5b'
 alias jarvis2='OLLAMA_API_BASE=http://127.0.0.1:11434 aider --model ollama/qwen2.5-coder:3b'
 
+
+. "$HOME/.cargo/env"
+
+alias backup-ssd='/home/noya/backupMiniSSD/backup_to_minissd.sh'
