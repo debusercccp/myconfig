@@ -1,23 +1,40 @@
 #!/bin/bash
 
-# Percorsi
+# --- Configurazione ---
+MOUNT_POINT="$HOME/MiniSSD"
+DEST="$MOUNT_POINT/Backup_Sistema"
 SOURCES=("$HOME/Programmi" "$HOME/.bashrc" "$HOME/.config/kitty" "$HOME/.config/nvim" "$HOME/neural-lib")
-DEST="$HOME/MiniSSD/Backup_Sistema"
 IGNORE_FILE="$HOME/backupMiniSSD/.backup_ignore"
 
-if [ -d "$HOME/Programmi/.venv" ]; then
-    echo "Generazione requirements.txt per l'ambiente virtuale..."
-    $HOME/Programmi/.venv/bin/pip freeze > $HOME/Programmi/requirements.txt
+# --- 1. Controllo se il MiniSSD è collegato ---
+if ! mountpoint -q "$MOUNT_POINT"; then
+    echo " ERRORE: Il MiniSSD non è montato su $MOUNT_POINT."
+    echo "Inserisci il disco e riprova."
+    exit 1
 fi
 
-# Crea la cartella di destinazione se non esiste
-mkdir -p "$DEST"
+echo " MiniSSD rilevato. Preparazione backup..."
 
-echo "Inizio backup su MiniSSD..."
+# --- 2. Salvataggio dipendenze Python (se esiste .venv) ---
+VENV_PATH="$HOME/Programmi/.venv"
+if [ -d "$VENV_PATH" ]; then
+    echo " Generazione requirements.txt dalle dipendenze attuali..."
+    # Usiamo il binario pip interno al venv per essere sicuri di leggere i pacchetti giusti
+    "$VENV_PATH/bin/pip" freeze > "$HOME/Programmi/requirements.txt" 2>/dev/null
+fi
+
+# --- 3. Esecuzione Backup ---
+mkdir -p "$DEST"
+echo " Inizio sincronizzazione su $DEST..."
 
 for item in "${SOURCES[@]}"; do
-    # -a: archivio, -v: verbose, --delete: sincronizza eliminazioni
-    rsync -av --delete --exclude-from="$IGNORE_FILE" "$item" "$DEST"
+    if [ -e "$item" ]; then
+        echo "Copia di: $item..."
+        rsync -av --delete --exclude-from="$IGNORE_FILE" "$item" "$DEST"
+    else
+        echo "Avviso: $item non trovato, salto..."
+    fi
 done
 
-echo "Backup completato con successo!"
+echo "------------------------------------------"
+echo " Backup completato con successo!"
