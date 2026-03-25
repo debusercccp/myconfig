@@ -1,0 +1,31 @@
+# Cache generiche e di sistema
+.cache/
+Cache/
+.thumbnails/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Database pesanti di Git (puoi ricostruirli con un git pull/clone)
+.git/objects/pack/
+.git/hooks/
+.git/logs/
+
+# Strumenti di sviluppo (Cursor, Aider, VSCode)
+.cursor/
+.aider.chat.history.md
+.aider.input.history
+.vscode/
+
+# Build e Dataset (Le parti pesanti!)
+target/
+datasets/
+results/
+ftui.egg-info/
+libNN.egg-info/
+
+# File temporanei
+*.tmp
+*.log
+.direnv/
+.venv/
