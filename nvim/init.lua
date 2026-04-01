@@ -53,7 +53,11 @@ require("lazy").setup({
   -- LSP: GESTIONE E CONFIGURAZIONE
   { "williamboman/mason.nvim", config = true },
   { "williamboman/mason-lspconfig.nvim" },
-  { "neovim/nvim-lspconfig" },
+  
+  {
+    "neovim/nvim-lspconfig",
+    version = "v2.*"
+  },
 
   -- EVIDENZIAZIONE SINTASSI (Treesitter)
   {
@@ -74,6 +78,7 @@ require("lazy").setup({
   { 
     'nvim-telescope/telescope.nvim', 
     dependencies = { 'nvim-lua/plenary.nvim' },
+    tag = "0.1.8", 
     config = true
   },
 
