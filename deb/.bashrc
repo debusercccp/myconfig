@@ -120,9 +120,7 @@ export PATH="$HOME/.local/bin:$PATH"
 
 export PS1='\[\033[35m\]\t \[\033[37m\]\u\[\033[38;5;213m\]@\h \[\033[33m\]\w\[\033[0m\] '
 
-alias jarvis='OLLAMA_API_BASE=http://127.0.0.1:11434 aider --model ollama/qwen2.5-coder:1.5b'
-alias jarvis2='OLLAMA_API_BASE=http://127.0.0.1:11434 aider --model ollama/qwen2.5-coder:3b'
-
+alias jarvis='OLLAMA_API_BASE=http://127.0.0.1:11434 aider --model ollama/qwen3.5:latest'
 
 . "$HOME/.cargo/env"
 
