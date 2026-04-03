@@ -3,7 +3,7 @@
 # --- Configurazione ---
 MOUNT_POINT="$HOME/MiniSSD"
 DEST="$MOUNT_POINT/Backup_Sistema"
-SOURCES=("$HOME/Programmi" "$HOME/.bashrc" "$HOME/.config/kitty" "$HOME/.config/nvim" "$HOME/neural-lib")
+SOURCES=("$HOME/Programmi" "$HOME/.bashrc" "$HOME/.config/kitty" "$HOME/.config/nvim" "$HOME/librerie" "$HOME/modelli" "$HOME/datasets")
 IGNORE_FILE="$HOME/backupMiniSSD/.backup_ignore"
 
 # --- 1. Controllo se il MiniSSD è collegato ---
