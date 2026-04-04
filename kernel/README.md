@@ -44,10 +44,11 @@ Installazione delle dipendenze di build:
 sudo apt update
 sudo apt install build-essential flex bison libncurses-dev libssl-dev libelf-dev
 ```
-Su Arch:
+
+Su Arch Linux:
 
 ```bash
-sudo pacman -S --needed base-devel bc cpio iconv libelf ncurses openssl pahole python wget git xz
+sudo pacman -S --needed base-devel bc cpio libelf ncurses openssl pahole python wget grub
 ```
 
 > `flex` e `bison` sono necessari per la generazione degli analizzatori lessicali usati durante la configurazione del kernel.
@@ -95,6 +96,11 @@ scripts/config --disable DEBUG_INFO_BTF
 scripts/config --disable GDB_SCRIPTS
 ```
 
+> **Nota per Arch Linux:** Se `zcat /proc/config.gz` non è disponibile, la configurazione del kernel corrente può essere recuperata con:
+> ```bash
+> cp /usr/lib/modules/$(uname -r)/build/.config .config
+> ```
+
 ---
 
 ## 4. Compilazione e installazione
@@ -107,7 +113,7 @@ make -j$(nproc)
 
 Genera i file oggetto (`.o`) e l'immagine compressa `bzImage` sfruttando tutti i thread disponibili.
 
-### Installazione
+### Installazione — Debian/Ubuntu
 
 ```bash
 # Installa i moduli compilati in /lib/modules/6.19.7/
@@ -118,6 +124,26 @@ sudo make install
 
 # Aggiorna il bootloader
 sudo update-grub
+```
+
+### Installazione — Arch Linux
+
+Su Arch l'installazione è manuale e più granulare:
+
+```bash
+# 1. Installa i moduli compilati (driver)
+sudo make modules_install
+
+# 2. Copia il kernel in /boot
+sudo cp -v arch/x86/boot/bzImage /boot/vmlinuz-linux-bore
+
+# 3. Genera l'initramfs
+# Usa '6.19.7' se la cartella in /lib/modules non ha il suffisso -bore
+sudo mkinitcpio -k 6.19.7 -g /boot/initramfs-linux-bore.img
+
+# 4. Aggiorna GRUB
+# Se /boot/grub non esiste: sudo mkdir -p /boot/grub
+sudo grub-mkconfig -o /boot/grub/grub.cfg
 ```
 
 ---
@@ -148,7 +174,7 @@ Dopo il riavvio, verificare che tutto sia configurato correttamente:
 ```bash
 # Versione kernel
 uname -r
-# Atteso: 6.19.7
+# Atteso: 6.19.7 (o 6.19.7-bore se impostato LOCALVERSION)
 
 # Algoritmo TCP attivo
 sysctl net.ipv4.tcp_congestion_control
