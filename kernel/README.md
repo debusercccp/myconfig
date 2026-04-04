@@ -44,6 +44,11 @@ Installazione delle dipendenze di build:
 sudo apt update
 sudo apt install build-essential flex bison libncurses-dev libssl-dev libelf-dev
 ```
+Su Arch:
+
+```bash
+sudo pacman -S base-devel ncurses libelf openssl
+```
 
 > `flex` e `bison` sono necessari per la generazione degli analizzatori lessicali usati durante la configurazione del kernel.
 
