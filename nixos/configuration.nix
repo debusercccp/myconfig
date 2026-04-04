@@ -111,6 +111,36 @@
   # Install firefox.
   programs.firefox.enable = true;
 
+  programs.nix-ld.enable = true;
+  programs.nix-ld.libraries = with pkgs; [
+    nspr
+    nss
+    glib
+    gtk3
+    atk
+    at-spi2-atk
+    cairo
+    pango
+    gdk-pixbuf
+    xorg.libX11
+    xorg.libXcomposite
+    xorg.libXdamage
+    xorg.libXext
+    xorg.libXfixes
+    xorg.libXi
+    xorg.libXrandr
+    xorg.libXrender
+    xorg.libXtst
+    xorg.libXScrnSaver
+    alsa-lib
+    mesa
+    expat
+    dbus
+    libdrm
+    libxkbcommon
+    systemd # per libudev
+  ];
+
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
