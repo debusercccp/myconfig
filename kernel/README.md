@@ -47,7 +47,7 @@ sudo apt install build-essential flex bison libncurses-dev libssl-dev libelf-dev
 Su Arch:
 
 ```bash
-sudo pacman -S base-devel ncurses libelf openssl
+sudo pacman -S --needed base-devel bc cpio iconv libelf ncurses openssl pahole python wget git xz
 ```
 
 > `flex` e `bison` sono necessari per la generazione degli analizzatori lessicali usati durante la configurazione del kernel.
