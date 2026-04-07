@@ -88,24 +88,24 @@ patch -p1 < bore.patch
 
    ### 2.5.3 Compilazione e Deployment
 
-        ```bash
-        make -j$(nproc)
-        ```
+```bash
+make -j$(nproc)
+```
 
 Usando l'argomento -j$(nproc), istruiamo il compilatore a creare un numero di processi pari al numero di core logici della tua CPU.
 
 
    ### 2.5.4 Installazione su Debian
 
-        ```bash
-        make modules_install   #Prende tutti i driver compilati come moduli (.ko) e li organizza in /lib/modules/6.19.7/.
-        ```
-        ```bash
-        make install
-        ```
-        ```bash
-        update-grub
-        ```
+```bash
+make modules_install   #Prende tutti i driver compilati come moduli (.ko) e li organizza in /lib/modules/6.19.7/.
+```
+```bash
+make install
+```
+```bash
+update-grub
+```
 
 ## 3. Configurazione Lean Kernel
 
