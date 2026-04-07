@@ -71,42 +71,41 @@ patch -p1 < bore.patch
 ---
 ## 2.5 La Configurazione "Lean"
 
-### 2.5.1 Localmodconfig
-
-Il comando make localmodconfig funziona analizzando i moduli attualmente caricati nel sistema operativo (lsmod).
-
-Cosa fa: 
+   ### 2.5.1 Localmodconfig
         
-      Disabilita migliaia di driver per hardware che non possiedi.
+   Il comando make localmodconfig funziona analizzando i moduli attualmente caricati nel sistema operativo (lsmod).
 
-      Regola d'oro: Prima di lanciarlo, assicurati che tutte le periferiche che usi abitualmente siano collegate e accese, altrimenti i relativi driver verranno rimossi.
+   Cosa fa: 
+           Disabilita migliaia di driver per hardware che non possiedi.
+           Regola d'oro: Prima di lanciarlo, assicurati che tutte le periferiche che usi abitualmente siano collegate e accese, altrimenti i relativi driver verranno rimossi.
 
-### 2.5.2 Risoluzione dei "Blocchi" Debian
+   ### 2.5.2 Risoluzione dei "Blocchi" Debian
 
-Usiamo ./scripts/config per:
+   Usiamo ./scripts/config per:
 
-    Rimuovere le chiavi: Impedisce errori di "Missing certs".
+   - Rimuovere le chiavi: Impedisce errori di "Missing certs".
+   - Eliminare il Debug: Rimuovendo DEBUG_INFO, il kernel passa da ~500MB a ~15MB, rendendo il sistema più snello e il boot leggermente più rapido.
 
-    Eliminare il Debug: Rimuovendo DEBUG_INFO, il kernel passa da ~500MB a ~15MB, rendendo il sistema più snello e il boot leggermente più rapido.
+   ### 2.5.3 Compilazione e Deployment
 
-### 2.5.3 Compilazione e Deployment
+        ```bash
+        make -j$(nproc)
+        ```
 
-```bash
-make -j$(nproc)
-```
 Usando l'argomento -j$(nproc), istruiamo il compilatore a creare un numero di processi pari al numero di core logici della tua CPU.
 
-### 2.5.4 Installazione su Debian
 
-```bash
-    make modules_install   #Prende tutti i driver compilati come moduli (.ko) e li organizza in /lib/modules/6.19.7/.
-```
-```bash
-    make install
-```
-```bash
-    update-grub
-```
+   ### 2.5.4 Installazione su Debian
+
+        ```bash
+        make modules_install   #Prende tutti i driver compilati come moduli (.ko) e li organizza in /lib/modules/6.19.7/.
+        ```
+        ```bash
+        make install
+        ```
+        ```bash
+        update-grub
+        ```
 
 ## 3. Configurazione Lean Kernel
 
