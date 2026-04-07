@@ -192,6 +192,8 @@ sudo grub-mkconfig -o /boot/grub/grub.cfg
 Aggiungere le seguenti righe a `/etc/sysctl.conf`:
 
 ```ini
+vm.swappiness=10
+
 net.core.default_qdisc = fq
 net.ipv4.tcp_congestion_control = bbr
 ```
