@@ -69,6 +69,50 @@ patch -p1 < bore.patch
 - `kernel/sched/bore.c` — nuovo sottosistema BORE (file creato)
 
 ---
+### 2.5 La Configurazione "Lean"
+
+## 2.5.1 — Localmodconfig
+
+Il comando make localmodconfig funziona analizzando i moduli attualmente caricati nel sistema operativo (lsmod).
+
+    Cosa fa: 
+      Disabilita migliaia di driver per hardware che non possiedi.
+
+      Regola d'oro: Prima di lanciarlo, assicurati che tutte le periferiche che usi abitualmente (chiavette USB, mouse, controller, stampanti) siano collegate e accese, altrimenti i relativi driver verranno rimossi.
+
+## 2.5.2 — Risoluzione dei "Blocchi" Debian
+
+I kernel Debian ufficiali sono compilati con chiavi di firma digitali (SYSTEM_TRUSTED_KEYS). Se provi a compilare senza disabilitarle, il processo fallirà con un errore di certificato mancante.
+Usiamo ./scripts/config per:
+
+    Rimuovere le chiavi: Impedisce errori di "Missing certs".
+
+    Eliminare il Debug: Rimuovendo DEBUG_INFO, il kernel passa da ~500MB a ~15MB, rendendo il sistema più snello e il boot leggermente più rapido.
+
+4. Approfondimento: Compilazione e Deployment
+
+Qui il codice sorgente C viene trasformato in un binario eseguibile che il tuo processore può comprendere.
+4.1 — Parallelismo con -j$(nproc)
+
+La compilazione del kernel è una delle operazioni più pesanti per una CPU. Usando l'argomento -j$(nproc), istruiamo il compilatore a creare un numero di processi pari al numero di core logici della tua CPU.
+
+    Risultato: Se hai 8 core, il kernel verrà compilato fino a 8 volte più velocemente rispetto a una build a thread singolo.
+
+4.2 — La "Tripletta" di installazione su Debian
+
+A differenza di altre distribuzioni, su Debian il Makefile è integrato con gli script di sistema:
+
+    make modules_install: Prende tutti i driver compilati come moduli (.ko) e li organizza in /lib/modules/6.19.7/. Senza questo, al riavvio non avresti Wi-Fi, audio o accelerazione grafica.
+
+    make install: È un comando "magico" che esegue tre operazioni:
+
+        Copia l'immagine del kernel (vmlinuz) in /boot.
+
+        Genera il file Initrd (Initial Ramdisk), un mini-sistema temporaneo che serve al kernel per caricare i driver del disco all'avvio.
+
+        Crea la mappa dei simboli (System.map) per il debug del sistema.
+
+    update-grub: Registra formalmente il nuovo kernel nel menu di avvio, posizionandolo solitamente come prima scelta.
 
 ## 3. Configurazione Lean Kernel
 
