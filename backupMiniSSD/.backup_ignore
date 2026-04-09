@@ -17,12 +17,13 @@ __pycache__/
 .aider.input.history
 .vscode/
 
-# Build e Dataset (Le parti pesanti!)
+# Build e Dataset 
 target/
 datasets/
 results/
 ftui.egg-info/
 libNN.egg-info/
+datasets/PANTHER19.0_fasta
 
 # File temporanei
 *.tmp
