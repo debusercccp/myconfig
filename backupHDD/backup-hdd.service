@@ -1,0 +1,7 @@
+[Unit]
+Description=Pipeline Backup HDD USB
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/backup-hdd.sh
+User=noya
