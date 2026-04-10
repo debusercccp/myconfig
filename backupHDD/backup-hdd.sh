@@ -28,13 +28,7 @@ sleep 5
 # Verifichiamo che la cartella esista e sia effettivamente il disco montato
 if mountpoint -q "$TARGET"; then
     invia_notifica "Sincronizzazione in corso... Non scollegare il disco." "drive-harddisk"
-    
-    # Esecuzione Rsync Ottimizzata:
-    # -a: Archive (mantiene permessi e date)
-    # -v: Verbose (per leggere i log con journalctl)
-    # -S: Sparse (gestisce i file vuoti o le VM senza sprecare spazio)
-    # (Nessun -z per la compressione, nessun -c per il checksum)
-    
+
     if rsync -avS --delete \
         --exclude="target/" \
         --exclude="node_modules/" \
@@ -42,11 +36,16 @@ if mountpoint -q "$TARGET"; then
         --exclude=".dbus/" \
         --exclude=".local/share/Trash/" \
         --exclude=".git/" \
-        --exclude="*.lock" \        
-        --exclude="backupHDD" \
-        --exclude="backupMiniSSD" \
+        --exclude="*.lock" \
+        --exclude="HDD_Esterno" \
+        --exclude="I_Miei_Backup" \
+        --exclude="lost+found/" \
+        --exclude=".var/app/" \
+        --exclude=".mozilla/" \
+        --exclude=".config/google-chrome*/" \
+        --exclude=".config/chromium/" \
         "$SOURCE" "$TARGET/backup_automatico/"; then
-        
+
         invia_notifica "Backup completato con successo!" "emblem-ok-symbolic"
         echo "[ OK ] Sincronizzazione completata: $(date)" >> "$LOG_FILE"
     else
