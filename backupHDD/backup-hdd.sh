@@ -42,9 +42,9 @@ if mountpoint -q "$TARGET"; then
         --exclude=".dbus/" \
         --exclude=".local/share/Trash/" \
         --exclude=".git/" \
-        --exclude="*.lock" \
-        --exclude="HDD_Esterno" \
-        --exclude="I_Miei_Backup" \
+        --exclude="*.lock" \        
+        --exclude="backupHDD" \
+        --exclude="backupMiniSSD" \
         "$SOURCE" "$TARGET/backup_automatico/"; then
         
         invia_notifica "Backup completato con successo!" "emblem-ok-symbolic"
