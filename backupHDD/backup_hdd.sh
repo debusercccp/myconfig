@@ -58,4 +58,5 @@ if mountpoint -q "$TARGET"; then
 else
     
     echo "ERRORE: $TARGET esiste ma non è un mountpoint riconosciuto."
+    invia_notifica "Errore backup: disco non montato correttamente" "dialog-error"
 fi
