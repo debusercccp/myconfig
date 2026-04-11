@@ -15,6 +15,25 @@ export DISPLAY=:0
 export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$(id -u)/bus"
 export XAUTHORITY="/home/noya/.Xauthority"
 
+# --- Meccanismo Anti-Doppio Avvio ---
+LOCKFILE="/tmp/backup_hdd_${UUID_ATTUALE}.lock"
+
+# Se il file di lock esiste ed è associato a un processo attivo, esci
+if [ -e "$LOCKFILE" ]; then
+    PID=$(cat "$LOCKFILE")
+    if ps -p "$PID" > /dev/null; then
+        echo "Script già in esecuzione (PID: $PID). Esco per evitare doppie notifiche."
+        exit 0
+    fi
+fi
+
+# Crea il file di lock con il PID attuale
+echo $$ > "$LOCKFILE"
+
+# Assicurati di cancellare il lock quando lo script finisce (anche in caso di errore)
+trap 'rm -f "$LOCKFILE"; exit' INT TERM EXIT
+# ------------------------------------
+
 invia_notifica() {
     notify-send "Pipeline HDD" "$1" --icon="$2" -t 5000 || echo "Notifica fallita"
 }
