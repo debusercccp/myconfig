@@ -71,9 +71,7 @@ if mountpoint -q "$TARGET"; then
     
     ln -sfn "$TARGET/backup_automatico" /home/noya/HDD_Attivo
     echo "6. Link simbolico aggiornato in Home come HDD_Attivo."
-    
-    invia_notifica "Backup completato! Disponibile in ~/HDD_Attivo" "emblem-ok-symbolic"
-    
+        
 else
     
     echo "ERRORE: $TARGET esiste ma non è un mountpoint riconosciuto."
