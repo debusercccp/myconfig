@@ -2,6 +2,7 @@
 # Reindirizza tutto l'output in un log per capire dove si blocca
 exec > /tmp/pipeline_debug.log 2>&1
 set -x
+# -----------------------------------
 
 UUID_ATTUALE=$1
 echo "1. Inizio script. UUID passato da systemd: '$UUID_ATTUALE'"
@@ -52,9 +53,19 @@ fi
 # Rimuovo l'eventuale "a capo" dalla stringa TARGET
 TARGET=$(echo "$TARGET" | tr -d '\n' | tr -d '\r')
 
+UUID_ATTUALE=$1
+
+# Definizione del nome "umano" basata sull'UUID
+if [[ "$UUID_ATTUALE" == 8476* ]]; then
+    NOME_DISCO="Disco da 2T"
+else
+    NOME_DISCO="Disco da 500G"
+fi
+
+# Poi nella parte della notifica:
 if mountpoint -q "$TARGET"; then
     echo "3. Il target è un mountpoint valido. Lancio notifica iniziale..."
-    invia_notifica "Avvio sincronizzazione disco $UUID_ATTUALE..." "drive-harddisk"
+    invia_notifica "Avvio sincronizzazione $NOME_DISCO..." "drive-harddisk"
     
     echo "4. Inizio Rsync..."
     rsync -avS --delete \
@@ -67,13 +78,14 @@ if mountpoint -q "$TARGET"; then
         "$SOURCE" "$TARGET/backup_automatico/"
         
     echo "5. Rsync completato con codice uscita $?"
-    invia_notifica "Backup completato su $TARGET!" "emblem-ok-symbolic"
+    invia_notifica "Backup completato su $NOME_DISCO!" "emblem-ok-symbolic"
     
     ln -sfn "$TARGET/backup_automatico" /home/noya/HDD_Attivo
     echo "6. Link simbolico aggiornato in Home come HDD_Attivo."
-        
+
 else
-    
+       
     echo "ERRORE: $TARGET esiste ma non è un mountpoint riconosciuto."
+
     invia_notifica "Errore backup: disco non montato correttamente" "dialog-error"
 fi
