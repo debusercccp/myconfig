@@ -1,5 +1,5 @@
 #!/bin/bash
-# Reindirizza tutto l'output in un log per capire dove si blocca
+
 exec > /tmp/pipeline_debug.log 2>&1
 set -x
 # -----------------------------------
@@ -55,12 +55,12 @@ TARGET=$(echo "$TARGET" | tr -d '\n' | tr -d '\r')
 
 UUID_ATTUALE=$1
 
-# Definizione del nome "umano" basata sull'UUID
-if [[ "$UUID_ATTUALE" == 8476* ]]; then
-    NOME_DISCO="Disco da 2T"
-else
-    NOME_DISCO="Disco da 500G"
-fi
+case "$UUID_ATTUALE" in
+	72e5*) NOME_DISCO="Disco A (500Gb)" ;;
+	8476*) NOME_DISCO="Disco B (2Tb)" ;;
+	6550*) NOME_DISCO="Disco C (500Gb)" ;;
+	*)     NOME_DISCO="Disco Ignoto" ;;
+esac
 
 # Poi nella parte della notifica:
 if mountpoint -q "$TARGET"; then
