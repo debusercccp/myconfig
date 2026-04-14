@@ -1,5 +1,8 @@
 # Regola per il Disco A
-ACTION=="add", SUBSYSTEM=="block", ENV{ID_FS_UUID}=="72e5f1d0-55d1-4dd5-b0c7-644fbc342fcc", TAG+="systemd", ENV{SYSTEMD_WANTS}="backup-hdd@72e5f1d0-55d1-4dd5-b0c7-644fbc342fcc.service"
+ACTION=="add", SUBSYSTEM=="block", ENV{DEVTYPE}=="partition", ENV{ID_FS_UUID}=="72e5f1d0-55d1-4dd5-b0c7-644fbc342fcc", TAG+="systemd", ENV{SYSTEMD_WANTS}="backup-hdd@72e5f1d0-55d1-4dd5-b0c7-644fbc342fcc.service"
 
 # Regola per il Disco B (2Tb)
-ACTION=="add", SUBSYSTEM=="block", ENV{ID_FS_UUID}=="84763b78-b0dc-4593-ba3b-cebc88d54dda", TAG+="systemd", ENV{SYSTEMD_WANTS}="backup-hdd@84763b78-b0dc-4593-ba3b-cebc88d54dda.service"
+ACTION=="add", SUBSYSTEM=="block", ENV{DEVTYPE}=="partition", ENV{ID_FS_UUID}=="84763b78-b0dc-4593-ba3b-cebc88d54dda", TAG+="systemd", ENV{SYSTEMD_WANTS}="backup-hdd@84763b78-b0dc-4593-ba3b-cebc88d54dda.service"
+
+# Regola per il Disco C (6550...)
+ACTION=="add", SUBSYSTEM=="block", ENV{DEVTYPE}=="partition", ENV{ID_FS_UUID}=="65505cfd-073a-4f4c-8f8f-cbbec134f2aa", TAG+="systemd", ENV{SYSTEMD_WANTS}="backup-hdd@65505cfd-073a-4f4c-8f8f-cbbec134f2aa.service"
