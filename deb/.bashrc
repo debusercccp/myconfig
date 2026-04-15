@@ -94,6 +94,7 @@ alias l='ls -CF'
 
 alias aggiorna='sudo apt update && sudo apt upgrade'
 alias pulisci='sudo apt autoremove --purge && sudo apt clean'
+alias cestino='sudo rm -rf ~/.local/share/Trash/*'
 
 # Alias definitions.
 # You may want to put all your additions into a separate file like
