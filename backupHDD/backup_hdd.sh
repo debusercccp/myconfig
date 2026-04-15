@@ -1,5 +1,5 @@
 #!/bin/bash
-
+# Reindirizza tutto l'output in un log per capire dove si blocca
 exec > /tmp/pipeline_debug.log 2>&1
 set -x
 # -----------------------------------
@@ -68,6 +68,9 @@ if mountpoint -q "$TARGET"; then
     invia_notifica "Avvio sincronizzazione $NOME_DISCO..." "drive-harddisk"
     
     echo "4. Inizio Rsync..."
+    
+    # --- MODALITÀ 1: Sincronizzazione Totale (con --delete) ---
+    # Questa cartella sarà lo specchio esatto della Home
     rsync -avS --delete \
         --exclude="target/" --exclude="node_modules/" --exclude=".cache/" \
         --exclude=".dbus/" --exclude=".local/share/Trash/" --exclude=".git/" \
@@ -75,7 +78,28 @@ if mountpoint -q "$TARGET"; then
         --exclude="backupHDD/" --exclude="lost+found/" --exclude=".var/app/" \
         --exclude=".mozilla/" --exclude=".config/google-chrome*/" \
         --exclude=".config/chromium/" --exclude=".aider" \
+        --exclude="datasets/" --exclude="modelli/" \
         "$SOURCE" "$TARGET/backup_automatico/"
+
+    # --- MODALITÀ 2: Archivio Accumulatore (SENZA --delete) ---
+    # Copia i dati ma NON rimuove nulla dal disco se cancellato dal PC.
+    # Creiamo cartelle dedicate alla radice del disco.
+    
+    echo "4b. Archiviazione Datasets e Modelli (Senza rimozione)..."
+    
+    # Assicurati che le cartelle esistano sul disco
+    mkdir -p "$TARGET/Datasets_Archivio"
+    mkdir -p "$TARGET/Modelli_Archivio"
+
+    # Sincronizza Datasets (se la cartella esiste in Home)
+    if [ -d "${SOURCE}datasets" ]; then
+        rsync -avS "$SOURCE/datasets/" "$TARGET/Datasets_Archivio/"
+    fi
+
+    # Sincronizza Modelli (se la cartella esiste in Home)
+    if [ -d "${SOURCE}modelli" ]; then
+        rsync -avS "$SOURCE/modelli/" "$TARGET/Modelli_Archivio/"
+    fi
         
     echo "5. Rsync completato con codice uscita $?"
     invia_notifica "Backup completato su $NOME_DISCO!" "emblem-ok-symbolic"
