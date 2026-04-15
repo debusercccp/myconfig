@@ -74,7 +74,7 @@ if mountpoint -q "$TARGET"; then
     rsync -avS --delete \
         --exclude="target/" --exclude="node_modules/" --exclude=".cache/" \
         --exclude=".dbus/" --exclude=".local/share/Trash/" --exclude=".git/" \
-        --exclude="*.lock" --exclude="HDD_Esterno" --exclude="I_Miei_Backup" \
+        --exclude="*.lock" --exclude="HDD_Attivo" \
         --exclude="backupHDD/" --exclude="lost+found/" --exclude=".var/app/" \
         --exclude=".mozilla/" --exclude=".config/google-chrome*/" \
         --exclude=".config/chromium/" --exclude=".aider" \
