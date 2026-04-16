@@ -17,9 +17,9 @@ __pycache__/
 .aider.input.history
 .vscode/
 
-# Build e Dataset 
+# Build e Dataset (Le parti pesanti!)
 target/
-datasets/
+#datasets/
 results/
 ftui.egg-info/
 libNN.egg-info/
@@ -30,3 +30,11 @@ datasets/PANTHER19.0_fasta
 *.log
 .direnv/
 .venv/
+
+/home/noya/MiniSSD/
+/proc/
+/sys/
+/dev/
+/run/
+/mnt/
+/media/
