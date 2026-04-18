@@ -11,6 +11,7 @@ REPOS=(
   "serum_builder"
   "Music-gen"
   "ftui"
+  "sqlViewer"
   "grrs"
   "libNN"
   "myconfig"
