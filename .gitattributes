@@ -1,0 +1,28 @@
+# --- CLASSIFICAZIONE CORRETTA ---
+
+# Tratta i file .pacnew come CSS (il colpevole principale del Roff)
+*.pacnew linguist-language=css
+
+# Assicura che i file nella cartella deb siano visti come script Shell
+deb/* linguist-language=Shell
+
+# Se hai file di configurazione generici (es. quelli per waybar o i3/sway)
+*.conf linguist-language=Shell
+*.config linguist-language=Shell
+
+
+# --- ESCLUSIONI DALLE STATISTICHE ---
+
+# Nasconde i file di log e ignore dalle statistiche dei linguaggi
+.backup_ignore linguist-vendored
+*.log linguist-vendored
+*.bak linguist-vendored
+
+# Se non vuoi che i file di documentazione (README, history) 
+# influenzino la barra dei colori
+*.md linguist-documentation
+.aider.chat.history.md linguist-vendored
+.aider.input.history linguist-vendored
+
+# Ignora cartelle di backup o temporanee se presenti
+backupMiniSSD/* linguist-vendored
