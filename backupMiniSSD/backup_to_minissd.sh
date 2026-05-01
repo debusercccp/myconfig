@@ -3,7 +3,7 @@
 # --- Configurazione ---
 MOUNT_POINT="$HOME/MiniSSD"
 DEST="$MOUNT_POINT/Backup_Sistema"
-SOURCES=("$HOME/Programmi"  "$HOME/librerie" "$HOME/Documenti" "$HOME/myconfig")
+SOURCES=("$HOME/Programmi"  "$HOME/librerie" "$HOME/myconfig" "$HOME/Documenti")
 IGNORE_FILE="$HOME/backupMiniSSD/.backup_ignore"
 
 # --- 1. Controllo se il MiniSSD è collegato ---
@@ -16,12 +16,12 @@ fi
 echo " MiniSSD rilevato. Preparazione backup..."
 
 # --- 2. Salvataggio dipendenze Python (se esiste .venv) ---
-VENV_PATH="$HOME/Programmi/.venv"
-if [ -d "$VENV_PATH" ]; then
-    echo " Generazione requirements.txt dalle dipendenze attuali..."
-    # Usiamo il binario pip interno al venv per essere sicuri di leggere i pacchetti giusti
-    "$VENV_PATH/bin/pip" freeze > "$HOME/Programmi/requirements.txt" 2>/dev/null
-fi
+#VENV_PATH="$HOME/Programmi/.venv"
+#if [ -d "$VENV_PATH" ]; then
+#    echo " Generazione requirements.txt dalle dipendenze attuali..."
+#    # Usiamo il binario pip interno al venv per essere sicuri di leggere i pacchetti giusti
+#   "$VENV_PATH/bin/pip" freeze > "$HOME/Programmi/requirements.txt" 2>/dev/null
+#fi
 
 # --- 3. Esecuzione Backup ---
 mkdir -p "$DEST"

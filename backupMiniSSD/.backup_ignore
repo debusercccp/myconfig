@@ -38,3 +38,11 @@ datasets/PANTHER19.0_fasta
 /run/
 /mnt/
 /media/
+
+bin/
+usr/ 
+dev/ 
+etc/ 
+lib/ 
+lib64/ 
+proc/ 
