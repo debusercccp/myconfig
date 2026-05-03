@@ -227,3 +227,4 @@ ls /proc/sys/kernel/sched_bore
 ---
 
 > **Risultato:** kernel personalizzato, privo di driver superflui, ottimizzato per uso desktop intensivo con stack di rete avanzato.
+- Linux 7.0.1: Abilitato supporto MMC/SD Block device per ThinkPad S5 Yoga
