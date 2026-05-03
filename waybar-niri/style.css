@@ -1,0 +1,251 @@
+/* ========================================
+   Waybar - Tema Dracula per Niri
+   ======================================== */
+
+/* Palette Dracula */
+@define-color foreground   #f8f8f2;
+@define-color background   rgba(40, 42, 54, 0.85);
+@define-color background2  rgba(40, 42, 54, 0.6);
+@define-color gray         #44475a;
+@define-color black        #21222c;
+@define-color red          #ff5555;
+@define-color green        #50fa7b;
+@define-color yellow       #f1fa8c;
+@define-color cyan         #8be9fd;
+@define-color blue         #6272a4;
+@define-color purple       #bd93f9;
+@define-color pink         #ff79c6;
+@define-color orange       #ffb86c;
+@define-color white        #ffffff;
+@define-color brred        #ff6e6e;
+@define-color brgreen      #69ff94;
+
+/* Colori semantici */
+@define-color critical     @red;
+@define-color warning      @yellow;
+
+@keyframes blink {
+    to {
+        background-color: @white;
+        color: @black;
+    }
+}
+
+/* ---- Reset globale ---- */
+* {
+    border: none;
+    border-radius: 0;
+    font-family: "JetBrainsMono Nerd Font", "FiraCode Nerd Font", monospace;
+    font-weight: bold;
+    font-size: 14px;
+    min-height: 0;
+}
+
+/* ---- Finestra principale ---- */
+window#waybar {
+    background: transparent;
+    color: @foreground;
+}
+
+/* ---- Contenitori left/center/right ---- */
+.modules-left,
+.modules-center,
+.modules-right {
+    background: @background;
+    border-radius: 8px;
+    margin: 4px 2px;
+    padding: 0 4px;
+}
+
+/* ---- Stile base moduli ---- */
+#custom-launcher,
+#custom-power,
+#custom-updates,
+#niri-workspaces,
+#niri-window,
+#clock,
+#tray,
+#battery,
+#pulseaudio,
+#network,
+#cpu,
+#memory,
+#disk,
+#temperature,
+#backlight,
+#language {
+    padding: 0 8px;
+    margin: 2px 1px;
+    color: @foreground;
+    background: transparent;
+}
+
+/* ---- Launcher ---- */
+#custom-launcher {
+    color: @cyan;
+    font-size: 18px;
+    padding-right: 10px;
+}
+
+/* ---- Power ---- */
+#custom-power {
+    color: @red;
+    font-size: 16px;
+    padding-left: 10px;
+}
+
+/* ---- Workspaces ---- */
+#niri-workspaces button {
+    background: transparent;
+    color: @blue;
+    padding: 0 4px;
+    font-size: 12px;
+    transition: all 0.2s ease;
+}
+
+#niri-workspaces button.active {
+    color: @green;
+}
+
+#niri-workspaces button:hover {
+    color: @pink;
+    background: transparent;
+}
+
+/* ---- Window title ---- */
+#niri-window {
+    color: @foreground;
+    font-weight: normal;
+    font-size: 13px;
+    opacity: 0.8;
+}
+
+/* ---- Clock ---- */
+#clock {
+    color: @purple;
+    font-size: 14px;
+}
+
+/* ---- Battery ---- */
+#battery {
+    color: @green;
+}
+
+#battery.discharging {
+    color: @foreground;
+}
+
+#battery.warning:not(.charging) {
+    color: @warning;
+    animation-name: blink;
+    animation-duration: 1s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+}
+
+#battery.critical:not(.charging) {
+    color: @critical;
+    animation-name: blink;
+    animation-duration: 0.5s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+}
+
+/* ---- Audio ---- */
+#pulseaudio {
+    color: @yellow;
+}
+
+#pulseaudio.muted {
+    color: @blue;
+    opacity: 0.6;
+}
+
+#pulseaudio.microphone {
+    color: @orange;
+}
+
+/* ---- Network ---- */
+#network {
+    color: @cyan;
+}
+
+#network.disconnected {
+    color: @red;
+}
+
+/* ---- CPU ---- */
+#cpu {
+    color: @green;
+}
+
+/* ---- Memory ---- */
+#memory {
+    color: @purple;
+}
+
+/* ---- Disk ---- */
+#disk {
+    color: @orange;
+}
+
+#disk.warning {
+    color: @warning;
+}
+
+#disk.critical {
+    color: @critical;
+}
+
+/* ---- Temperature ---- */
+#temperature {
+    color: @orange;
+}
+
+#temperature.critical {
+    color: @critical;
+    animation-name: blink;
+    animation-duration: 0.5s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+}
+
+/* ---- Backlight ---- */
+#backlight {
+    color: @yellow;
+}
+
+/* ---- Updates ---- */
+#custom-updates {
+    color: @cyan;
+}
+
+/* ---- Tray ---- */
+#tray {
+    padding: 0 6px;
+}
+
+#tray > .passive {
+    -gtk-icon-effect: dim;
+}
+
+#tray > .needs-attention {
+    -gtk-icon-effect: highlight;
+    background-color: @red;
+    border-radius: 4px;
+}
+
+/* ---- Tooltip ---- */
+tooltip {
+    background: rgba(40, 42, 54, 0.95);
+    border-radius: 8px;
+    border: 1px solid @purple;
+}
+
+tooltip label {
+    color: @foreground;
+    padding: 4px 8px;
+}

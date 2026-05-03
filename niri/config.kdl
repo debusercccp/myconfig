@@ -1,0 +1,40 @@
+environment {
+    GDK_BACKEND "wayland"
+    QT_QPA_PLATFORM "wayland"
+    XDG_CURRENT_DESKTOP "niri"
+    XDG_SESSION_TYPE "wayland"
+}
+
+// Regola per waybar: niente bordi/background artificiali
+window-rule {
+    match app-id="waybar"
+    draw-border-with-background false
+}
+
+// Regola globale per angoli arrotondati
+window-rule {
+    geometry-corner-radius 12
+    clip-to-geometry true
+}
+
+spawn-at-startup "bash" "-c" "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE DISPLAY"
+spawn-at-startup "bash" "-c" "sleep 3 && systemctl --user restart xdg-desktop-portal-gtk.service && sleep 1 && systemctl --user restart xdg-desktop-portal.service"
+spawn-at-startup "bash" "-c" "sleep 5 && waybar"
+spawn-at-startup "dunst"
+spawn-at-startup "swaybg" "-i" "/usr/share/desktop-base/active-theme/wallpaper/contents/images/1920x1080.svg" "-m" "fill"
+
+binds {
+    Mod+Q { spawn "kitty"; }
+    Mod+C { close-window; }
+    Mod+R { spawn "fuzzel"; }
+    Mod+Shift+E { quit; }
+    Mod+Left  { focus-column-left; }
+    Mod+Right { focus-column-right; }
+    Mod+Up    { focus-window-or-workspace-up; }
+    Mod+Down  { focus-window-or-workspace-down; }
+    Mod+Ctrl+Left  { move-column-left; }
+    Mod+Ctrl+Right { move-column-right; }
+    Mod+F { maximize-column; }
+    Mod+Comma  { consume-window-into-column; }
+    Mod+Period { expel-window-from-column; }
+}
