@@ -28,6 +28,7 @@
         "cpu",
         "memory",
         "disk",
+        "custom/nightlight",
         "backlight",
         "pulseaudio#microphone",
         "pulseaudio",
@@ -213,5 +214,13 @@
         "exec": "pgrep -x rsync > /dev/null && echo '󰁯 BACKUP' || echo ''",
         "interval": 5,
         "tooltip": false
+    },
+
+    "custom/nightlight": {
+        "format": "{}",
+        "return-type": "json",
+        "interval": 2,
+        "exec": "~/.config/waybar/scripts/nightlight.sh status",
+        "on-click": "~/.config/waybar/scripts/nightlight.sh toggle"
     }
 }

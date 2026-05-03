@@ -271,3 +271,17 @@ tooltip label {
     padding: 0 10px;
     border-radius: 5px;
 }
+
+#custom-nightlight {
+    padding: 0 10px;
+    font-size: 16px;
+    transition: color 0.3s ease;
+}
+
+#custom-nightlight.on {
+    color: #ffb86c; /* Arancione Dracula - Filtro attivo */
+}
+
+#custom-nightlight.off {
+    color: #6272a4; /* Grigio Dracula - Filtro spento */
+}
