@@ -14,10 +14,14 @@
         "niri/workspaces",
         "niri/window"
     ],
+
     "modules-center": [
         "clock"
     ],
+
     "modules-right": [
+        "custom/mounts", 
+        "custom/backup", // L'ho aggiunto qui così lo vedi quando parte!
         "tray",
         "custom/updates",
         "temperature",
@@ -194,5 +198,20 @@
         "interval": 3600,
         "tooltip": true,
         "tooltip-format": "Aggiornamenti disponibili"
+    },
+
+    "custom/mounts": {
+        "format": "{}",
+        "exec": "~/.config/waybar/scripts/mounts.sh waybar",
+        "return-type": "json",
+        "interval": 10,
+        "on-click": "~/.config/waybar/scripts/mounts.sh toggle",
+        "tooltip": true
+    },
+
+    "custom/backup": {
+        "exec": "pgrep -x rsync > /dev/null && echo '󰁯 BACKUP' || echo ''",
+        "interval": 5,
+        "tooltip": false
     }
 }

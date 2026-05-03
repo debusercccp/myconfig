@@ -17,11 +17,11 @@ window-rule {
     clip-to-geometry true
 }
 
-spawn-at-startup "bash" "-c" "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE DISPLAY"
-spawn-at-startup "bash" "-c" "sleep 3 && systemctl --user restart xdg-desktop-portal-gtk.service && sleep 1 && systemctl --user restart xdg-desktop-portal.service"
-spawn-at-startup "bash" "-c" "sleep 5 && waybar"
-spawn-at-startup "dunst"
-spawn-at-startup "swaybg" "-i" "/usr/share/desktop-base/active-theme/wallpaper/contents/images/1920x1080.svg" "-m" "fill"
+spawn-at-startup "bash" "-c" "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE DISPLAY > /dev/null 2>&1"
+spawn-at-startup "bash" "-c" "sleep 3 && systemctl --user restart xdg-desktop-portal-gtk.service && sleep 1 && systemctl --user restart xdg-desktop-portal.service > /dev/null 2>&1"
+spawn-at-startup "bash" "-c" "sleep 5 && waybar > /dev/null 2>&1"
+spawn-at-startup "dunst" ">" "/dev/null" "2>&1"
+spawn-at-startup "swaybg" "-i" "/usr/share/desktop-base/active-theme/wallpaper/contents/images/1920x1080.svg" "-m" "fill" ">" "/dev/null" "2>&1"
 
 binds {
     Mod+Q { spawn "kitty"; }
@@ -35,6 +35,36 @@ binds {
     Mod+Ctrl+Left  { move-column-left; }
     Mod+Ctrl+Right { move-column-right; }
     Mod+F { maximize-column; }
-    Mod+Comma  { consume-window-into-column; }
-    Mod+Period { expel-window-from-column; }
+    
+    // Cambiare Workspace (scorrere giù/su)
+    Mod+Page_Down { focus-workspace-down; }
+    Mod+Page_Up   { focus-workspace-up; }
+    Mod+U          { focus-workspace-down; }
+    Mod+I          { focus-workspace-up; }
+
+    // Spostare le finestre tra i Workspace
+    Mod+Ctrl+Page_Down  { move-column-to-workspace-down; }
+    Mod+Ctrl+Page_Up    { move-column-to-workspace-up; }
+
+    // Gestione larghezza colonne
+    Mod+Minus  { set-column-width "-10%"; }
+    Mod+Plus   { set-column-width "+10%"; }
+    Mod+Shift+F  { maximize-column; }
+
+    // Altre funzioni di layout
+    Mod+V       { switch-focus-between-floating-and-tiling; }
+    Mod+Shift+V { toggle-window-floating; }
+
+    // 1. Mostra questa lista
+    "Mod+Shift+Slash" { show-hotkey-overlay; }
+
+    // 2. Cambia larghezza colonne tra i preset (4/3, 1/2, ecc)
+    "Mod+BracketLeft"  { switch-preset-column-width; }
+    
+    // 3. Inserisci o espelli finestra dalla colonna (Layout)
+    "Mod+Comma"  { consume-or-expel-window-left; }
+    "Mod+Period" { consume-or-expel-window-right; }
+
+    // 4. Apre la panoramica di tutte le finestre (Overview)
+    "Mod+Tab" { toggle-overview; }
 }

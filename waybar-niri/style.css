@@ -249,3 +249,25 @@ tooltip label {
     color: @foreground;
     padding: 4px 8px;
 }
+
+#custom-mounts {
+    color: @pink; /* Rosa Dracula per i dischi */
+    padding: 0 10px;
+}
+
+#custom-mounts.mounted {
+    color: #50fa7b; /* Verde Dracula */
+}
+#custom-mounts.unmounted {
+    color: #ffb86c; /* Arancione Dracula */
+}
+#custom-mounts.empty {
+    color: #6272a4; /* Grigio/Blu Dracula (invisibile o discreto) */
+}
+
+#custom-backup {
+    color: @red;
+    background: @background2;
+    padding: 0 10px;
+    border-radius: 5px;
+}

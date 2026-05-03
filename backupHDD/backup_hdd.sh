@@ -31,12 +31,29 @@ fi
 echo $$ > "$LOCKFILE"
 trap 'rm -f "$LOCKFILE"; exit' INT TERM EXIT
 
-# --- Controllo Montaggio ---
-if [ -z "$TARGET" ]; then
-    echo "Target vuoto, attendo montaggio..."
-    sleep 5
+# --- Attesa Intelligente del Montaggio ---
+echo "Attendo che il sistema monti il disco (max 60 secondi)..."
+ATTESA=0
+while [ $ATTESA -lt 60 ]; do
     TARGET=$(lsblk -rn -o UUID,MOUNTPOINT | grep "$UUID_ATTUALE" | awk '{print $2}')
     TARGET=$(echo "$TARGET" | tr -d '\n' | tr -d '\r')
+    
+    # Se la variabile TARGET non è vuota e risulta essere un mountpoint valido, esci dal ciclo
+    if [ -n "$TARGET" ] && mountpoint -q "$TARGET"; then
+        echo "Disco montato con successo in: $TARGET"
+        break
+    fi
+    
+    # Altrimenti aspetta 2 secondi e riprova
+    sleep 2
+    ATTESA=$((ATTESA + 2))
+done
+
+# Se dopo 60 secondi il disco non è ancora montato, interrompi tutto
+if [ -z "$TARGET" ] || ! mountpoint -q "$TARGET"; then
+    echo "TIMEOUT: Disco non montato dopo 60 secondi. Esco."
+    invia_notifica "Backup annullato: disco non montato" "dialog-warning"
+    exit 1
 fi
 
 # --- Identificazione Disco ---
