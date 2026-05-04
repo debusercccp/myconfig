@@ -79,7 +79,7 @@ if [ -n "$TARGET" ] && mountpoint -q "$TARGET"; then
         --exclude=".dbus/" --exclude=".local/share/Trash/" --exclude=".git/" \
         --exclude="*.lock" --exclude="HDD_Attivo" --exclude="backupHDD/" \
         --exclude="lost+found/" --exclude=".var/app/" --exclude=".aider" \
-        --exclude="datasets/" --exclude="modelli/" \
+        --exclude="datasets/" --exclude="modelli/" --exclude=".mozilla/" \
         "$SOURCE" "$TARGET/backup_automatico/"
 
     echo "4b. Archiviazione Datasets e Modelli (Senza delete)..."
