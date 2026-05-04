@@ -68,4 +68,8 @@ binds {
 
     // 4. Apre la panoramica di tutte le finestre (Overview)
     "Mod+Tab" { toggle-overview; }
+
+    // Controllo Luminosità (Tasti Fn della tastiera)
+    "XF86MonBrightnessUp"   { spawn "brightnessctl" "set" "5%+"; }
+    "XF86MonBrightnessDown" { spawn "brightnessctl" "set" "5%-" "-n" "1"; }
 }
