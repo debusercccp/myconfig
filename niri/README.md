@@ -44,7 +44,15 @@ sudo apt install \
   libxkbcommon-dev \
   libpixman-1-dev \
   libudev-dev \
-  libdisplay-info-dev
+  libdisplay-info-dev \
+  gammastep \
+  blueman \
+  rfkill \
+  psmisc
+
+usermod -aG video 
+
+chmod +s /usr/sbin/rfkill
 ```
 
 **Dettagli:**

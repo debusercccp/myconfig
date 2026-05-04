@@ -285,3 +285,25 @@ tooltip label {
 #custom-nightlight.off {
     color: #6272a4; /* Grigio Dracula - Filtro spento */
 }
+
+/* ---- Bluetooth ---- */
+#bluetooth {
+    color: #8be9fd;
+    padding: 0 8px;      /* Aggiunge respiro a destra e sinistra */
+    margin: 2px 1px;     /* Lo distanzia dagli altri moduli */
+    font-size: 16px;     /* Ingrandisce un po' l'icona per allinearla alle altre */
+}
+
+#bluetooth.connected {
+    color: #50fa7b; 
+    padding: 0 8px;
+    margin: 2px 1px;
+    font-size: 16px;
+}
+
+#bluetooth.disabled {
+    color: #6272a4; 
+    padding: 0 8px;
+    margin: 2px 1px;
+    font-size: 16px;
+}

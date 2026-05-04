@@ -29,7 +29,7 @@
         "memory",
         "disk",
         "custom/nightlight",
-        "backlight",
+        "bluetooth",
         "pulseaudio#microphone",
         "pulseaudio",
         "battery",
@@ -222,5 +222,13 @@
         "interval": 2,
         "exec": "~/.config/waybar/scripts/nightlight.sh status",
         "on-click": "~/.config/waybar/scripts/nightlight.sh toggle"
+    },
+
+    "bluetooth": {
+        "format": "󰂯",
+        "format-disabled": "󰂲",
+        "format-connected": "󰂱 {num_connections}",
+        "on-click": "/usr/sbin/rfkill toggle bluetooth", // <--- PERCORSO COMPLETO
+        "on-click-right": "blueman-manager"
     }
 }

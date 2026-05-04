@@ -23,6 +23,7 @@ spawn-at-startup "bash" "-c" "sleep 3 && waybar > /dev/null 2>&1"
 spawn-at-startup "dunst" ">" "/dev/null" "2>&1"
 spawn-at-startup "swaybg" "-i" "/usr/share/desktop-base/active-theme/wallpaper/contents/images/1920x1080.svg" "-m" "fill"
 spawn-at-startup "/home/noya/.config/waybar/scripts/nightlight.sh" "toggle"
+spawn-at-startup "blueman-applet"
 
 binds {
     Mod+Q { spawn "kitty"; }
