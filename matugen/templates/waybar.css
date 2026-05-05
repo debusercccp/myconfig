@@ -1,0 +1,18 @@
+/* Variabili base */
+@define-color bg-transparent rgba({{colors.surface.default.rgb}}, 0.85);
+@define-color bg-semi rgba({{colors.surface.default.rgb}}, 0.95);
+@define-color fg {{colors.on_surface.default.hex}};
+@define-color accent {{colors.primary.default.hex}};
+@define-color tertiary {{colors.tertiary.default.hex}};
+
+/* Colori specifici per le icone (estratti dalle palette di Matugen) */
+@define-color color-clock {{colors.primary.default.hex}};
+@define-color color-battery {{colors.secondary.default.hex}};
+@define-color color-network {{colors.tertiary.default.hex}};
+@define-color color-audio {{colors.primary_container.default.hex}};
+@define-color color-bluetooth {{colors.secondary_container.default.hex}};
+@define-color color-cpu {{colors.error.default.hex}};
+@define-color color-memory {{colors.primary.default.hex}};
+@define-color color-disk {{colors.secondary.default.hex}};
+@define-color color-power {{colors.error.default.hex}};
+@define-color color-updates {{colors.tertiary.default.hex}};

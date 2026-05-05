@@ -1,3 +1,9 @@
+/* ================================================
+   Niri Config - Dynamically themed with Matugen
+   Includes colors.kdl per theme coordination
+   ================================================ */
+
+
 environment {
     GDK_BACKEND "wayland"
     QT_QPA_PLATFORM "wayland"
@@ -5,74 +11,119 @@ environment {
     XDG_SESSION_TYPE "wayland"
 }
 
-// Regola per waybar: niente bordi/background artificiali
-window-rule {
-    match app-id="waybar"
-    draw-border-with-background false
-}
+/* ================================================
+   FINESTRE - Regole globali e specifiche
+   ================================================ */
 
-// Regola globale per angoli arrotondati
+/* Angoli arrotondati e clip per tutte le finestre */
 window-rule {
     geometry-corner-radius 12
     clip-to-geometry true
 }
 
+/* Waybar - trasparenza, no border */
+window-rule {
+    match app-id="waybar"
+    draw-border-with-background false
+}
+
+/* Kitty - border con colore dinamico */
+window-rule {
+    match app-id="kitty"
+    geometry-corner-radius 8
+}
+
+/* Fuzzel launcher - personalizzazione */
+window-rule {
+    match app-id="fuzzel"
+    geometry-corner-radius 12
+}
+
+/* ================================================
+   STARTUP COMMANDS - Avvio servizi e UI
+   ================================================ */
+
+/* DBus environment variables per XDG portal */
 spawn-at-startup "bash" "-c" "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE DISPLAY > /dev/null 2>&1"
+
+/* Riavvia i servizi XDG desktop portal */
 spawn-at-startup "bash" "-c" "sleep 3 && systemctl --user restart xdg-desktop-portal-gtk.service && sleep 1 && systemctl --user restart xdg-desktop-portal.service > /dev/null 2>&1"
+
+/* Avvia Waybar con i colori generati da Matugen */
 spawn-at-startup "bash" "-c" "sleep 3 && waybar > /dev/null 2>&1"
+
+/* Notifiche desktop (Dunst) */
 spawn-at-startup "dunst" ">" "/dev/null" "2>&1"
-spawn-at-startup "swaybg" "-i" "/usr/share/desktop-base/active-theme/wallpaper/contents/images/1920x1080.svg" "-m" "fill"
+
+/* Sfondo desktop - swaybg con fill mode */
+spawn-at-startup "swaybg" "-i" "/home/noya/Immagini/mountains.jpeg" "-m" "fill"
+
+/* Nightlight (filtro luce blu) */
 spawn-at-startup "/home/noya/.config/waybar/scripts/nightlight.sh" "toggle"
+
+/* Applet Bluetooth nel system tray */
 spawn-at-startup "blueman-applet"
 
+/* Matugen - Monitora i cambiamenti di wallpaper e rigenera i colori */
+spawn-at-startup "matugen" "image" "/usr/share/desktop-base/active-theme/wallpaper/contents/images/1920x1080.svg"
+
+/* ================================================
+   KEYBINDINGS - Scorciatoie da tastiera
+   ================================================ */
+
 binds {
+    /* ---- Finestre di base ---- */
     Mod+Q { spawn "kitty"; }
     Mod+C { close-window; }
     Mod+R { spawn "fuzzel"; }
     Mod+Shift+E { quit; }
+    
+    /* ---- Navigazione finestre ---- */
     Mod+Left  { focus-column-left; }
     Mod+Right { focus-column-right; }
     Mod+Up    { focus-window-or-workspace-up; }
     Mod+Down  { focus-window-or-workspace-down; }
+    
+    /* ---- Spostamento finestre ---- */
     Mod+Ctrl+Left  { move-column-left; }
     Mod+Ctrl+Right { move-column-right; }
-    Mod+F { maximize-column; }
     
-    // Cambiare Workspace (scorrere giù/su)
-    Mod+Page_Down { focus-workspace-down; }
-    Mod+Page_Up   { focus-workspace-up; }
-    Mod+U          { focus-workspace-down; }
-    Mod+I          { focus-workspace-up; }
-
-    // Spostare le finestre tra i Workspace
-    Mod+Ctrl+Page_Down  { move-column-to-workspace-down; }
-    Mod+Ctrl+Page_Up    { move-column-to-workspace-up; }
-
-    // Gestione larghezza colonne
+    /* ---- Layout e dimensioni ---- */
+    Mod+F { maximize-column; }
+    Mod+Shift+F { maximize-column; }
     Mod+Minus  { set-column-width "-10%"; }
     Mod+Plus   { set-column-width "+10%"; }
-    Mod+Shift+F  { maximize-column; }
-
-    // Altre funzioni di layout
-    Mod+V       { switch-focus-between-floating-and-tiling; }
+    Mod+V { switch-focus-between-floating-and-tiling; }
     Mod+Shift+V { toggle-window-floating; }
-
-    // 1. Mostra questa lista
-    "Mod+Shift+Slash" { show-hotkey-overlay; }
-
-    // 2. Cambia larghezza colonne tra i preset (4/3, 1/2, ecc)
-    "Mod+BracketLeft"  { switch-preset-column-width; }
     
-    // 3. Inserisci o espelli finestra dalla colonna (Layout)
+    /* ---- Workspace navigation ---- */
+    Mod+Page_Down { focus-workspace-down; }
+    Mod+Page_Up   { focus-workspace-up; }
+    Mod+U { focus-workspace-down; }
+    Mod+I { focus-workspace-up; }
+    
+    /* ---- Workspace movement ---- */
+    Mod+Ctrl+Page_Down { move-column-to-workspace-down; }
+    Mod+Ctrl+Page_Up   { move-column-to-workspace-up; }
+    
+    /* ---- Column preset widths ---- */
+    "Mod+BracketLeft" { switch-preset-column-width; }
     "Mod+Comma"  { consume-or-expel-window-left; }
     "Mod+Period" { consume-or-expel-window-right; }
-
-    // 4. Apre la panoramica di tutte le finestre (Overview)
+    
+    /* ---- Overview e help ---- */
     "Mod+Tab" { toggle-overview; }
-
-    // Controllo Luminosità (Tasti Fn della tastiera)
+    "Mod+Shift+Slash" { show-hotkey-overlay; }
+    
+    /* ---- Brightness control (Fn keys) ---- */
     "XF86MonBrightnessUp"   { spawn "brightnessctl" "set" "5%+"; }
     "XF86MonBrightnessDown" { spawn "brightnessctl" "set" "5%-" "-n" "1"; }
-
-    "Mod+E" { spawn "dolphin"; }
+    
+    /* ---- File manager ---- */
+    Mod+E { spawn "dolphin"; }
 }
+
+
+/* ================================================
+   FINE CONFIGURAZIONE NIRI
+   ================================================ */

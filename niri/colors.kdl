@@ -1,0 +1,28 @@
+// Niri Dynamic Colors
+// Colori coordinati con Waybar
+
+prefer-no-csd
+
+default-seat "seat0" {
+    focus-ring {
+        width 4
+        active-color "#9a0430"
+        inactive-color "#1e1e2e"
+    }
+    
+    border {
+        width 2
+        active-color "#9a0430"
+        inactive-color "#1e1e2e"
+    }
+}
+
+window-rule {
+    geometry-corner-radius 12
+    clip-to-geometry true
+}
+
+window-rule {
+    match app-id="waybar"
+    draw-border-with-background false
+}

@@ -1,37 +1,9 @@
-/* ========================================
-   Waybar - Tema Dracula per Niri
-   ======================================== */
+@import "colors.css";
 
-/* Palette Dracula */
-@define-color foreground   #f8f8f2;
-@define-color background   rgba(40, 42, 54, 0.85);
-@define-color background2  rgba(40, 42, 54, 0.6);
-@define-color gray         #44475a;
-@define-color black        #21222c;
-@define-color red          #ff5555;
-@define-color green        #50fa7b;
-@define-color yellow       #f1fa8c;
-@define-color cyan         #8be9fd;
-@define-color blue         #6272a4;
-@define-color purple       #bd93f9;
-@define-color pink         #ff79c6;
-@define-color orange       #ffb86c;
-@define-color white        #ffffff;
-@define-color brred        #ff6e6e;
-@define-color brgreen      #69ff94;
+/* ================================================
+   Waybar - Tema Dinamico (Fixed Padding)
+   ================================================ */
 
-/* Colori semantici */
-@define-color critical     @red;
-@define-color warning      @yellow;
-
-@keyframes blink {
-    to {
-        background-color: @white;
-        color: @black;
-    }
-}
-
-/* ---- Reset globale ---- */
 * {
     border: none;
     border-radius: 0;
@@ -41,269 +13,69 @@
     min-height: 0;
 }
 
-/* ---- Finestra principale ---- */
 window#waybar {
     background: transparent;
-    color: @foreground;
+    color: @fg;
 }
 
-/* ---- Contenitori left/center/right ---- */
+/* Container con bordi dinamici Matugen */
 .modules-left,
 .modules-center,
 .modules-right {
-    background: @background;
-    border-radius: 8px;
-    margin: 4px 2px;
-    padding: 0 4px;
+    background: @bg-transparent;
+    border-radius: 10px;
+    margin: 4px 4px;
+    padding: 0 6px;
+    border: 1px solid @accent;
 }
 
-/* ---- Stile base moduli ---- */
-#custom-launcher,
-#custom-power,
-#custom-updates,
-#niri-workspaces,
-#niri-window,
-#clock,
-#tray,
-#battery,
-#pulseaudio,
-#network,
-#cpu,
-#memory,
-#disk,
-#temperature,
-#backlight,
-#language {
-    padding: 0 8px;
-    margin: 2px 1px;
-    color: @foreground;
-    background: transparent;
+/* Questo ridà spazio alle icone schiacciate */
+#custom-launcher, #custom-power, #custom-updates, #niri-workspaces, 
+#clock, #tray, #battery, #pulseaudio, #network, #cpu, #memory, 
+#disk, #temperature, #backlight, #bluetooth, #custom-nightlight, 
+#custom-mounts, #custom-backup {
+    padding: 0 10px;
 }
 
-/* ---- Launcher ---- */
+/* ---- COLORI DINAMICI MODULI ---- */
+#clock { color: @color-clock; }
+#battery { color: @color-battery; }
+#network { color: @color-network; }
+#cpu { color: @color-cpu; }
+#memory { color: @color-memory; }
+#disk { color: @color-disk; }
+#bluetooth { color: @color-bluetooth; }
+#pulseaudio { color: @color-audio; }
+#custom-power { color: @color-power; }
+#custom-updates { color: @color-updates; }
+
 #custom-launcher {
-    color: @cyan;
+    color: @accent;
     font-size: 18px;
-    padding-right: 10px;
 }
 
-/* ---- Power ---- */
-#custom-power {
-    color: @red;
-    font-size: 16px;
-    padding-left: 10px;
-}
-
-/* ---- Workspaces ---- */
 #niri-workspaces button {
-    background: transparent;
-    color: @blue;
+    color: @tertiary;
     padding: 0 4px;
-    font-size: 12px;
-    transition: all 0.2s ease;
 }
 
 #niri-workspaces button.active {
-    color: @green;
-}
-
-#niri-workspaces button:hover {
-    color: @pink;
-    background: transparent;
-}
-
-/* ---- Window title ---- */
-#niri-window {
-    color: @foreground;
-    font-weight: normal;
-    font-size: 13px;
-    opacity: 0.8;
-}
-
-/* ---- Clock ---- */
-#clock {
-    color: @purple;
-    font-size: 14px;
-}
-
-/* ---- Battery ---- */
-#battery {
-    color: @green;
-}
-
-#battery.discharging {
-    color: @foreground;
-}
-
-#battery.warning:not(.charging) {
-    color: @warning;
-    animation-name: blink;
-    animation-duration: 1s;
-    animation-timing-function: linear;
-    animation-iteration-count: infinite;
-    animation-direction: alternate;
-}
-
-#battery.critical:not(.charging) {
-    color: @critical;
-    animation-name: blink;
-    animation-duration: 0.5s;
-    animation-timing-function: linear;
-    animation-iteration-count: infinite;
-    animation-direction: alternate;
-}
-
-/* ---- Audio ---- */
-#pulseaudio {
-    color: @yellow;
-}
-
-#pulseaudio.muted {
-    color: @blue;
-    opacity: 0.6;
-}
-
-#pulseaudio.microphone {
-    color: @orange;
-}
-
-/* ---- Network ---- */
-#network {
-    color: @cyan;
-}
-
-#network.disconnected {
-    color: @red;
-}
-
-/* ---- CPU ---- */
-#cpu {
-    color: @green;
-}
-
-/* ---- Memory ---- */
-#memory {
-    color: @purple;
-}
-
-/* ---- Disk ---- */
-#disk {
-    color: @orange;
-}
-
-#disk.warning {
-    color: @warning;
-}
-
-#disk.critical {
-    color: @critical;
-}
-
-/* ---- Temperature ---- */
-#temperature {
-    color: @orange;
-}
-
-#temperature.critical {
-    color: @critical;
-    animation-name: blink;
-    animation-duration: 0.5s;
-    animation-timing-function: linear;
-    animation-iteration-count: infinite;
-    animation-direction: alternate;
-}
-
-/* ---- Backlight ---- */
-#backlight {
-    color: @yellow;
-}
-
-/* ---- Updates ---- */
-#custom-updates {
-    color: @cyan;
-}
-
-/* ---- Tray ---- */
-#tray {
-    padding: 0 6px;
-}
-
-#tray > .passive {
-    -gtk-icon-effect: dim;
-}
-
-#tray > .needs-attention {
-    -gtk-icon-effect: highlight;
-    background-color: @red;
-    border-radius: 4px;
-}
-
-/* ---- Tooltip ---- */
-tooltip {
-    background: rgba(40, 42, 54, 0.95);
-    border-radius: 8px;
-    border: 1px solid @purple;
-}
-
-tooltip label {
-    color: @foreground;
-    padding: 4px 8px;
+    color: @accent;
+    font-weight: 900;
 }
 
 #custom-mounts {
-    color: @pink; /* Rosa Dracula per i dischi */
-    padding: 0 10px;
+    color: @accent;
 }
 
-#custom-mounts.mounted {
-    color: #50fa7b; /* Verde Dracula */
-}
-#custom-mounts.unmounted {
-    color: #ffb86c; /* Arancione Dracula */
-}
-#custom-mounts.empty {
-    color: #6272a4; /* Grigio/Blu Dracula (invisibile o discreto) */
+/* Tooltip dinamico */
+tooltip {
+    background: @bg-semi;
+    border: 1px solid @accent;
+    border-radius: 8px;
 }
 
-#custom-backup {
-    color: @red;
-    background: @background2;
-    padding: 0 10px;
-    border-radius: 5px;
-}
-
-#custom-nightlight {
-    padding: 0 10px;
-    font-size: 16px;
-    transition: color 0.3s ease;
-}
-
-#custom-nightlight.on {
-    color: #ffb86c; /* Arancione Dracula - Filtro attivo */
-}
-
-#custom-nightlight.off {
-    color: #6272a4; /* Grigio Dracula - Filtro spento */
-}
-
-/* ---- Bluetooth ---- */
-#bluetooth {
-    color: #8be9fd;
-    padding: 0 8px;      /* Aggiunge respiro a destra e sinistra */
-    margin: 2px 1px;     /* Lo distanzia dagli altri moduli */
-    font-size: 16px;     /* Ingrandisce un po' l'icona per allinearla alle altre */
-}
-
-#bluetooth.connected {
-    color: #50fa7b; 
-    padding: 0 8px;
-    margin: 2px 1px;
-    font-size: 16px;
-}
-
-#bluetooth.disabled {
-    color: #6272a4; 
-    padding: 0 8px;
-    margin: 2px 1px;
-    font-size: 16px;
+tooltip label {
+    color: @fg;
+    padding: 6px;
 }

@@ -1,0 +1,9 @@
+[config]
+# Questo assicura che Matugen generi i file dove servono
+[config.outputs.niri]
+template = "niri.kdl"
+dest = "~/.config/niri/colors.kdl"
+
+[config.outputs.waybar]
+template = "waybar.css"
+dest = "~/.config/waybar/colors.css"

@@ -1,0 +1,9 @@
+// Template per i bordi di Niri
+layout {
+    focus-ring {
+        color "{{colors.primary.default.hex}}"
+    }
+    border {
+        color "{{colors.outline.default.hex}}"
+    }
+}

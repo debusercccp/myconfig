@@ -1,0 +1,24 @@
+/* Waybar Dynamic Colors - GTK Syntax */
+
+@define-color bg #1e1e2e;
+@define-color fg #cdd6f4;
+@define-color accent #9a0430;
+@define-color tertiary #a6e3a1;
+@define-color success #a6e3a1;
+@define-color warning #f9e2af;
+@define-color critical #f38ba8;
+
+@define-color color-battery #a6e3a1;
+@define-color color-clock #89b4fa;
+@define-color color-network #89dceb;
+@define-color color-bluetooth #cba6f7;
+@define-color color-cpu #a6e3a1;
+@define-color color-memory #f5c2e7;
+@define-color color-disk #fab387;
+@define-color color-audio #f9e2af;
+@define-color color-updates #89dceb;
+@define-color color-power #f38ba8;
+
+@define-color bg-transparent rgba(30, 30, 46, 0.85);
+@define-color bg-semi rgba(30, 30, 46, 0.6);
+@define-color bg-light rgba(30, 30, 46, 0.3);

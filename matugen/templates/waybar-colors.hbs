@@ -1,0 +1,53 @@
+/* ================================================
+   Waybar Dynamic Colors - Generato da Matugen
+   Paletta completa sincronizzata col wallpaper
+   ================================================ */
+
+:root {
+    /* Colori primari dal wallpaper */
+    --bg: {{colors.primary.default.hex}};
+    --fg: {{colors.primary.on_default.hex}};
+    --accent: {{colors.secondary.default.hex}};
+    --accent-fg: {{colors.secondary.on_default.hex}};
+    --tertiary: {{colors.tertiary.default.hex}};
+    --tertiary-fg: {{colors.tertiary.on_default.hex}};
+    
+    /* Colori per stati */
+    --success: {{colors.primary.default.hex}};
+    --warning: {{colors.tertiary.default.hex}};
+    --critical: {{colors.error.default.hex}};
+    --critical-fg: {{colors.error.on_default.hex}};
+    
+    /* Colori neutri */
+    --bg-secondary: {{colors.secondary.default.hex}};
+    --bg-tertiary: {{colors.tertiary.default.hex}};
+    
+    /* Trasparenze */
+    --bg-transparent: rgba({{colors.primary.default.rgb}}, 0.85);
+    --bg-semi: rgba({{colors.primary.default.rgb}}, 0.6);
+    --bg-light: rgba({{colors.primary.default.rgb}}, 0.3);
+    
+    /* Colori specifici moduli */
+    --color-launcher: {{colors.secondary.default.hex}};
+    --color-workspaces: {{colors.tertiary.default.hex}};
+    --color-workspaces-active: {{colors.primary.default.hex}};
+    --color-clock: {{colors.secondary.default.hex}};
+    --color-network: {{colors.secondary.default.hex}};
+    --color-network-disconnected: {{colors.error.default.hex}};
+    --color-battery: {{colors.primary.default.hex}};
+    --color-battery-warning: {{colors.tertiary.default.hex}};
+    --color-battery-critical: {{colors.error.default.hex}};
+    --color-audio: {{colors.tertiary.default.hex}};
+    --color-cpu: {{colors.primary.default.hex}};
+    --color-memory: {{colors.secondary.default.hex}};
+    --color-disk: {{colors.tertiary.default.hex}};
+    --color-temperature: {{colors.tertiary.default.hex}};
+    --color-bluetooth: {{colors.secondary.default.hex}};
+    --color-bluetooth-connected: {{colors.primary.default.hex}};
+    --color-updates: {{colors.secondary.default.hex}};
+    --color-power: {{colors.error.default.hex}};
+    
+    /* Sfondo container barra */
+    --bar-bg: var(--bg-transparent);
+    --bar-border: var(--accent);
+}
