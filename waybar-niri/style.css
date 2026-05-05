@@ -26,7 +26,7 @@ window#waybar {
     border-radius: 10px;
     margin: 4px 4px;
     padding: 0 6px;
-    border: 1px solid @tertiary;
+    border: 1px solid @secondary;
 }
 
 /* Questo ridà spazio alle icone schiacciate */

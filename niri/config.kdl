@@ -50,7 +50,8 @@ window-rule {
 window-rule {
     match app-id="kitty"
     geometry-corner-radius 8
-    opacity 0.85
+    draw-border-with-background false
+    opacity 0.80
 }
 
 /* Fuzzel launcher - personalizzazione */
@@ -85,7 +86,7 @@ spawn-at-startup "/home/noya/.config/waybar/scripts/nightlight.sh" "toggle"
 spawn-at-startup "blueman-applet"
 
 /* Matugen - Monitora i cambiamenti di wallpaper e rigenera i colori */
-spawn-at-startup "matugen" "image" "/home/noya/Immagini/labarc.png"
+spawn-at-startup "matugen" "image" "/home/noya/Immagini/debian.png"
 
 /* ================================================
    KEYBINDINGS - Scorciatoie da tastiera

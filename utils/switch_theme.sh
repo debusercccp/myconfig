@@ -16,7 +16,7 @@ swaybg -i "$1" -m fill &
 matugen image "$1"
 
 # 4. Ricarica Niri (Fondamentale per i bordi delle finestre!)
-niri msg action reload-config
+niri msg action load-config-file
 
 # 5. Riavvia Waybar 
 # Usiamo un piccolo sleep per dare tempo a Matugen di scrivere i file
