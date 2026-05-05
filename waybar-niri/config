@@ -4,11 +4,10 @@
     "exclusive": true,
     "passthrough": false,
     "gtk-layer-shell": true,
-    "height": 36,
+    "height": 40,           // Lascia solo questa
     "margin-right": 5,
     "margin-left": 5,
     "output": "eDP-1",
-    "height": 40,
 
     "modules-left": [
         "custom/launcher",

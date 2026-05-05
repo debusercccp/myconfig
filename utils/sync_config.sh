@@ -37,5 +37,9 @@ sync_folder "$HOME/.config/niri" "$DEST/niri"
 # 4. Waybar (verso waybar-niri come richiesto)
 sync_folder "$HOME/.config/waybar" "$DEST/waybar-niri"
 
+sync_folder "$HOME/.config/matugen" "$DEST/matugen"
+
+sync_folder "$HOME/.config/kitty" "$DEST/kitty"
+
 echo -e "${GREEN}--------------------------------------------${NC}"
 echo -e "${GREEN}Sincronizzazione completata!${NC}"

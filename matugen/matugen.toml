@@ -1,9 +1,26 @@
 [config]
-# Questo assicura che Matugen generi i file dove servono
-[config.outputs.niri]
-template = "niri.kdl"
-dest = "~/.config/niri/colors.kdl"
+color_system = "okhsl"
+saturation = 0.8
+lightness = 0.55
+
+[[templates]]
+name = "waybar_colors"
+input = "templates/waybar-colors.hbs"
+output = "waybar/colors.css"
+
+[[templates]]
+name = "niri_colors"
+input = "templates/niri-colors.hbs"
+output = "niri/colors.kdl"
+
+[image_analysis]
+use_dominant_colors = true
+color_count = 8
 
 [config.outputs.waybar]
 template = "waybar.css"
 dest = "~/.config/waybar/colors.css"
+
+[config.outputs.niri]
+template = "niri.kdl"
+dest = "~/.config/niri/colors.kdl"

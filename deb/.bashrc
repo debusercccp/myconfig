@@ -123,6 +123,7 @@ parse_git_branch() {
 
 export PATH="$HOME/.cargo/bin:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
+export PATH=$PATH:/usr/sbin
 #export PS1='\[\033[35m\]\t \[\033[37m\]\u\[\033[38;5;213m\]@\h \[\033[33m\]\w\[\033[0m\] '
 export GH_TOKEN="suca"
 

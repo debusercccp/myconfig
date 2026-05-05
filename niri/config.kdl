@@ -3,6 +3,25 @@
    Includes colors.kdl per theme coordination
    ================================================ */
 
+include "colors.kdl"
+
+layout {
+    // Spazio tra le finestre
+    gaps 16
+
+    // Il bordo della finestra attiva
+    focus-ring {
+        width 4
+        // Qui usiamo la variabile che Matugen scrive in colors.kdl
+        // Se colors.kdl contiene già il blocco layout, questo include basta!
+    }
+
+    // Il bordo delle finestre non attive
+    border {
+        width 1
+        color "#44475a" // Colore fisso Dracula per le finestre inattive
+    }
+}
 
 environment {
     GDK_BACKEND "wayland"
@@ -31,6 +50,7 @@ window-rule {
 window-rule {
     match app-id="kitty"
     geometry-corner-radius 8
+    opacity 0.85
 }
 
 /* Fuzzel launcher - personalizzazione */
@@ -56,7 +76,7 @@ spawn-at-startup "bash" "-c" "sleep 3 && waybar > /dev/null 2>&1"
 spawn-at-startup "dunst" ">" "/dev/null" "2>&1"
 
 /* Sfondo desktop - swaybg con fill mode */
-spawn-at-startup "swaybg" "-i" "/home/noya/Immagini/mountains.jpeg" "-m" "fill"
+spawn-at-startup "swaybg" "-i" "/home/noya/Immagini/labarc.png" "-m" "fill"
 
 /* Nightlight (filtro luce blu) */
 spawn-at-startup "/home/noya/.config/waybar/scripts/nightlight.sh" "toggle"
@@ -65,7 +85,7 @@ spawn-at-startup "/home/noya/.config/waybar/scripts/nightlight.sh" "toggle"
 spawn-at-startup "blueman-applet"
 
 /* Matugen - Monitora i cambiamenti di wallpaper e rigenera i colori */
-spawn-at-startup "matugen" "image" "/usr/share/desktop-base/active-theme/wallpaper/contents/images/1920x1080.svg"
+spawn-at-startup "matugen" "image" "/home/noya/Immagini/labarc.png"
 
 /* ================================================
    KEYBINDINGS - Scorciatoie da tastiera
