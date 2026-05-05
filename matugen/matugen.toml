@@ -1,26 +1,12 @@
 [config]
 color_system = "okhsl"
-saturation = 0.8
-lightness = 0.55
+saturation = 0.4
+lightness = 0.5
 
 [[templates]]
-name = "waybar_colors"
-input = "templates/waybar-colors.hbs"
-output = "waybar/colors.css"
+path = "/home/noya/.config/matugen/templates/niri.kdl"
+output = "/home/noya/.config/niri/colors.kdl"
 
 [[templates]]
-name = "niri_colors"
-input = "templates/niri-colors.hbs"
-output = "niri/colors.kdl"
-
-[image_analysis]
-use_dominant_colors = true
-color_count = 8
-
-[config.outputs.waybar]
-template = "waybar.css"
-dest = "~/.config/waybar/colors.css"
-
-[config.outputs.niri]
-template = "niri.kdl"
-dest = "~/.config/niri/colors.kdl"
+path = "/home/noya/.config/matugen/templates/waybar.css"
+output = "/home/noya/.config/waybar/colors.css"

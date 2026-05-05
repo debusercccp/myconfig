@@ -19,7 +19,7 @@ layout {
     // Il bordo delle finestre non attive
     border {
         width 1
-        color "#44475a" // Colore fisso Dracula per le finestre inattive
+        inactive-color "#44475a" // Colore fisso Dracula per le finestre inattive
     }
 }
 
