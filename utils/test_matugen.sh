@@ -80,7 +80,7 @@ if [ -f "$WAYBAR_DIR/colors.css" ]; then
     lines=$(wc -l < "$WAYBAR_DIR/colors.css")
     echo -e "${GREEN}✓${NC} colors.css ($lines lines)"
     echo -e "  ${CYAN}Variabili CSS rilevate:${NC}"
-    grep -o "--[a-z-]*:" "$WAYBAR_DIR/colors.css" | sort | uniq | head -5
+    grep -o "@define-color [a-zA-Z0-9_-]*" "$WAYBAR_DIR/colors.css" | sort | uniq | head -5
     echo "  ..."
 else
     echo -e "${YELLOW}⚠${NC} colors.css non trovato (non ancora generato)"
@@ -214,18 +214,18 @@ echo "────────────────────────�
 
 if [ -f "$WAYBAR_DIR/colors.css" ]; then
     echo -e "${CYAN}Variabili trovate:${NC}"
-    VARS=$(grep -o '\-\-[a-z\-]*:' "$WAYBAR_DIR/colors.css" | wc -l)
+    VARS=$(grep -c "@define-color" "$WAYBAR_DIR/colors.css")
     echo -e "  Total: $VARS variabili"
     
     # Campionare alcune variabili
     echo -e "\n${CYAN}Esempi:${NC}"
-    grep '^[[:space:]]*--' "$WAYBAR_DIR/colors.css" | head -8 | sed 's/^/  /'
-    
+    grep '@define-color' "$WAYBAR_DIR/colors.css" | head -8 | sed 's/^/  /'
+
     # Verifica valori hex
     echo -e "\n${CYAN}Valori hex trovati:${NC}"
     grep -o '#[0-9a-fA-F]\{6\}' "$WAYBAR_DIR/colors.css" | head -5 | sed 's/^/  /'
 else
-    echo -e "${YELLOW}⚠${NC} colors.css non trovato"
+    echo -e "${YELLOW} ${NC} colors.css non trovato"
 fi
 
 # ================================================

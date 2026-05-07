@@ -91,6 +91,7 @@ spawn-at-startup "blueman-applet"
 /* Matugen - Monitora i cambiamenti di wallpaper e rigenera i colori */
 spawn-at-startup "matugen" "image" "/home/noya/Immagini/debian.png"
 
+
 /* ================================================
    KEYBINDINGS - Scorciatoie da tastiera
    ================================================ */
