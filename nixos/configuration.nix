@@ -1,4 +1,4 @@
-# Edit this configuration file to define what should be installed on
+# Edit this configuration file to define what should be installed on 
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
@@ -14,12 +14,9 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  networking.hostName = "nixThink"; # Define your hostname.
-  # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
+  networking.hostName = "lynx"; # Define your hostname.
   
-  # programs.hyprland.enable = true;
-
-  # Opzionale ma consigliato
+  # Opzionale ma consigliato per applicazioni Electron/Ozone su Wayland
   environment.sessionVariables = {
     NIXOS_OZONE_WL = "1";
   };
@@ -48,12 +45,29 @@
     LC_TELEPHONE = "it_IT.UTF-8";
     LC_TIME = "it_IT.UTF-8";
   };
+
+  fonts.packages = with pkgs; [
+	nerd-fonts.shure-tech-mono
+	];
+
+
   # Enable the X11 windowing system.
   services.xserver.enable = true;
 
-  # Enable the Cinnamon Desktop Environment.
+  # Enable the Cinnamon Desktop Environment (and LightDM)
+  # Note: Niri can be launched directly from LightDM!
   services.xserver.displayManager.lightdm.enable = true;
   services.xserver.desktopManager.cinnamon.enable = true;
+
+  # === NIRI & WAYLAND CONFIGURATION ===
+  # Enables Niri session, locks, and systemd integration
+  programs.niri.enable = true;
+  
+  # Optional: standard Wayland support tools
+  xdg.portal = {
+    enable = true;
+    extraPortals = [ pkgs.xdg-desktop-portal-gnome ];
+  };
 
   # Configure keymap in X11
   services.xserver.xkb = {
@@ -75,32 +89,13 @@
     alsa.enable = true;
     alsa.support32Bit = true;
     pulse.enable = true;
-    # If you want to use JACK applications, uncomment this
-    #jack.enable = true;
-
-    # use the example session manager (no others are packaged yet so this is enabled by default,
-    # no need to redefine it in your config for now)
-    # media-session.enable = true;
   };
-
-  # Enable touchpad support (enabled default in most desktopManager).
-  # services.xserver.libinput.enable = true;
-
-  services.ollama = {
-    enable = true;
-    # Se hai una GPU NVIDIA, scommenta la riga sotto
-    # acceleration = "cuda"; 
-    # Imposta l'ascolto su tutte le interfacce per farlo vedere a Docker
-    host = "0.0.0.0";
-  };
-
-  virtualisation.docker.enable = true;
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.noya = {
     isNormalUser = true;
     description = "noya";
-    extraGroups = ["sudoers" "networkmanager" "wheel" "docker" ];
+    extraGroups = [ "networkmanager" "wheel" "docker" ]; # Note: removed "sudoers" as "wheel" covers it
     packages = with pkgs; [
        thunderbird
     ];
@@ -113,88 +108,50 @@
 
   programs.nix-ld.enable = true;
   programs.nix-ld.libraries = with pkgs; [
-    nspr
-    nss
-    glib
-    gtk3
-    atk
-    at-spi2-atk
-    cairo
-    pango
-    gdk-pixbuf
-    xorg.libX11
-    xorg.libXcomposite
-    xorg.libXdamage
-    xorg.libXext
-    xorg.libXfixes
-    xorg.libXi
-    xorg.libXrandr
-    xorg.libXrender
-    xorg.libXtst
-    xorg.libXScrnSaver
-    alsa-lib
-    mesa
-    expat
-    dbus
-    libdrm
-    libxkbcommon
-    systemd # per libudev
+    nspr nss glib gtk3 atk at-spi2-atk cairo pango gdk-pixbuf
+    xorg.libX11 xorg.libXcomposite xorg.libXdamage xorg.libXext
+    xorg.libXfixes xorg.libXi xorg.libXrandr xorg.libXrender
+    xorg.libXtst xorg.libXScrnSaver alsa-lib mesa expat dbus
+    libdrm libxkbcommon systemd
   ];
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
-  # List packages installed in system profile. To search, run:
-  # $ nix search wget
+  # List packages installed in system profile.
   environment.systemPackages = with pkgs; [
-    neovim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
+    neovim
     wget
     gcc
-  # waybar
-  # hyprpaper
-  # wl-clipboard
     kitty
     fastfetch
     nerd-fonts.hack
+    nerd-fonts.jetbrains-mono
     python311
     python311Packages.pip
-  # wayland
     nmap
     htop
     git
-  # rofi
-    nautilus
-    ollama
-    docker-compose # Utile se vorrai automatizzare
     curl
-    ];
+    cargo
+    
+    kdePackages.qtsvg
+    kdePackages.dolphin
+    fuzzel          # Wayland application launcher
+    dunst           # Notification daemon
+    waybar          # Status bar (often paired with Niri)
+    wl-clipboard    # Clipboard manager for Wayland
+    swaybg          # Wallpaper setter for Wayland
+    xwayland        # For running X11 apps inside Niri seamlessly
+  ];
 
-
-  # Some programs need SUID wrappers, can be configured further or are
-  # started in user sessions.
-  # programs.mtr.enable = true;
-   programs.gnupg.agent = {
+  programs.gnupg.agent = {
      enable = true;
      enableSSHSupport = true;
-   };
-
-  # List services that you want to enable:
+  };
 
   # Enable the OpenSSH daemon.
-   services.openssh.enable = true;
+  services.openssh.enable = true;
 
-  # Open ports in the firewall.
-  # networking.firewall.allowedTCPPorts = [ ... ];
-  # networking.firewall.allowedUDPPorts = [ ... ];
-  # Or disable the firewall altogether.
-  # networking.firewall.enable = false;
-
-  # This value determines the NixOS release from which the default
-  # settings for stateful data, like file locations and database versions
-  # on your system were taken. It‘s perfectly fine and recommended to leave
-  # this value at the release version of the first install of this system.
-  # Before changing this value read the documentation for this option
-  # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-  system.stateVersion = "25.11"; # Did you read the comment?
-
+  system.stateVersion = "25.11";
 }
