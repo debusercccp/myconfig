@@ -1,0 +1,6 @@
+[Unit]
+Description=Controllo livello batteria
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/monitor_battery.sh
