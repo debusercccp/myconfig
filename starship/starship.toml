@@ -39,4 +39,16 @@ style = "bold cyan"
 [git_status]
 format = "([$all_status]($style) )"
 style = "bold red"
+ahead = "⇡${count}"
+diverged = "⇡${ahead_count}⇣${behind_count}"
+behind = "⇣${count}"
 modified = "!"
+staged = "+"
+
+[rust]
+symbol = " "
+style = "bold red"
+
+[python]
+symbol = " "
+pyenv_prefix = "venv "
