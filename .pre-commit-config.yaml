@@ -1,0 +1,58 @@
+# ~/.config/waybar/scripts/ o radice del tuo repository myconfig
+# Per installare gli hook: pre-commit install
+# Per aggiornare i tool: pre-commit autoupdate
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0 # Puoi aggiornare le versioni con `pre-commit autoupdate`
+    hooks:
+      - id: check-yaml
+        name: Verifica sintassi YAML
+      - id: check-json
+        name: Verifica sintassi JSON
+      - id: check-toml
+        name: Verifica sintassi TOML
+      - id: end-of-file-fixer
+        name: Inserisci riga vuota a fine file
+      - id: trailing-whitespace
+        name: Rimuovi spazi a fine riga
+      - id: check-executables-have-shebangs
+        name: Verifica Shebang sugli eseguibili
+      - id: check-shebang-scripts-are-executable
+        name: Verifica permessi di esecuzione sugli script
+
+  # Linter per Bash (fondamentale per evitare bug come quello delle variabili vuote o spazi nei toggle)
+  - repo: https://github.com/koalaman/shellcheck-precommit
+    rev: v0.11.0
+    hooks:
+      - id: shellcheck
+        name: Linter Bash (ShellCheck)
+        args: ["--severity=warning"] # Blocca il commit solo per Warning ed Errori
+
+  # Formattatore per script Bash (mantiene lo stile pulito e uniforme)
+  - repo: https://github.com/scop/pre-commit-shfmt
+    rev: v3.13.1-1
+    hooks:
+      - id: shfmt
+        name: Formattatore Bash (shfmt)
+        args: ["-i", "4", "-ci"] # Indentazione a 4 spazi, indenta anche i "case"
+
+  # Formattatore universale per JSON, Markdown, YAML (opzionale ma consigliato per i dotfiles)
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v4.0.0-alpha.8
+    hooks:
+      - id: prettier
+        name: Formattatore Prettier (JSON/Markdown)
+        types_or: [json, markdown]
+        # Evita che prettier tocchi file di configurazione con sintassi custom (es. hyprland o niri se usi estensioni particolari)
+        exclude: ^(neovim/|niri/)
+
+  # Linter e Formattatore per Python (se hai script come wttr.py o monitoraggi vari)
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.13
+    hooks:
+      - id: ruff
+        name: Linter Python (Ruff)
+        args: [ --fix ]
+      - id: ruff-format
+        name: Formattatore Python (Ruff)
