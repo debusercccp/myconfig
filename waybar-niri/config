@@ -20,7 +20,7 @@
     ],
 
     "modules-right": [
-        "custom/mounts", 
+        "custom/mounts",
         "custom/backup", // L'ho aggiunto qui così lo vedi quando parte!
         "tray",
         "custom/updates",
@@ -219,9 +219,10 @@
     "custom/nightlight": {
         "format": "{}",
         "return-type": "json",
-        "interval": 2,
-        "exec": "~/.config/waybar/scripts/nightlight.sh status",
-        "on-click": "~/.config/waybar/scripts/nightlight.sh toggle"
+        // Usa il percorso assoluto reale se non si trova in ~/.config/waybar/
+        "exec": "$HOME/myconfig/waybar-niri/scripts/nightlight.sh status",
+        "on-click": "$HOME/myconfig/waybar-niri/scripts/nightlight.sh toggle",
+        "interval": 5
     },
 
     "bluetooth": {

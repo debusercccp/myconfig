@@ -89,7 +89,7 @@ spawn-at-startup "/home/noya/.config/waybar/scripts/nightlight.sh" "toggle"
 spawn-at-startup "blueman-applet"
 
 /* Matugen - Monitora i cambiamenti di wallpaper e rigenera i colori */
-spawn-at-startup "matugen" "image" "/home/noya/Immagini/debian.png"
+spawn-at-startup "matugen" "image" "/home/noya/Immagini/blacklodge.jpg"
 
 
 /* ================================================
@@ -102,17 +102,17 @@ binds {
     Mod+C { close-window; }
     Mod+R { spawn "fuzzel"; }
     Mod+Shift+E { quit; }
-    
+
     /* ---- Navigazione finestre ---- */
     Mod+Left  { focus-column-left; }
     Mod+Right { focus-column-right; }
     Mod+Up    { focus-window-or-workspace-up; }
     Mod+Down  { focus-window-or-workspace-down; }
-    
+
     /* ---- Spostamento finestre ---- */
     Mod+Ctrl+Left  { move-column-left; }
     Mod+Ctrl+Right { move-column-right; }
-    
+
     /* ---- Layout e dimensioni ---- */
     Mod+F { maximize-column; }
     Mod+Shift+F { maximize-column; }
@@ -120,30 +120,30 @@ binds {
     Mod+Plus   { set-column-width "+10%"; }
     Mod+V { switch-focus-between-floating-and-tiling; }
     Mod+Shift+V { toggle-window-floating; }
-    
+
     /* ---- Workspace navigation ---- */
     Mod+Page_Down { focus-workspace-down; }
     Mod+Page_Up   { focus-workspace-up; }
     Mod+U { focus-workspace-down; }
     Mod+I { focus-workspace-up; }
-    
+
     /* ---- Workspace movement ---- */
     Mod+Ctrl+Page_Down { move-column-to-workspace-down; }
     Mod+Ctrl+Page_Up   { move-column-to-workspace-up; }
-    
+
     /* ---- Column preset widths ---- */
     "Mod+BracketLeft" { switch-preset-column-width; }
     "Mod+Comma"  { consume-or-expel-window-left; }
     "Mod+Period" { consume-or-expel-window-right; }
-    
+
     /* ---- Overview e help ---- */
     "Mod+Tab" { toggle-overview; }
     "Mod+Shift+Slash" { show-hotkey-overlay; }
-    
+
     /* ---- Brightness control (Fn keys) ---- */
     "XF86MonBrightnessUp"   { spawn "brightnessctl" "set" "5%+"; }
     "XF86MonBrightnessDown" { spawn "brightnessctl" "set" "5%-" "-n" "1"; }
-    
+
     /* ---- File manager ---- */
     Mod+E { spawn "dolphin"; }
 
@@ -155,4 +155,3 @@ binds {
     XF86MyComputer { spawn "dolphin" "/home/noya/MiniSSD"; }
 
 }
-
