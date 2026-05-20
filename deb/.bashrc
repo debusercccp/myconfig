@@ -96,6 +96,7 @@ alias aggiorna='sudo apt update && sudo apt upgrade'
 alias pulisci='sudo apt autoremove --purge && sudo apt clean'
 alias cestino='sudo rm -rf ~/.local/share/Trash/*'
 alias activate='source ~/.venv/bin/activate'
+alias pacchetti="aptitude search '!?origin (debian) ?installed'"
 
 # Alias definitions.
 # You may want to put all your additions into a separate file like
@@ -125,12 +126,13 @@ export PATH="$HOME/.cargo/bin:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
 export PATH=$PATH:/usr/sbin
 #export PS1='\[\033[35m\]\t \[\033[37m\]\u\[\033[38;5;213m\]@\h \[\033[33m\]\w\[\033[0m\] '
-export GH_TOKEN="suca"
 
 export PS1='\[\033[35m\]\t \[\033[37m\]\u\[\033[38;5;213m\]@\h \[\033[33m\]\w\[\033[1;36m\]$(parse_git_branch)\[\033[0m\] '
 
-alias jarvis='OLLAMA_API_BASE=http://127.0.0.1:11434 aider --model ollama/qwen3.5:latest'
+alias jarvis='OLLAMA_API_BASE=http://127.0.0.1:11434 nice -n 15 aider --model ollama/llama3.2:latest'
 
 . "$HOME/.cargo/env"
 
 alias backup-ssd='/home/noya/backupMiniSSD/backup_to_minissd.sh'
+
+eval "$(starship init bash)"
