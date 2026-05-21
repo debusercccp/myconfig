@@ -167,9 +167,21 @@ binds {
 input {
     keyboard {
         xkb {
+            layout "it"
+            // layout "gb" // Layout UK di scorta
+        }
+        repeat-delay 300
+        repeat-rate 40
+    }
 
-            }
+    touchpad {
+        tap // Abilita il tocco leggero per cliccare
+        dwt // Disabilita il touchpad mentre scrivi (Disable-While-Typing)
 
-        // numlock  <--- ASSICURATI CHE SIA COMMENTATO O CANCELLATO
+        // natural-scroll // Decommenta se preferisci lo scorrimento in stile smartphone
+    }
+
+    trackball {
+        // accel-profile "adaptive"
     }
 }
