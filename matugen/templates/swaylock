@@ -1,0 +1,2 @@
+ring-color={{colors.primary.default.hex_stripped}}
+key-hl-color={{colors.secondary.default.hex_stripped}}

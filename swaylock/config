@@ -1,0 +1,39 @@
+# ==========================================
+# Configurazione Swaylock Standard (Black Lodge)
+# ==========================================
+
+image=/home/noya/Immagini/blacklodge.jpg
+scaling=fill
+
+# Colore di fallback
+color=000000
+
+# --- Indicatore ---
+indicator-radius=50
+indicator-thickness=5
+
+# --- Colori dell'anello esterno ---
+ring-color=8a0303
+ring-clear-color=e0af68     # Giallo
+ring-ver-color=ffffff       # Bianco
+ring-wrong-color=ff0000     # Rosso acceso
+
+# --- Colori del cerchio interno ---
+inside-color=00000000
+inside-clear-color=00000000
+inside-ver-color=00000000
+inside-wrong-color=00000000
+
+# --- Linee e separatori ---
+line-uses-ring
+line-color=00000000
+
+# --- Testo ---
+text-color=ffffff
+text-clear-color=000000
+text-ver-color=000000
+text-wrong-color=ffffff
+
+# --- Feedback Tasti ---
+key-hl-color=ffffff
+bs-hl-color=ff0000
