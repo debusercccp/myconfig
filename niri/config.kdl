@@ -12,6 +12,8 @@ layout {
     // Spazio tra le finestre
     gaps 16
 
+    background-color "transparent"
+
     // Il bordo della finestra attiva
     focus-ring {
         width 4
@@ -24,6 +26,12 @@ layout {
         width 1
         inactive-color "#44475a" // Colore fisso Dracula per le finestre inattive
     }
+}
+
+// Assegna swaybg al livello del backdrop
+layer-rule {
+    match namespace="^wallpaper$"
+    place-within-backdrop true
 }
 
 environment {
@@ -80,7 +88,7 @@ spawn-at-startup "bash" "-c" "sleep 3 && waybar > /dev/null 2>&1"
 spawn-at-startup "dunst" ">" "/dev/null" "2>&1"
 
 /* Sfondo desktop - swaybg con fill mode */
-spawn-at-startup "swaybg" "-i" "/home/noya/Immagini/labarc.png" "-m" "fill"
+spawn-at-startup "swaybg" "-i" "/home/noya/Immagini/blacklodge.jpg" "-m" "fill"
 
 /* Nightlight (filtro luce blu) */
 spawn-at-startup "/home/noya/.config/waybar/scripts/nightlight.sh" "toggle"
