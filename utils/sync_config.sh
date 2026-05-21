@@ -38,6 +38,7 @@ sync_item "$HOME/.config/niri"     "$DEST/niri"
 sync_item "$HOME/.config/waybar"   "$DEST/waybar-niri"
 sync_item "$HOME/.config/matugen"  "$DEST/matugen"
 sync_item "$HOME/.config/kitty"    "$DEST/kitty"
+sync_item "$HOME/.config/swaylock" "$DEST/swaylock"
 
 # --- Sincronizzazione File Singoli (Configurazioni Shell) ---
 # Gestisce sia se hai una cartella starship sia se hai solo il file .toml diretto

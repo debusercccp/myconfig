@@ -1,42 +1,40 @@
 #!/usr/bin/env bash
+# Script di aggiornamento per NixOS e Debian/Ubuntu (Ottimizzato per Waybar)
 
-# Original script by @speltriao on GitHub
-# https://github.com/speltriao/Pacman-Update-for-GNOME-Shell
-
-# If the operating system is not Arch Linux, exit the script successfully
-if [ ! -f /etc/arch-release ]; then
-    exit 0
+# Rilevamento della Distribuzione
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    OS=$ID
+else
+    OS="unknown"
 fi
 
-# Calculate updates for each service
-AUR=$(paru -Qua | wc -l)
-OFFICIAL=$(checkupdates | wc -l)
-ALL=$(paru -Qet | wc -l)
-
-# Case/switch for each service updates
-case $1 in
-    aur) echo " $AUR";;
-    official) echo " $OFFICIAL";;
+case "$1" in
+    update)
+        if [ "$OS" = "nixos" ]; then
+            # Aggiorna il Flake ed esegue il rebuild su Kitty
+            kitty --hold bash -c "cd ~/myconfig-nix && nix flake update && sudo nixos-rebuild switch --flake .#lynx"
+        elif [ "$OS" = "debian" ] || [ "$OS" = "ubuntu" ]; then
+            kitty bash -c "sudo apt update && sudo apt upgrade -y"
+        fi
+        pkill -SIGRTMIN+8 waybar
+        exit 0
+        ;;
+    *)
+        # Output JSON puro per Waybar (Evita calcoli pesanti o stringhe di errore nel PATH)
+        if [ "$OS" = "nixos" ]; then
+            # Su NixOS il concetto di "numero di aggiornamenti staccati" non esiste nativamente.
+            # Mostriamo un'icona pulita di sistema pronto.
+            printf '{"text": " NixOS", "tooltip": "Sistema Gestito via Flake\\nClick per aggiornare il repository ed eseguire il rebuild"}\n'
+        elif [ "$OS" = "debian" ] || [ "$OS" = "ubuntu" ]; then
+            COUNT=$(apt-get upgrade -s 2>/dev/null | grep -P '^Inst' | wc -l)
+            if [ "$COUNT" = "0" ]; then
+                printf '{"text": " APT", "tooltip": "Sistema Debian aggiornato"}\n'
+            else
+                printf '{"text": " %s", "tooltip": "%s aggiornamenti APT disponibili"}\n' "$COUNT" "$COUNT"
+            fi
+        else
+            printf '{"text": " OS", "tooltip": "Sistema Operativo Sconosciuto"}\n'
+        fi
+        ;;
 esac
-
-# If the parameter is "update", update all services
-if [ "$1" = "update" ]; then
-    foot paru -Syu; pkill -SIGRTMIN+8 waybar
-fi
-
-# If there aren't any parameters, return the total number of updates
-if [ "$1" = "" ]; then
-    # Calculate total number of updates
-    COUNT=$((OFFICIAL+AUR))
-    # If there are updates, the script will output the following:   Updates
-    # If there are no updates, the script will output nothing.
-
-    if [[ "$COUNT" = "0" ]]
-    then
-        printf '{"text": "%s", "tooltip": "%s"}\n' " $ALL" " $ALL "
-    else
-        # This Update symbol is RTL. So &#x202d; is left-to-right override.
-        printf '{"text": "%s", "tooltip": "%s"}\n' " $COUNT" " $COUNT of  $ALL"
-    fi
-    exit 0
-fi

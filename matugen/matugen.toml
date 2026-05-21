@@ -10,3 +10,7 @@ output = "/home/noya/.config/niri/colors.kdl"
 [[templates]]
 path = "/home/noya/.config/matugen/templates/waybar.css"
 output = "/home/noya/.config/waybar/colors.css"
+
+#[[templates]]
+#path = "/home/noya/.config/matugen/templates/swaylock"
+#output = "/home/noya/.config/swaylock/config"
