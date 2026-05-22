@@ -75,6 +75,8 @@ window-rule {
    STARTUP COMMANDS - Avvio servizi e UI
    ================================================ */
 
+spawn-at-startup "bash" "-c" "systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE"
+
 /* DBus environment variables per XDG portal */
 spawn-at-startup "bash" "-c" "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE DISPLAY > /dev/null 2>&1"
 
@@ -99,6 +101,8 @@ spawn-at-startup "blueman-applet"
 /* Matugen - Monitora i cambiamenti di wallpaper e rigenera i colori */
 spawn-at-startup "matugen" "image" "/home/noya/Immagini/blacklodge.jpg"
 
+// Salva la history del copia-incolla
+spawn-at-startup "wl-paste" "--watch" "cliphist" "store"
 
 /* ================================================
    KEYBINDINGS - Scorciatoie da tastiera
@@ -128,6 +132,9 @@ binds {
     Mod+Plus   { set-column-width "+10%"; }
     Mod+V { switch-focus-between-floating-and-tiling; }
     Mod+Shift+V { toggle-window-floating; }
+
+    // Premi Mod+V per aprire la lista degli appunti e incollare
+    Mod+A { spawn "bash" "-c" "cliphist list | fuzzel --dmenu | cliphist decode | wl-copy"; }
 
     /* ---- Workspace navigation ---- */
     Mod+Page_Down { focus-workspace-down; }
