@@ -1,0 +1,7 @@
+[Unit]
+Description=Pipeline Backup HDD USB
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/ionice -c 2 -n 7 /usr/local/bin/backup_hdd.sh %i
+User=noya

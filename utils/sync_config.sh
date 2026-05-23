@@ -40,6 +40,10 @@ sync_item "$HOME/.config/matugen"  "$DEST/matugen"
 sync_item "$HOME/.config/kitty"    "$DEST/kitty"
 sync_item "$HOME/.config/swaylock" "$DEST/swaylock"
 
+sync_item "/usr/local/bin/backup_hdd.sh"                    "$DEST/backupHDD/backup_hdd.sh"
+sync_item "/etc/udev/rules.d/99-backup-hdd.rules"           "$DEST/backupHDD/99-backup-hdd.rules"
+sync_item "/etc/systemd/system/backup-hdd@.service"         "$DEST/backupHDD/backup-hdd@.service"
+
 # --- Sincronizzazione File Singoli (Configurazioni Shell) ---
 # Gestisce sia se hai una cartella starship sia se hai solo il file .toml diretto
 if [ -d "$HOME/.config/starship" ]; then

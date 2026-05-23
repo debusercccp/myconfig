@@ -102,8 +102,9 @@ rsync -avHS --delete \
     --exclude="datasets/"             \
     --exclude="modelli/"              \
     --exclude=".mozilla/"             \
+    --exclude="/usb"                  \
     --exclude="noya_packs/"           \
-    --exclude="Scaricati/*.iso"       \
+    --exclude="Scaricati/"            \
     "$SOURCE" "$TARGET/backup_automatico/"
 
 # =========================================================================
