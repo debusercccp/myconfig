@@ -100,6 +100,10 @@ rsync -avHS --delete \
     --exclude=".var/app/"             \
     --exclude=".aider"                \
     --exclude="datasets/"             \
+    --exclude="/HDD_Attivo"           \
+    --exclude="/TUTTI_I_DATASETS"     \
+    --exclude="/TUTTI_I_MODELLI"      \
+    --exclude="/TUTTI_I_PACKS"        \
     --exclude="modelli/"              \
     --exclude=".mozilla/"             \
     --exclude="/usb"                  \
