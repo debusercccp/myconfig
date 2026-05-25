@@ -85,7 +85,7 @@ mkdir -p \
 # RSYNC — Mirror della home (esclusioni ottimizzate)
 # =========================================================================
 echo "Avvio rsync mirror..."
-rsync -avHS --delete \
+rsync -avHS --delete --ignore-errors  \
     --exclude="target/"               \
     --exclude="node_modules/"         \
     --exclude=".cache/"               \
@@ -100,6 +100,7 @@ rsync -avHS --delete \
     --exclude=".var/app/"             \
     --exclude=".aider"                \
     --exclude="datasets/"             \
+    --exclude="MiniSSD/"              \
     --exclude="/HDD_Attivo"           \
     --exclude="/TUTTI_I_DATASETS"     \
     --exclude="/TUTTI_I_MODELLI"      \
