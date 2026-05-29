@@ -51,7 +51,7 @@ format = "[$symbol($version )]($style)"
 [python]
 symbol = " "
 style = "bold blue"
-format = "[$symbol($version )]($style)"
-pyenv_version_name = false
+format = "[$symbol($version )(\\($virtualenv\\) )]($style)"
+pyenv_version_name = true
 detect_extensions = []
 detect_files = ["requirements.txt", "pyproject.toml", "Pipfile", "setup.py", "poetry.lock"]
