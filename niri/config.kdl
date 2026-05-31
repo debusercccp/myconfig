@@ -107,7 +107,7 @@ spawn-at-startup "blueman-applet"
 // Salva la history del copia-incolla
 spawn-at-startup "wl-paste" "--watch" "cliphist" "store"
 
-spawn-at-startup "bash" "-c" "sleep 5 && conky -c ~/.config/conky/conky.conf > /dev/null 2>&1"
+spawn-at-startup "bash" "-c" "sleep 10 && conky -c ~/.config/conky/conky.conf > /dev/null 2>&1"
 
 /* ================================================
    KEYBINDINGS - Scorciatoie da tastiera
