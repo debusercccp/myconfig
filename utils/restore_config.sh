@@ -46,10 +46,7 @@ restore_folder "$SRC/kitty" "$HOME/.config/kitty"
 # 6. Neovim
 restore_folder "$SRC/nvim" "$HOME/.config/nvim"
 
-# 7. Matugen (Reintrodotto per simmetria con sync_config.sh)
-restore_folder "$SRC/matugen" "$HOME/.config/matugen"
-
-# 8. Conky (Nuovo modulo)
+# 7. Conky (Nuovo modulo)
 restore_folder "$SRC/conky" "$HOME/.config/conky"
 
 echo -e "${GREEN}--------------------------------------------${NC}"
