@@ -104,13 +104,10 @@ spawn-at-startup "/home/noya/.config/waybar/scripts/nightlight.sh" "toggle"
 /* Applet Bluetooth nel system tray */
 spawn-at-startup "blueman-applet"
 
-/* Matugen - Monitora i cambiamenti di wallpaper e rigenera i colori */
-spawn-at-startup "matugen" "image" "/home/noya/Immagini/blacklodge.jpg"
-
 // Salva la history del copia-incolla
 spawn-at-startup "wl-paste" "--watch" "cliphist" "store"
 
-spawn-at-startup "conky" "-c" "~/.config/conky/conky.conf"
+spawn-at-startup "bash" "-c" "sleep 5 && conky -c ~/.config/conky/conky.conf > /dev/null 2>&1"
 
 /* ================================================
    KEYBINDINGS - Scorciatoie da tastiera

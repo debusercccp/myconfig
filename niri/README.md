@@ -1,50 +1,67 @@
-# 1. Installa tutte le dipendenze
-sudo apt install -y \
-  build-essential pkg-config libwayland-dev libpango1.0-dev \
-  libpipewire-0.3-dev libinput-dev libseat-dev libgbm-dev \
-  libxkbcommon-dev libpixman-1-dev libudev-dev libdisplay-info-dev \
-  waybar fuzzel dunst swaybg kitty konsole \
-  xdg-desktop-portal xdg-desktop-portal-gtk xdg-desktop-portal-wlr \
-  qt5-wayland qt6-wayland qt5ct qt6ct \
-  fonts-noto-color-emoji fonts-font-awesome fonts-ubuntu-nerd fonts-jetbrains-mono fonts-fira-code \
-  libgtk-layer-shell0 \
-  wl-clipboard cliphist \
-  swaylock \
-  brightnessctl wpctl pavucontrol slurp grim psmisc \
-  dunst \
-  blueman rfkill \
-  dolphin galculator firefox-esr \
-  conky conky-all \
-  gammastep
+# Niri + Waybar (Debian Trixie)
 
-# 2. Setup rfkill
-sudo chmod +s /usr/sbin/rfkill
+Compositor Wayland scrollante + Waybar + suite completa di tools per Debian.
 
-# 3. Compila Niri (opzionale se usi il pacchetto)
-git clone https://github.com/YaLTeR/niri.git
-cd niri
-cargo build --release
-sudo install -D target/release/niri /usr/local/bin/niri
+**Status**: Working | **OS**: Debian Trixie | **Niri**: 26.04+
 
-# 4. Crea directory di config
-mkdir -p ~/.config/niri
-mkdir -p ~/.config/waybar/scripts
-mkdir -p ~/.config/fuzzel
-mkdir -p ~/.config/dunst
-mkdir -p ~/.config/conky
+---
 
-# 5. Copia i file di config forniti
-# Copia: config.kdl in ~/.config/niri/
-# Copia: waybar/config in ~/.config/waybar/
-# Copia: waybar/style.css in ~/.config/waybar/
-# Copia: fuzzel/fuzzel.ini in ~/.config/fuzzel/
-# Copia: dunst/dunstrc in ~/.config/dunst/
-# Copia: waybar/scripts/mounts.sh in ~/.config/waybar/scripts/
-# Copia: waybar/scripts/nightlight.sh in ~/.config/waybar/scripts/
+## Quick Start
 
-# 6. Rendi gli script eseguibili
-chmod +x ~/.config/waybar/scripts/mounts.sh
-chmod +x ~/.config/waybar/scripts/nightlight.sh
+**Per istruzioni dettagliate, leggi [QUICKSTART.txt](QUICKSTART.txt)**
 
-# 7. Avvia Niri
-niri
+Le istruzioni sono in plain text per evitare problemi di rendering su GitHub.
+
+---
+
+## File di Configurazione
+
+Copia da questo repo:
+
+- `complete-config/niri-config.kdl` → `~/.config/niri/config.kdl`
+- `waybar-niri/config` → `~/.config/waybar/config`
+- `waybar-niri/style.css` → `~/.config/waybar/style.css`
+- `fuzzel-config/fuzzel.ini` → `~/.config/fuzzel/fuzzel.ini`
+- `dunst-config/dunstrc` → `~/.config/dunst/dunstrc`
+- `waybar-scripts/mounts.sh` → `~/.config/waybar/scripts/mounts.sh` (chmod +x)
+
+---
+
+## Features
+
+- Compositor scrollante (Niri)
+- Waybar con moduli custom
+- Fuzzel app launcher
+- Notifiche Dracula
+- Clipboard history
+- USB mount/unmount da barra
+- Nightlight (blue light filter)
+- Bluetooth applet
+- System monitor (Conky)
+
+---
+
+## Tema
+
+- Colori: Dracula
+- Font: JetBrainsMono Nerd Font
+- Icons: FontAwesome
+
+---
+
+## Docs
+
+- [QUICKSTART.txt](QUICKSTART.txt) - Istruzioni passo-passo
+- [NIRI_WAYBAR_FINAL_README.md](NIRI_WAYBAR_FINAL_README.md) - Documentazione completa
+
+---
+
+## Resources
+
+- [Niri](https://github.com/YaLTeR/niri)
+- [Waybar](https://github.com/Alexays/Waybar)
+- [KDL](https://kdl.dev/)
+
+---
+
+**Last update**: May 2026

@@ -1,48 +1,151 @@
+# Dunst Configuration
+# File: ~/.config/dunst/dunstrc
+# Notification daemon con tema Dracula
+
 [global]
-    ### Aspetto Generale ###
-    font = JetBrainsMono Nerd Font 10
-    allow_markup = yes
-    format = "<b>%s</b>\n%b"
-    sort = yes
-    indicate_hidden = yes
-    alignment = left
-    show_age_threshold = 60
-    word_wrap = yes
-    ignore_newline = no
-    stack_duplicates = true
-    hide_duplicate_count = false
-    show_indicators = yes
+    # Monitor dove mostrare le notifiche (0 = primary, 1 = secondary)
+    monitor = 0
 
-    ### Geometria ###
-    width = 300
-    height = 200
+    # Geometria: [WIDTH]x[HEIGHT][+XOFF+YOFF]
+    # Lascia vuoto per auto
+    geometry = "350x80+30+30"
+
+    # Dove posizionare le notifiche
+    # top-left, top-center, top-right
+    # middle-left, center, middle-right
+    # bottom-left, bottom-center, bottom-right
     origin = top-right
-    offset = 10x50
-    shrink = no
-    transparency = 10
-    padding = 15
-    horizontal_padding = 15
-    frame_width = 2
-    corner_radius = 10  # Si abbina ai tuoi window-rule di Niri
 
-    ### Colori Dracula ###
+    # Offset da bordi (px)
+    offset = 15x15
+
+    # Spaziatura verticale fra notifiche
+    separation = 15
+
+    # Padding interno
+    padding = 16
+    horizontal_padding = 16
+
+    # Arrotondamento angoli
+    corner_radius = 12
+
+    # Dimensione font
+    font = JetBrainsMono Nerd Font 10
+    line_height = 0
+
+    # Markup: none, pango, full
+    markup = pango
+
+    # Modalità text: static, vertical, ellipsize
+    text_icon_padding = 10
+    icon_position = left
+
+    # Larghezza icone (px)
+    icon_size = 48
+
+    # Max larghezza titolo
+    title_width = 0
+
+    # Durata notifiche (ms)
+    # timeout = 10000 (10 sec)
+    timeout = 5000
+    show_age_threshold = 60
+
+    # Colore background, border, foreground
+    background = "#282a36"
+    foreground = "#f8f8f2"
     frame_color = "#bd93f9"
-    separator_color = "frame"
+    frame_width = 2
+
+    # Progressbar (se supportato)
+    progress_bar = true
+    progress_bar_height = 3
+    progress_bar_frame_width = 1
+    progress_bar_min_width = 150
+    progress_bar_max_width = 300
+
+    # Azioni (click su notifica)
+    # mouse_left_click = do_action, close_current
+    # mouse_middle_click = do_action, close_current
+    # mouse_right_click = close_current
+    mouse_left_click = close_current
+    mouse_middle_click = do_action
+    mouse_right_click = close_all
+
+    # History length (numero notifiche da ricordare)
+    history_length = 15
+
+    # Abilita suoni
+    # sound = true
+    # sound_name = /usr/share/sounds/freedesktop/stereo/complete.oga
+
+    # Ignore transient messages (tipo notifiche flash)
+    ignore_transient = no
+
+    # Stack duplicate notifications
+    stack_duplicates = true
+
+    # Always run dunst, anche se no notifications
+    always_run_script = true
+
+    # Browser per link
+    browser = firefox
+
+    # History file
+    history = /tmp/dunst_history
+
+# Urgency: low (verde), normal (blu), critical (rosso)
 
 [urgency_low]
     background = "#282a36"
-    foreground = "#6272a4"
-    timeout = 5
+    foreground = "#50fa7b"
+    frame_color = "#50fa7b"
+    timeout = 3000
 
 [urgency_normal]
     background = "#282a36"
     foreground = "#f8f8f2"
-    timeout = 10
-    # Bordo rosa per le notifiche normali
-    frame_color = "#ff79c6"
+    frame_color = "#bd93f9"
+    timeout = 5000
 
 [urgency_critical]
     background = "#282a36"
     foreground = "#ff5555"
     frame_color = "#ff5555"
     timeout = 0
+    # background = "#ff5555"
+    # foreground = "#21222c"
+
+# Regole per applicazioni specifiche
+
+[thunderbird]
+    appname = Thunderbird
+    urgency = normal
+    timeout = 8000
+
+[spotify]
+    appname = spotify
+    urgency = low
+    timeout = 2000
+
+[update]
+    appname = "Update Notification"
+    urgency = critical
+    timeout = 0
+
+[pidgin]
+    appname = Pidgin
+    urgency = low
+    timeout = 3000
+
+[slack]
+    appname = Slack
+    urgency = normal
+    timeout = 4000
+
+# Esempio regola custom per app specifica
+# [my_app]
+#     appname = My Application
+#     background = "#6272a4"
+#     foreground = "#f1fa8c"
+#     frame_color = "#f1fa8c"
