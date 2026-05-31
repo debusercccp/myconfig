@@ -13,11 +13,11 @@ echo -e "${GREEN}Ripristino configurazioni da repository a locale (README preser
 restore_folder() {
     local repo_src=$1
     local local_target=$2
-    
+
     if [ -d "$repo_src" ]; then
         # Crea la cartella di destinazione se non esiste
         mkdir -p "$local_target"
-        
+
         # Copia tutto il contenuto del repository nella cartella locale .config
         # --recursive: copia sottocartelle
         # --update: copia solo se il file sorgente è più recente o mancante nella destinazione
@@ -43,8 +43,14 @@ restore_folder "$SRC/waybar-niri" "$HOME/.config/waybar"
 # 5. Kitty
 restore_folder "$SRC/kitty" "$HOME/.config/kitty"
 
-# 6. Neovim (Aggiunto al posto di Matugen)
+# 6. Neovim
 restore_folder "$SRC/nvim" "$HOME/.config/nvim"
+
+# 7. Matugen (Reintrodotto per simmetria con sync_config.sh)
+restore_folder "$SRC/matugen" "$HOME/.config/matugen"
+
+# 8. Conky (Nuovo modulo)
+restore_folder "$SRC/conky" "$HOME/.config/conky"
 
 echo -e "${GREEN}--------------------------------------------${NC}"
 echo -e "${GREEN}Ripristino completato!${NC}"
