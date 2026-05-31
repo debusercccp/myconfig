@@ -75,6 +75,7 @@ window-rule {
 window-rule {
     match app-id="conky"
     open-floating true
+    focusable false
 }
 
 /* ================================================
