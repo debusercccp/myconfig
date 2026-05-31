@@ -1,20 +1,24 @@
 # Niri + Waybar Setup su Debian Trixie (Testing)
+
 Guida completa per compilare **Niri** (compositor Wayland scrollante), configurare **Waybar** (barra di stato) e risolvere i problemi comuni su **Debian Trixie**.
 
 ---
 
 ## Sommario
+
 1. [Prerequisiti](#prerequisiti)
 2. [Librerie e Pacchetti Installati](#librerie-e-pacchetti-installati)
 3. [Compilazione di Niri](#compilazione-di-niri)
 4. [Configurazione Niri (config.kdl)](#configurazione-niri-configkdl)
 5. [Configurazione Waybar](#configurazione-waybar)
-6. [Troubleshooting Completo](#troubleshooting-completo)
-7. [Quick Start](#quick-start)
+6. [Componenti Aggiuntivi](#componenti-aggiuntivi)
+7. [Troubleshooting Completo](#troubleshooting-completo)
+8. [Quick Start](#quick-start)
 
 ---
 
 ## Prerequisiti
+
 - **OS**: Debian Trixie (testing)
 - **Hardware**: Laptop con monitor integrato (eDP-1) o display esterno
 - **Rust**: Cargo installato via `rustup`
@@ -25,7 +29,9 @@ Guida completa per compilare **Niri** (compositor Wayland scrollante), configura
 ## Librerie e Pacchetti Installati
 
 ### Dipendenze di Build (per compilare Niri da sorgente)
+
 Questi pacchetti permettono a `cargo` di compilare il codice Rust di Niri:
+
 ```bash
 sudo apt install \
   build-essential \
@@ -39,13 +45,7 @@ sudo apt install \
   libxkbcommon-dev \
   libpixman-1-dev \
   libudev-dev \
-  libdisplay-info-dev \
-  gammastep \
-  blueman \
-  rfkill \
-  psmisc
-usermod -aG video $USER
-chmod +s /usr/sbin/rfkill
+  libdisplay-info-dev
 ```
 
 **Dettagli:**
@@ -57,7 +57,8 @@ chmod +s /usr/sbin/rfkill
 - `libinput-dev`: Input device (mouse, tastiera)
 - `libgbm-dev`, `libxkbcommon-dev`, `libpixman-1-dev`, `libudev-dev`, `libdisplay-info-dev`: Rendering e system utilities
 
-### Componenti Runtime (Desktop Environment)
+### Core Desktop Components
+
 ```bash
 sudo apt install \
   niri \
@@ -72,7 +73,8 @@ sudo apt install \
   xdg-desktop-portal-wlr
 ```
 
-**O**, se compili Niri da sorgente e installi solo i componenti essenziali:
+**Oppure**, se compili Niri da sorgente e installi solo i componenti essenziali:
+
 ```bash
 sudo apt install \
   waybar \
@@ -85,6 +87,7 @@ sudo apt install \
 ```
 
 ### Supporto Grafico e Icone
+
 ```bash
 sudo apt install \
   qt5-wayland \
@@ -95,6 +98,7 @@ sudo apt install \
   fonts-font-awesome \
   fonts-ubuntu-nerd \
   fonts-jetbrains-mono \
+  fonts-fira-code \
   libgtk-layer-shell0
 ```
 
@@ -105,6 +109,7 @@ sudo apt install \
 - `libgtk-layer-shell0`: **ESSENZIALE** — permette a Waybar di ancorare le finestre ai bordi dello schermo via `wlr-layer-shell` protocol
 
 ### Clipboard e Gestione Appunti
+
 ```bash
 sudo apt install \
   wl-clipboard \
@@ -113,70 +118,129 @@ sudo apt install \
 
 **Dettagli:**
 - `wl-clipboard`: Fornisce `wl-copy` e `wl-paste`, necessari per la clipboard Wayland
-- `cliphist`: Demone che mantiene la history degli appunti; usato con `wl-paste --watch cliphist store` e richiamato via fuzzel con `Mod+A`
+- `cliphist`: Demone che mantiene la history degli appunti; usato con `wl-paste --watch cliphist store`
 
 ### Sicurezza e Blocco Schermo
+
 ```bash
 sudo apt install \
   swaylock
 ```
 
 **Dettagli:**
-- `swaylock`: Screen locker Wayland; attivato con `Mod+L` (keybinding `allow-when-locked=true`)
+- `swaylock`: Screen locker Wayland; attivato con `Mod+L`
 
-### Applicazioni Desktop
-```bash
-sudo apt install \
-  dolphin \
-  galculator \
-  firefox-esr
-```
+### Controllo Audio, Video e Sistema
 
-**Dettagli:**
-- `dolphin`: File manager KDE; aperto con `Mod+E` e `XF86MyComputer`
-- `galculator`: Calcolatrice GTK; attivata con il tasto `XF86Calculator`
-- `firefox-esr`: Browser; attivato con il tasto `XF86HomePage`
-
-**Nota:** `firefox-esr` è la versione disponibile nei repo Debian. Se preferisci Firefox stabile o nightly, scaricalo dal sito ufficiale Mozilla.
-
-### Matugen (Theming Dinamico)
-`matugen` non e' disponibile nei repo Debian e va installato separatamente. E' il motore che genera la palette colori da un wallpaper e la scrive in `colors.kdl` (incluso da `config.kdl`).
-
-**Installazione tramite Cargo:**
-```bash
-cargo install matugen
-```
-
-**O tramite release precompilata (GitHub):**
-```bash
-# Scarica l'ultimo binario da https://github.com/InioX/matugen/releases
-curl -L https://github.com/InioX/matugen/releases/latest/download/matugen-x86_64-unknown-linux-gnu.tar.gz | tar xz
-sudo install -D matugen /usr/local/bin/matugen
-```
-
-**Utilizzo nel config.kdl:**
-```kdl
-spawn-at-startup "matugen" "image" "/home/noya/Immagini/blacklodge.jpg"
-```
-Questo comando genera `~/.config/niri/colors.kdl` con i valori della focus-ring ricavati dal wallpaper.
-
-### Utility Optional (ma Consigliato)
 ```bash
 sudo apt install \
   brightnessctl \
   wpctl \
   pavucontrol \
   slurp \
-  grim
+  grim \
+  psmisc
+```
+
+**Dettagli:**
+- `brightnessctl`: Controllo luminosità schermo (XF86MonBrightnessUp/Down)
+- `wpctl`: Controllo volume audio via pipewire (XF86AudioRaiseVolume/LowerVolume/Mute)
+- `pavucontrol`: Mixer audio GUI
+- `slurp`: Selettore regione per screenshot
+- `grim`: Screenshot tool per Wayland
+- `psmisc`: Fornisce `pkill`, `pgrep` per process management
+
+### Sistema di Notifiche
+
+```bash
+sudo apt install \
+  dunst
+```
+
+**Nota:** Se preferisci un notification daemon alternativo, puoi usare `mako-notifier`:
+```bash
+sudo apt install mako
+```
+
+### Bluetooth e Wireless
+
+```bash
+sudo apt install \
+  blueman \
+  rfkill
+```
+
+**Dettagli:**
+- `blueman`: Applet Bluetooth nel system tray
+- `rfkill`: Utility per abilitare/disabilitare radio (WiFi, Bluetooth)
+
+**Setup aggiuntivo per rfkill:**
+```bash
+sudo chmod +s /usr/sbin/rfkill
+```
+
+### Theming Dinamico e Colori
+
+```bash
+sudo apt install \
+  matugen
+```
+
+**Nota:** `matugen` non è disponibile direttamente nei repo Debian. Installazione opzioni:
+
+**Opzione A: Build da sorgente con Cargo (consigliato)**
+```bash
+cargo install matugen
+```
+
+**Opzione B: Binario precompilato da GitHub**
+```bash
+curl -L https://github.com/InioX/matugen/releases/latest/download/matugen-x86_64-unknown-linux-gnu.tar.gz | tar xz
+sudo install -D matugen /usr/local/bin/matugen
+rm matugen
+```
+
+### Applicazioni Desktop
+
+```bash
+sudo apt install \
+  dolphin \
+  galculator \
+  firefox-esr \
+  conky \
+  conky-all
+```
+
+**Dettagli:**
+- `dolphin`: File manager KDE (Mod+E, XF86MyComputer)
+- `galculator`: Calcolatrice GTK (XF86Calculator)
+- `firefox-esr`: Browser (XF86HomePage)
+- `conky`: System monitor configurabile
+- `conky-all`: Plugin aggiuntivi per conky
+
+### Nightlight (Filtro Luce Blu)
+
+Per usare il filtro notturno, puoi usare `gammastep` o `redshift`:
+
+```bash
+sudo apt install \
+  gammastep
+```
+
+**Oppure:**
+```bash
+sudo apt install \
+  redshift
 ```
 
 ---
 
 ## Compilazione di Niri
 
-### Opzione A: Compilare da Sorgente (Versione Piu' Recente)
+### Opzione A: Compilare da Sorgente (Versione Più Recente)
+
 ```bash
-# 1. Installa Rust (se non gia' fatto)
+# 1. Installa Rust (se non già fatto)
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 source $HOME/.cargo/env
 
@@ -206,18 +270,22 @@ niri --version
 
 **Tempo di compilazione**: 5-15 minuti a seconda del processore.
 
-### Opzione B: Installa dal Pacchetto Debian (se disponibile)
+### Opzione B: Installa dal Pacchetto Debian
+
 ```bash
 sudo apt install niri
 ```
 
-**Nota**: La versione nei repo Trixie potrebbe essere leggermente dietro la HEAD di GitHub, ma e' stabile.
+**Nota**: La versione nei repo Trixie potrebbe essere leggermente dietro la HEAD di GitHub, ma è stabile.
 
 ---
 
 ## Configurazione Niri (config.kdl)
 
 ### File: `~/.config/niri/config.kdl`
+
+Il tuo config include:
+
 ```kdl
 environment {
     GDK_BACKEND "wayland"
@@ -226,60 +294,64 @@ environment {
     XDG_SESSION_TYPE "wayland"
 }
 
-// Propaga le variabili a D-Bus per xdg-desktop-portal
-spawn-at-startup "bash" "-c" "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE DISPLAY"
+/* D-Bus environment propagation — ESSENZIALE per Waybar */
+spawn-at-startup "bash" "-c" "systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE"
+spawn-at-startup "bash" "-c" "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE DISPLAY > /dev/null 2>&1"
 
-// Riavvia i portal per garantire funzionamento
-spawn-at-startup "bash" "-c" "sleep 1 && systemctl --user restart xdg-desktop-portal-gtk.service && sleep 1 && systemctl --user restart xdg-desktop-portal.service"
+/* XDG Desktop Portal */
+spawn-at-startup "bash" "-c" "sleep 3 && systemctl --user restart xdg-desktop-portal-gtk.service && sleep 1 && systemctl --user restart xdg-desktop-portal.service > /dev/null 2>&1"
 
-// Avvia Waybar (con delay di sicurezza)
-spawn-at-startup "bash" "-c" "sleep 3 && waybar"
+/* Waybar */
+spawn-at-startup "bash" "-c" "sleep 3 && waybar > /dev/null 2>&1"
 
-// Gestione notifiche
+/* Notifications */
 spawn-at-startup "dunst"
 
-// Sfondo (opzionale, commenta se preferisci uno sfondo diverso)
-spawn-at-startup "swaybg" "-i" "/usr/share/desktop-base/active-theme/wallpaper/contents/images/1920x1080.svg" "-m" "fill"
+/* Wallpaper */
+spawn-at-startup "swaybg" "-i" "/home/noya/Immagini/blacklodge.jpg" "-m" "fill"
 
-// Window rules
-window-rule {
-    match app-id="waybar"
-    draw-border-with-background false
-}
+/* Nightlight (blue light filter) */
+spawn-at-startup "/home/noya/.config/waybar/scripts/nightlight.sh" "toggle"
 
-window-rule {
-    geometry-corner-radius 12
-    clip-to-geometry true
-}
+/* Bluetooth applet */
+spawn-at-startup "blueman-applet"
 
-// Keybindings
-binds {
-    Mod+Q { spawn "kitty"; }
-    Mod+C { close-window; }
-    Mod+R { spawn "fuzzel"; }
-    Mod+Shift+E { quit; }
+/* Dynamic theming from wallpaper */
+spawn-at-startup "matugen" "image" "/home/noya/Immagini/blacklodge.jpg"
 
-    // Navigazione tra colonne
-    Mod+Left  { focus-column-left; }
-    Mod+Right { focus-column-right; }
-    Mod+Up    { focus-window-or-workspace-up; }
-    Mod+Down  { focus-window-or-workspace-down; }
+/* Clipboard history */
+spawn-at-startup "wl-paste" "--watch" "cliphist" "store"
 
-    // Movimento finestre
-    Mod+Ctrl+Left  { move-column-left; }
-    Mod+Ctrl+Right { move-column-right; }
+/* System monitor */
+spawn-at-startup "conky" "-c" "~/.config/conky/conky.conf"
 
-    // Layout
-    Mod+F { maximize-column; }
-    Mod+Comma  { consume-window-into-column; }
-    Mod+Period { expel-window-from-column; }
+/* Include generated colors from matugen */
+include "colors.kdl"
+
+/* Layout, window rules, binds ... */
+```
+
+### File: `~/.config/niri/colors.kdl`
+
+Questo file viene generato automaticamente da `matugen`:
+
+```kdl
+// Generated by matugen from wallpaper
+layout {
+    focus-ring {
+        width 4
+        active-color "#<color-from-wallpaper>"
+    }
 }
 ```
 
+Non modificare manualmente — `matugen` lo rigenera ogni volta che cambia il wallpaper.
+
 ### Sintassi KDL Importante
+
 - **Stringhe**: Usa `"doppi apici"` per stringhe, non virgolette singole
-- **Blocchi**: `spawn-at-startup` e' un comando, non un blocco — non serve `{}`
-- **Commenti**: `//` per linee singole
+- **Blocchi**: `spawn-at-startup` è un comando, non un blocco — non serve `{}`
+- **Commenti**: `//` per linee singole, `/* */` per blocchi
 - **No virgole**: KDL non richiede virgole fra attributi
 
 ### Errori Comuni in config.kdl
@@ -287,16 +359,18 @@ binds {
 | Errore | Causa | Soluzione |
 |--------|-------|-----------|
 | `unexpected node 'match-app-id'` | Sintassi vecchia (Niri < 26.00) | Usa `match app-id="..."` invece |
-| `unexpected node 'block-out-from-margins'` | Attributo non esiste in questa versione | Rimuovi completamente |
-| `error parsing KDL` | Virgolette singole usate come `'string'` | Usa sempre `"doppi apici"` |
-| `unknown variable WAYLAND_DISPLAY` | Variabile d'ambiente non definita | Aggiungi a `environment { ... }` |
+| `unexpected node 'block-out-from-margins'` | Attributo non esiste | Rimuovi completamente |
+| `error parsing KDL` | Virgolette singole `'string'` | Usa sempre `"doppi apici"` |
+| `include: file not found: colors.kdl` | File non esiste | Esegui manualmente `matugen image <wallpaper>` |
 
 ---
 
 ## Configurazione Waybar
 
 ### File: `~/.config/waybar/config`
-Copia il file JSON fornito (`waybar-niri/config`). Punti chiave:
+
+JSON config per Waybar con moduli Niri-compatibili e custom script per mounts:
+
 ```json
 {
     "layer": "top",
@@ -305,69 +379,209 @@ Copia il file JSON fornito (`waybar-niri/config`). Punti chiave:
     "gtk-layer-shell": true,
     "height": 36,
     "output": "eDP-1",
-    "modules-left": [ "custom/launcher", "niri/workspaces", "niri/window" ],
-    "modules-center": [ "clock" ],
-    "modules-right": [ "battery", "pulseaudio", "network", "custom/power" ]
+    "modules-left": [
+        "custom/launcher",
+        "niri/workspaces",
+        "niri/window"
+    ],
+    "modules-center": [
+        "clock"
+    ],
+    "modules-right": [
+        "custom/mounts",
+        "tray",
+        "battery",
+        "pulseaudio",
+        "network",
+        "custom/power"
+    ]
 }
 ```
 
-**Parametri critici:**
-- `layer: "top"` — mette la barra sopra tutte le finestre
-- `exclusive: true` — Niri riserva lo spazio per la barra (non copre le finestre)
-- `gtk-layer-shell: true` — abilita il protocollo wlr-layer-shell
-- `output: "eDP-1"` — specifico per il tuo monitor (vedi sotto come trovarlo)
-- `modules-*` — moduli disponibili per Niri (non usare `sway/*` o `hyprland/*`)
-
 ### File: `~/.config/waybar/style.css`
-Copia il file CSS fornito (`waybar-niri/style.css`). Theme Dracula con colori semantici.
 
-### Trovare il Nome Corretto del Monitor
-```bash
-# Metodo 1: niri
-niri msg outputs
-# Output: LG Display 0x0470 Unknown (eDP-1)
+Tema Dracula con colori semantici.
 
-# Metodo 2: wlr-randr (se installato)
-wlr-randr
+### Custom Module: Montaggio Dischi
 
-# Metodo 3: xrandr (su X11, non funziona su Wayland direttamente)
-xrandr
+Aggiungi nel config JSON:
 
-# Metodo 4: /sys
-ls /sys/class/drm/
-```
-
-Se il tuo monitor si chiama diversamente (es. `HDMI-1`, `DP-2`), aggiorna il `config` di Waybar:
 ```json
-"output": "HDMI-1"
+"custom/mounts": {
+    "format": "{}",
+    "exec": "~/.config/waybar/scripts/mounts.sh waybar",
+    "interval": 5,
+    "on-click": "~/.config/waybar/scripts/mounts.sh toggle",
+    "tooltip": true
+}
 ```
 
-### Moduli Supportati in Waybar su Niri
+Copia lo script `/path/to/mounts.sh` in `~/.config/waybar/scripts/mounts.sh` e rendilo eseguibile:
+
+```bash
+chmod +x ~/.config/waybar/scripts/mounts.sh
+```
+
+---
+
+## Componenti Aggiuntivi
+
+### Matugen — Dynamic Theming
+
+**Cosa fa:**
+Genera una palette colori dal wallpaper corrente e scrive i valori in `~/.config/niri/colors.kdl`. Questo consente al `focus-ring` di adattarsi automaticamente al wallpaper.
+
+**Setup:**
+```bash
+# Nel config.kdl
+spawn-at-startup "matugen" "image" "/percorso/al/wallpaper.jpg"
+
+# Includi il file generato
+include "colors.kdl"
+```
+
+**Test:**
+```bash
+matugen image /home/noya/Immagini/blacklodge.jpg
+cat ~/.config/niri/colors.kdl
+```
+
+### Clipboard History — cliphist
+
+**Cosa fa:**
+Mantiene una history degli appunti (testo copiato). Accessibile via `Mod+A`.
+
+**Setup:**
+```kdl
+spawn-at-startup "wl-paste" "--watch" "cliphist" "store"
+
+# Nel binds:
+Mod+A { spawn "bash" "-c" "cliphist list | fuzzel --dmenu | cliphist decode | wl-copy"; }
+```
+
+**Test:**
+```bash
+# Copia del testo
+echo "test" | wl-copy
+
+# Lista clipboard
+cliphist list
+
+# Incolla da history
+cliphist list | fuzzel --dmenu | cliphist decode | wl-copy
+```
+
+### Conky — System Monitor
+
+**Cosa fa:**
+Monitor di sistema (CPU, RAM, temperatura, disco) personalizzabile. Puoi posizionarlo come finestra floating o sul desktop.
+
+**Setup:**
+```kdl
+spawn-at-startup "conky" "-c" "~/.config/conky/conky.conf"
+
+window-rule {
+    match app-id="conky"
+    open-floating true
+}
+```
+
+**Config minimale `~/.config/conky/conky.conf`:**
+```
+conky.config = {
+    alignment = 'top_right',
+    background = true,
+    border_width = 0,
+    cpu_avg_samples = 2,
+    default_color = 'white',
+    default_outline_color = 'white',
+    double_buffer = true,
+    draw_borders = false,
+    draw_graph_borders = true,
+    draw_outline = false,
+    draw_shades = false,
+    gap_x = 10,
+    gap_y = 10,
+    net_avg_samples = 2,
+    no_buffers = true,
+    out_to_console = false,
+    out_to_ncurses = false,
+    out_to_stderr = false,
+    out_to_x = true,
+    own_window = true,
+    own_window_argb_visual = true,
+    own_window_transparent = true,
+    own_window_type = 'desktop',
+    text_buffer_size = 32768,
+    update_interval = 1.0,
+    uppercase = false,
+    use_spacer = 'none',
+    use_xft = true,
+};
+
+conky.text = [[
+CPU: $cpu%
+RAM: $memperc%
+Temp: ${hwmon 0 temp 1}°C
+Disk: ${fs_used /}/${fs_size /}
+]];
+```
+
+### Nightlight — Filtro Luce Blu
+
+Script personalizzato per abilitare/disabilitare `gammastep`:
+
+**File: `~/.config/waybar/scripts/nightlight.sh`**
+
+```bash
+#!/bin/bash
+
+if [ "$1" = "toggle" ]; then
+    if pgrep -x "gammastep" > /dev/null; then
+        killall gammastep
+        notify-send "Nightlight" "Disabilitato"
+    else
+        gammastep -O 3000 &
+        notify-send "Nightlight" "Abilitato (3000K)"
+    fi
+fi
+```
+
+Rendi eseguibile:
+```bash
+chmod +x ~/.config/waybar/scripts/nightlight.sh
+```
+
+---
+
+## Configurazione Waybar Moduli
+
+### Moduli Disponibili per Niri
 
 | Modulo | Stato | Note |
 |--------|-------|-------|
-| `niri/workspaces` | SI | Mostra i workspace Niri |
-| `niri/window` | SI | Titolo della finestra attiva |
-| `clock` | SI | Orologio e data |
-| `battery` | SI | Batteria (specifiche BAT0/BAT1) |
-| `pulseaudio` | SI | Volume audio |
-| `network` | SI | Stato rete |
-| `cpu` | SI | Utilizzo CPU |
-| `memory` | SI | Utilizzo RAM |
-| `disk` | SI | Spazio disco |
-| `temperature` | SI | Temperatura sensori |
-| `backlight` | SI | Luminosita' schermo |
-| `tray` | SI | System tray |
-| `sway/workspaces` | NO | Solo Sway |
-| `hyprland/workspaces` | NO | Solo Hyprland |
-| `sway/window` | NO | Solo Sway |
-| `custom/*` | SI | Script personalizzati |
+| `niri/workspaces` | ✅ | Mostra i workspace Niri |
+| `niri/window` | ✅ | Titolo della finestra attiva |
+| `clock` | ✅ | Orologio e data |
+| `battery` | ✅ | Batteria (BAT0, BAT1) |
+| `pulseaudio` | ✅ | Volume audio |
+| `network` | ✅ | Stato rete |
+| `cpu` | ✅ | Utilizzo CPU |
+| `memory` | ✅ | Utilizzo RAM |
+| `disk` | ✅ | Spazio disco |
+| `temperature` | ✅ | Temperatura sensori |
+| `backlight` | ✅ | Luminosità schermo |
+| `tray` | ✅ | System tray |
+| `custom/*` | ✅ | Script personalizzati |
+| `sway/workspaces` | ❌ | Solo Sway |
+| `hyprland/workspaces` | ❌ | Solo Hyprland |
 
 ---
 
 ## Troubleshooting Completo
 
 ### Problema 1: Niri Non Compila — `error: could not find libseat`
+
 **Sintomo:**
 ```
 error: linking with 'cc' failed: exit code 1
@@ -379,320 +593,186 @@ error: linking with 'cc' failed: exit code 1
 **Soluzione:**
 ```bash
 sudo apt install libseat-dev
-cargo build --release  # Ricompila
+cargo build --release
 ```
 
 ---
 
 ### Problema 2: Waybar Non Appare a Schermo
+
 **Sintomi:**
 - Processo Waybar attivo (`ps aux | grep waybar`)
 - Nessun output di errore nel log
-- La barra non e' visibile sullo schermo
+- La barra non è visibile sullo schermo
 
-**Cause Comuni:**
+**Soluzione (come trattato nel README base):**
 
-#### A. D-Bus Non Propagato (CAUSA PIU' COMUNE)
-Il compositor Niri non propaga automaticamente le variabili d'ambiente a D-Bus, quindi:
-1. `xdg-desktop-portal` fallisce silenziosamente
-2. GTK non riesce a creare la surface Wayland
-3. Waybar parte ma non renderizza
-
-**Sintomi specifici:**
-```bash
-waybar 2>&1 | grep -i portal
-# Output:
-# [error] Errore nel chiamare StartServiceByName per org.freedesktop.portal.Desktop: E' stato raggiunto il timeout
-```
-
-**Soluzione:**
-Aggiungi nel `config.kdl` come **primo spawn-at-startup**:
+Aggiungi nel `config.kdl`:
 ```kdl
 spawn-at-startup "bash" "-c" "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE DISPLAY"
-spawn-at-startup "bash" "-c" "sleep 1 && systemctl --user restart xdg-desktop-portal-gtk.service && sleep 1 && systemctl --user restart xdg-desktop-portal.service"
+spawn-at-startup "bash" "-c" "sleep 3 && systemctl --user restart xdg-desktop-portal-gtk.service && sleep 1 && systemctl --user restart xdg-desktop-portal.service"
 spawn-at-startup "bash" "-c" "sleep 3 && waybar"
 ```
 
-O, per test immediato:
-```bash
-dbus-update-activation-environment --systemd WAYLAND_DISPLAY=$WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=niri XDG_SESSION_TYPE=wayland DISPLAY=$DISPLAY
-systemctl --user restart xdg-desktop-portal-gtk.service
-sleep 1
-systemctl --user restart xdg-desktop-portal.service
-sleep 2
-waybar 2>&1
-```
-
-#### B. Monitor Output Sbagliato
-Se hai piu' monitor, Waybar potrebbe avviarsi su uno non visibile.
-
-**Debug:**
-```bash
-niri msg outputs
-# Leggi il nome corretto (es. eDP-1, HDMI-1, DP-1)
-# Aggiorna config
-"output": "HDMI-1"  # Cambia nel file config di Waybar
-```
-
-#### C. Variabili d'Ambiente Mancanti
-Waybar deve avere accesso a `WAYLAND_DISPLAY` e `XDG_RUNTIME_DIR`.
-
-**Debug:**
-```bash
-echo $WAYLAND_DISPLAY  # Deve essere: wayland-1 (o simile)
-echo $XDG_RUNTIME_DIR  # Deve essere: /run/user/1000
-ls $XDG_RUNTIME_DIR/wayland*  # Deve esistere il socket
-```
-
-Se vuote, lancia Waybar con:
-```bash
-WAYLAND_DISPLAY=wayland-1 waybar 2>&1
-```
-
-#### D. GTK Compilation Senza Debug
-Se vedi:
-```
-Gtk-WARNING **: GTK_DEBUG set but ignored because gtk isn't built with G_ENABLE_DEBUG
-```
-Non e' un errore fatale. GTK e' compilato senza debug e non puoi usare `GTK_DEBUG=all`. Ignora questo warning.
-
 ---
 
-### Problema 3: Waybar Crasha con Segmentation Fault
+### Problema 3: matugen Non Genera colors.kdl
+
 **Sintomo:**
 ```
-Segmentazione non corretta (core dump creato)
+error: include: file not found: colors.kdl
 ```
 
-**Causa:** Conflitto tra istanze di `xdg-desktop-portal` (una gira gia', ne avvii un'altra)
+**Causa:** `matugen` non è installato o non è stato eseguito
 
 **Soluzione:**
 ```bash
-pkill -f xdg-desktop-portal
-sleep 1
-systemctl --user restart dbus.service
-sleep 1
-systemctl --user start xdg-desktop-portal
-sleep 1
-waybar 2>&1
+# Installa matugen
+cargo install matugen
+
+# Esegui manualmente per testare
+matugen image /home/noya/Immagini/blacklodge.jpg
+
+# Verifica che il file sia stato creato
+cat ~/.config/niri/colors.kdl
+
+# Se non esiste ancora, crea un placeholder
+touch ~/.config/niri/colors.kdl
 ```
 
 ---
 
-### Problema 4: Waybar Timeout su Portal D-Bus
+### Problema 4: cliphist Non Salva gli Appunti
+
 **Sintomo:**
 ```
-[error] Errore nel chiamare StartServiceByName per org.freedesktop.impl.portal.desktop.gtk: E' stato raggiunto il timeout
+Mod+A apre fuzzel vuoto
+cliphist list restituisce nulla
 ```
 
-**Causa:** `xdg-desktop-portal-gtk.service` non parte perche' manca l'environment.
-
-**Debug:**
-```bash
-journalctl --user -xeu xdg-desktop-portal.service --no-pager | tail -30
-journalctl --user -xeu xdg-desktop-portal-gtk.service --no-pager | tail -30
-```
-
-**Soluzione:** Vedi **Problema 2A** sopra — aggiungi `dbus-update-activation-environment`.
-
----
-
-### Problema 5: Moduli Sway/Hyprland Disabilitati
-**Sintomo:**
-```
-[warning] module sway/workspaces: Disabling module "sway/workspaces", Socket path is empty
-[warning] module hyprland/language: Disabling module "hyprland/language", Socket path is empty
-```
-
-**Causa:** Waybar e' configurato per un altro compositor (Sway/Hyprland), non Niri.
-
-**Soluzione:** Usa `niri/workspaces` al posto di `sway/workspaces` nel config JSON.
-
----
-
-### Problema 6: Permessi Denied su Input Devices
-**Sintomo:**
-```
-[warning] Can't open /dev/input/event* (are you in the input group?): EACCES Permesso negato
-```
-
-**Causa:** L'utente non appartiene al gruppo `input` (necessario per moduli come `keyboard-state`).
-
-**Soluzione (opzionale):**
-```bash
-sudo usermod -aG input $USER
-# Logout e login per applicare
-```
-
----
-
-### Problema 7: Batteria Non Rilevata
-**Sintomo:**
-```
-[warning] No battery named BAT2
-```
-
-**Causa:** Il tuo laptop ha una batteria con nome diverso.
-
-**Debug:**
-```bash
-ls /sys/class/power_supply/
-# Output: ACAD  BAT0
-# (non BAT2)
-```
-
-**Soluzione:** Aggiorna il config Waybar:
-```json
-"battery": {
-    "bat": "BAT0",
-    ...
-}
-```
-
----
-
-### Problema 8: Luminosita' (Backlight) Non Funziona
-**Sintomo:**
-```bash
-incbrightness: command not found
-decbrightness: command not found
-```
-
-**Causa:** Script personalizzati non disponibili. Su Debian si usa `brightnessctl`.
-
-**Soluzione:**
-```bash
-sudo apt install brightnessctl
-# Nel config Waybar, usa:
-"backlight": {
-    "device": "intel_backlight",
-    "on-scroll-up": "brightnessctl set 5%+",
-    "on-scroll-down": "brightnessctl set 5%-",
-    ...
-}
-```
-
----
-
-### Problema 9: Niri Esce al Riavvio della Sessione
-**Sintomo:** Dopo `niri msg action quit`, quando rientra non carica il config.kdl
-
-**Causa:** File in uso o sintassi errata in config.kdl
-
-**Soluzione:**
-```bash
-# Verifica la sintassi
-cat ~/.config/niri/config.kdl | kdl --validate
-# (se kdl-cli e' disponibile)
-
-# O avvia Niri manualmente per vedere gli errori
-niri
-# Nel log comparira' il messaggio d'errore esatto
-```
-
----
-
-### Problema 10: cliphist Non Salva gli Appunti
-**Sintomo:** `Mod+A` apre fuzzel vuoto o il comando `cliphist list` non restituisce nulla.
-
-**Causa:** `wl-paste --watch cliphist store` non e' in esecuzione, oppure `cliphist` non e' installato.
+**Causa:** `wl-paste --watch cliphist store` non è in esecuzione
 
 **Verifica:**
 ```bash
 pgrep -a wl-paste
-# Deve mostrare: wl-paste --watch cliphist store
 ```
 
-**Soluzione:** Assicurati che nel `config.kdl` sia presente:
-```kdl
-spawn-at-startup "wl-paste" "--watch" "cliphist" "store"
-```
-E che entrambi i pacchetti siano installati:
+**Soluzione:**
 ```bash
+# Assicurati che nel config.kdl sia presente
+# spawn-at-startup "wl-paste" "--watch" "cliphist" "store"
+
+# Verifica i pacchetti
 sudo apt install wl-clipboard cliphist
+
+# Riavvia Niri
+niri msg action quit
+niri &
 ```
 
 ---
 
-### Problema 11: matugen Non Genera colors.kdl
-**Sintomo:** Niri si avvia ma il `focus-ring` non ha i colori dinamici, oppure compare l'errore `include: file not found: colors.kdl`.
+### Problema 5: Conky Non Appare
 
-**Causa:** `matugen` non e' installato o il percorso del wallpaper e' errato.
-
-**Verifica:**
-```bash
-which matugen
-matugen image /home/noya/Immagini/blacklodge.jpg
-cat ~/.config/niri/colors.kdl
+**Sintomo:**
+```
+Conky non è visibile, o è nascosto dietro le finestre
 ```
 
-**Soluzione:** Se il file non viene generato, esegui matugen manualmente e controlla i log. Se `colors.kdl` non esiste ancora, crea un file segnaposto per evitare errori di include:
+**Causa:** Window rule mancante o posizionamento sbagliato
+
+**Soluzione:**
+```kdl
+window-rule {
+    match app-id="conky"
+    open-floating true
+}
+```
+
+Se conky è ancora nascosto, prova a modificare il percorso della config:
 ```bash
-touch ~/.config/niri/colors.kdl
+conky -c ~/.config/conky/conky.conf
+```
+
+---
+
+### Problema 6: Bluetooth Applet Non Appare
+
+**Sintomo:**
+```
+blueman-applet non compare nel tray
+```
+
+**Causa:** Dipendenze mancanti o D-Bus non configurato
+
+**Soluzione:**
+```bash
+sudo apt install blueman
+pkill blueman-applet
+blueman-applet &
 ```
 
 ---
 
 ## Quick Start
 
-### Setup Veloce (5 minuti)
+### Setup Veloce (10 minuti)
+
 ```bash
-# 1. Installa dipendenze
+# 1. Installa tutte le dipendenze
 sudo apt install -y \
   build-essential pkg-config libwayland-dev libpango1.0-dev \
   libpipewire-0.3-dev libinput-dev libseat-dev libgbm-dev \
   libxkbcommon-dev libpixman-1-dev libudev-dev libdisplay-info-dev \
-  waybar fuzzel dunst swaybg kitty \
-  xdg-desktop-portal xdg-desktop-portal-gtk \
-  fonts-font-awesome libgtk-layer-shell0 \
-  brightnessctl \
+  waybar fuzzel dunst swaybg kitty konsole \
+  xdg-desktop-portal xdg-desktop-portal-gtk xdg-desktop-portal-wlr \
+  qt5-wayland qt6-wayland qt5ct qt6ct \
+  fonts-noto-color-emoji fonts-font-awesome fonts-ubuntu-nerd fonts-jetbrains-mono fonts-fira-code \
+  libgtk-layer-shell0 \
   wl-clipboard cliphist \
   swaylock \
+  brightnessctl wpctl pavucontrol slurp grim psmisc \
+  dunst \
+  blueman rfkill \
+  brightnessctl wpctl pavucontrol slurp grim \
   dolphin galculator firefox-esr \
-  blueman
+  conky conky-all \
+  gammastep
 
-# 2. Compila Niri (opzionale se usi il pacchetto)
+# 2. Setup rfkill
+sudo chmod +s /usr/sbin/rfkill
+
+# 3. Compila Niri (opzionale se usi il pacchetto)
 git clone https://github.com/YaLTeR/niri.git
 cd niri
 cargo build --release
 sudo install -D target/release/niri /usr/local/bin/niri
 
-# 3. Installa matugen
+# 4. Installa matugen
 cargo install matugen
-# oppure scarica il binario precompilato da GitHub Releases
 
-# 4. Crea config.kdl
+# 5. Crea directory di config
 mkdir -p ~/.config/niri
-# Copia il file config.kdl fornito
+mkdir -p ~/.config/waybar/scripts
+mkdir -p ~/.config/fuzzel
+mkdir -p ~/.config/dunst
+mkdir -p ~/.config/conky
 
-# 5. Copia config Waybar
-mkdir -p ~/.config/waybar
-cp config ~/.config/waybar/config
-cp style.css ~/.config/waybar/style.css
+# 6. Copia i file di config forniti
+# Copia: config.kdl, waybar/config, waybar/style.css, fuzzel/fuzzel.ini, dunst/dunstrc
+# Copia: waybar/scripts/mounts.sh, waybar/scripts/nightlight.sh
 
-# 6. Avvia Niri
+# 7. Genera colori iniziali
+matugen image /percorso/al/wallpaper.jpg
+
+# 8. Avvia Niri
 niri
-
-# 7. Da un terminale in Niri, testa Waybar
-pkill waybar && waybar &
-```
-
----
-
-## File Aggiuntivi
-I seguenti file sono forniti nella cartella `waybar-niri/`:
-- `config` — Config JSON per Waybar (moduli Niri, tema Dracula)
-- `style.css` — CSS con palette Dracula, colori semantici
-
-Copiali:
-```bash
-cp config ~/.config/waybar/config
-cp style.css ~/.config/waybar/style.css
 ```
 
 ---
 
 ## Comandi Utili
+
 ```bash
 # Verificare versione Niri
 niri --version
@@ -700,62 +780,54 @@ niri --version
 # Controllare output monitor
 niri msg outputs
 
-# Visualizzare event stream (workspaces, finestre, layout)
+# Visualizzare event stream
 niri msg event-stream
 
 # Inviare azioni via IPC
-niri msg action quit  # Esci da Niri
-niri msg action focus-window-or-workspace-down
+niri msg action quit
 
 # Riavviare Waybar
-pkill waybar
-sleep 1
-waybar &
+pkill waybar && sleep 1 && waybar &
 
 # Debug D-Bus
-dbus-update-activation-environment --systemd WAYLAND_DISPLAY=$WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=niri XDG_SESSION_TYPE=wayland
 systemctl --user status xdg-desktop-portal
 
 # Verificare batteria
 cat /sys/class/power_supply/BAT0/capacity
 
-# Test luminosita'
+# Luminosità
 brightnessctl get
 brightnessctl set 50%
 
 # Clipboard history
 cliphist list
-cliphist list | fuzzel --dmenu | cliphist decode | wl-copy
 
-# Generare colori da wallpaper con matugen
-matugen image /percorso/al/wallpaper.jpg
-cat ~/.config/niri/colors.kdl
+# Generare colori da wallpaper
+matugen image /home/noya/Immagini/wallpaper.jpg
 
-# Reload config.kdl senza riavviare (solo cambiano i keybindings)
-# Purtroppo Niri non ha reload runtime -- devi uscire e rientrare
-niri msg action quit
-niri &
+# Testare nightlight
+~/.config/waybar/scripts/nightlight.sh toggle
+
+# Montare dischi
+~/.config/waybar/scripts/mounts.sh list
+~/.config/waybar/scripts/mounts.sh toggle
+
+# Reload config.kdl (riavvia Niri)
+niri msg action quit && niri &
 ```
 
 ---
 
 ## Risorse Utili
+
 - **Niri GitHub**: https://github.com/YaLTeR/niri
 - **Waybar Wiki**: https://github.com/Alexays/Waybar/wiki
 - **KDL Language**: https://kdl.dev/
-- **Wayland Protocol**: https://wayland.freedesktop.org/
-- **xdg-desktop-portal**: https://github.com/flatpak/xdg-desktop-portal
 - **matugen**: https://github.com/InioX/matugen
-
----
-
-## Contatti e Feedback
-Se riscontri problemi non documentati qui:
-1. Controlla i log di Niri: `journalctl -u niri` (se installato come systemd service)
-2. Apri un issue su GitHub: https://github.com/YaLTeR/niri/issues
-3. Consulta la community: Discord Niri, forum Wayland
+- **Conky**: https://github.com/brndnmtthws/conky
+- **Blueman**: https://github.com/blueman-project/blueman
 
 ---
 
 **Ultima modifica**: Maggio 2026
-**Testato su**: Debian Trixie (Testing), Niri 26.04, Waybar 0.12.0
+**Testato su**: Debian Trixie (Testing), Niri 26.04+, Waybar 0.12.0

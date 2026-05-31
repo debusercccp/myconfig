@@ -71,6 +71,12 @@ window-rule {
     geometry-corner-radius 12
 }
 
+/* Conky - Impedisce a Niri di inserirlo nelle colonne di scorrimento */
+window-rule {
+    match app-id="conky"
+    open-floating true
+}
+
 /* ================================================
    STARTUP COMMANDS - Avvio servizi e UI
    ================================================ */
@@ -87,7 +93,7 @@ spawn-at-startup "bash" "-c" "sleep 3 && systemctl --user restart xdg-desktop-po
 spawn-at-startup "bash" "-c" "sleep 3 && waybar > /dev/null 2>&1"
 
 /* Notifiche desktop (Dunst) */
-spawn-at-startup "dunst" ">" "/dev/null" "2>&1"
+spawn-at-startup "dunst"
 
 /* Sfondo desktop - swaybg con fill mode */
 spawn-at-startup "swaybg" "-i" "/home/noya/Immagini/blacklodge.jpg" "-m" "fill"
@@ -103,6 +109,8 @@ spawn-at-startup "matugen" "image" "/home/noya/Immagini/blacklodge.jpg"
 
 // Salva la history del copia-incolla
 spawn-at-startup "wl-paste" "--watch" "cliphist" "store"
+
+spawn-at-startup "conky" "-c" "~/.config/conky/conky.conf"
 
 /* ================================================
    KEYBINDINGS - Scorciatoie da tastiera
