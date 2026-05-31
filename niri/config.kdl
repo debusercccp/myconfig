@@ -34,6 +34,12 @@ layer-rule {
     place-within-backdrop true
 }
 
+layer-rule {
+    match namespace="conky_namespace"
+    // Nessun nodo aggiuntivo necessario per v26.04
+    // open-on-output serve se hai multi-monitor
+}
+
 environment {
     GDK_BACKEND "wayland"
     QT_QPA_PLATFORM "wayland"
@@ -75,7 +81,6 @@ window-rule {
 window-rule {
     match app-id="conky"
     open-floating true
-    focusable false
 }
 
 /* ================================================
@@ -108,7 +113,7 @@ spawn-at-startup "blueman-applet"
 // Salva la history del copia-incolla
 spawn-at-startup "wl-paste" "--watch" "cliphist" "store"
 
-spawn-at-startup "bash" "-c" "sleep 10 && conky -c ~/.config/conky/conky.conf > /dev/null 2>&1"
+spawn-at-startup "bash" "-c" "sleep 10 && conky -c ~/.config/conky/conky.conf"
 
 /* ================================================
    KEYBINDINGS - Scorciatoie da tastiera
