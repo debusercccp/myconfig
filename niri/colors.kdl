@@ -1,6 +1,15 @@
-// Colori statici Tokyo Night / Dracula per Niri
 layout {
     focus-ring {
-        active-color "#bb9af7"
+        width 3
+        active-color "#bb9af7"       // Violet
+        inactive-color "#2e3440"     // Dark
     }
+
+    border {
+        width 1
+        inactive-color "#364458"     // Subtle border
+    }
+
+    gaps 16
+    background-color "transparent"
 }
