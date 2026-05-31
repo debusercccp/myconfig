@@ -1,0 +1,6 @@
+// Colori statici Tokyo Night / Dracula per Niri
+layout {
+    focus-ring {
+        active-color "#bb9af7"
+    }
+}
