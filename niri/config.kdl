@@ -181,7 +181,7 @@ binds {
     "Mod+L" allow-when-locked=true { spawn "swaylock"; }
     XF86MyComputer { spawn "dolphin" "/home/noya/MiniSSD"; }
 
-    Print { spawn "sh" "-c" "grim -g \"$(slurp)\" ~/Pictures/Screenshots/$(date +%Y-%m-%d_%H-%M-%S).png"; }
+    Print { spawn "sh" "-c" "grim -g \"$(slurp)\" ~/Immagini/Screenshots/$(date +%Y-%m-%d_%H-%M-%S).png"; }
 
 }
 
