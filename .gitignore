@@ -10,3 +10,6 @@ __pycache__/
 *.bak
 *.swp
 *~
+
+# Secrets — never commit a password CSV (see utils/pwsearch.py)
+*.csv

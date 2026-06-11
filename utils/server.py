@@ -1,7 +1,9 @@
 import sys
 from socket import *
 
-myHost = '0.0.0.0'
+# WARNING: binds all interfaces ('0.0.0.0') with no authentication.
+# This is a plaintext echo server — run only on trusted/LAN networks.
+myHost = "0.0.0.0"
 myPort = 50007
 
 sockobj = socket(AF_INET, SOCK_STREAM)
@@ -18,19 +20,20 @@ print(f"Server listening on {myPort}...")
 
 while True:
     connection, address = sockobj.accept()
-    print('Server connected by', address)
+    print("Server connected by", address)
     i = 0
     try:
         while True:
             data = connection.recv(1024)
-            if not data: break
-            
-            connection.send(b'Echo=>' + data)
-            
+            if not data:
+                break
+
+            connection.send(b"Echo=>" + data)
+
             # Fixed the print/send logic
             log_msg = f"i: {i}\n"
-            print(log_msg, end='')
-            connection.send(log_msg.encode('utf-8'))
+            print(log_msg, end="")
+            connection.send(log_msg.encode("utf-8"))
             i += 1
     finally:
         connection.close()

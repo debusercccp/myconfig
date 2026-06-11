@@ -9,10 +9,34 @@ import sys
 import os
 import argparse
 
-CSV_PATH = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)),
-    "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-)
+
+def resolve_csv_path():
+    """Percorso del CSV: override via $PWSEARCH_CSV, altrimenti fuori dal repo."""
+    env = os.environ.get("PWSEARCH_CSV")
+    if env:
+        return os.path.abspath(os.path.expanduser(env))
+    return os.path.join(
+        os.path.expanduser("~"), ".local", "share", "pwsearch", "passwords.csv"
+    )
+
+
+def assert_csv_safe(path):
+    """Rifiuta un CSV di password versionato nel repo o con permessi troppo aperti."""
+    repo_dir = os.path.dirname(os.path.abspath(__file__))
+    if os.path.commonpath([os.path.abspath(path), repo_dir]) == repo_dir:
+        print(
+            f"{RED}Rifiuto: il CSV è dentro il repository ({path}).{RESET}\n"
+            f"{DIM}Spostalo fuori e indica il percorso con $PWSEARCH_CSV.{RESET}"
+        )
+        sys.exit(1)
+    mode = os.stat(path).st_mode
+    if mode & 0o077:
+        print(
+            f"{RED}Rifiuto: permessi troppo aperti su {path} ({oct(mode & 0o777)}).{RESET}\n"
+            f"{DIM}Proteggilo con: chmod 600 {path}{RESET}"
+        )
+        sys.exit(1)
+
 
 # Colori ANSI
 RESET = "\033[0m"
@@ -104,11 +128,14 @@ def main():
     )
     args = parser.parse_args()
 
-    if not os.path.exists(CSV_PATH):
-        print(f"{RED}Errore: file non trovato → {CSV_PATH}{RESET}")
+    csv_path = resolve_csv_path()
+    if not os.path.exists(csv_path):
+        print(f"{RED}Errore: file non trovato → {csv_path}{RESET}")
+        print(f"{DIM}Imposta $PWSEARCH_CSV per indicare il vault.{RESET}")
         sys.exit(1)
 
-    rows = load_csv(CSV_PATH)
+    assert_csv_safe(csv_path)
+    rows = load_csv(csv_path)
     results = search(rows, args.query)
 
     total = len(results)
