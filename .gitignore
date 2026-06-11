@@ -1,1 +1,12 @@
-.ruff-cache
+# Caches
+.ruff-cache/
+__pycache__/
+*.pyc
+
+# Editor / tooling
+.claude/
+
+# Backup & temp files
+*.bak
+*.swp
+*~

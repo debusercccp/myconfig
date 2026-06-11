@@ -1,9 +1,22 @@
 /* ================================================
-   Niri Config
+   Niri Config 
    ================================================ */
 
 hotkey-overlay {
     skip-at-startup
+}
+
+/* Cursore: tema e dimensione espliciti */
+cursor {
+    xcursor-theme "Adwaita"
+    xcursor-size 24
+}
+
+/* Su kernel modificati il piano cursore KMS (i915) può non renderizzare:
+   il cursore si muove ma resta invisibile. disable-cursor-plane forza
+   niri a compositare il cursore via software. */
+debug {
+    disable-cursor-plane
 }
 
 include "colors.kdl"
@@ -125,17 +138,17 @@ binds {
     Mod+C { close-window; }
     Mod+R { spawn "fuzzel"; }
     Mod+Shift+E { quit; }
-
+    
     /* ---- Navigazione finestre ---- */
     Mod+Left  { focus-column-left; }
     Mod+Right { focus-column-right; }
     Mod+Up    { focus-window-or-workspace-up; }
     Mod+Down  { focus-window-or-workspace-down; }
-
+    
     /* ---- Spostamento finestre ---- */
     Mod+Ctrl+Left  { move-column-left; }
     Mod+Ctrl+Right { move-column-right; }
-
+    
     /* ---- Layout e dimensioni ---- */
     Mod+F { maximize-column; }
     Mod+Shift+F { maximize-column; }
@@ -143,7 +156,7 @@ binds {
     Mod+Plus   { set-column-width "+10%"; }
     Mod+V { switch-focus-between-floating-and-tiling; }
     Mod+Shift+V { toggle-window-floating; }
-
+    
     // Premi Mod+V per aprire la lista degli appunti e incollare
     Mod+A { spawn "bash" "-c" "cliphist list | fuzzel --dmenu | cliphist decode | wl-copy"; }
 
@@ -152,24 +165,24 @@ binds {
     Mod+Page_Up   { focus-workspace-up; }
     Mod+U { focus-workspace-down; }
     Mod+I { focus-workspace-up; }
-
+    
     /* ---- Workspace movement ---- */
     Mod+Ctrl+Page_Down { move-column-to-workspace-down; }
     Mod+Ctrl+Page_Up   { move-column-to-workspace-up; }
-
+    
     /* ---- Column preset widths ---- */
     "Mod+BracketLeft" { switch-preset-column-width; }
     "Mod+Comma"  { consume-or-expel-window-left; }
     "Mod+Period" { consume-or-expel-window-right; }
-
+    
     /* ---- Overview e help ---- */
     "Mod+Tab" { toggle-overview; }
     "Mod+Shift+Slash" { show-hotkey-overlay; }
-
+    
     /* ---- Brightness control (Fn keys) ---- */
     "XF86MonBrightnessUp"   { spawn "brightnessctl" "set" "5%+"; }
     "XF86MonBrightnessDown" { spawn "brightnessctl" "set" "5%-" "-n" "1"; }
-
+    
     /* ---- File manager ---- */
     "Mod+E" { spawn "dolphin"; }
 
@@ -180,7 +193,7 @@ binds {
     XF86Calculator { spawn "galculator"; }
     "Mod+L" allow-when-locked=true { spawn "swaylock"; }
     XF86MyComputer { spawn "dolphin" "/home/noya/MiniSSD"; }
-
+    
     Print { spawn "sh" "-c" "grim -g \"$(slurp)\" ~/Immagini/Screenshots/$(date +%Y-%m-%d_%H-%M-%S).png"; }
 
 }
@@ -198,7 +211,7 @@ input {
     touchpad {
         tap // Abilita il tocco leggero per cliccare
         dwt // Disabilita il touchpad mentre scrivi (Disable-While-Typing)
-
+        
         // natural-scroll // Decommenta se preferisci lo scorrimento in stile smartphone
     }
 
@@ -206,3 +219,4 @@ input {
         // accel-profile "adaptive"
     }
 }
+
