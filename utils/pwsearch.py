@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 pwsearch.py — cerca nel CSV delle password su servizio, username, password o fonte.
-Uso: python3 pwsearch.py <query> [--top N]
+Uso: python3 pwsearch.py <query> [--csv PATH] [--top N]
 """
 
 import csv
@@ -10,11 +10,11 @@ import os
 import argparse
 
 
-def resolve_csv_path():
-    """Percorso del CSV: override via $PWSEARCH_CSV, altrimenti fuori dal repo."""
-    env = os.environ.get("PWSEARCH_CSV")
-    if env:
-        return os.path.abspath(os.path.expanduser(env))
+def resolve_csv_path(override=None):
+    """Percorso del CSV: --csv ha la precedenza, poi $PWSEARCH_CSV, infine il default."""
+    candidate = override or os.environ.get("PWSEARCH_CSV")
+    if candidate:
+        return os.path.abspath(os.path.expanduser(candidate))
     return os.path.join(
         os.path.expanduser("~"), ".local", "share", "pwsearch", "passwords.csv"
     )
@@ -117,6 +117,11 @@ def main():
         "query", help="Testo da cercare (servizio, username, password o fonte)"
     )
     parser.add_argument(
+        "--csv",
+        metavar="PATH",
+        help="Percorso del CSV (ha la precedenza su $PWSEARCH_CSV e sul default)",
+    )
+    parser.add_argument(
         "--top",
         type=int,
         default=5,
@@ -128,7 +133,7 @@ def main():
     )
     args = parser.parse_args()
 
-    csv_path = resolve_csv_path()
+    csv_path = resolve_csv_path(args.csv)
     if not os.path.exists(csv_path):
         print(f"{RED}Errore: file non trovato → {csv_path}{RESET}")
         print(f"{DIM}Imposta $PWSEARCH_CSV per indicare il vault.{RESET}")
