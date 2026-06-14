@@ -3,7 +3,7 @@
 # --- Configurazione ---
 MOUNT_POINT="$HOME/MiniSSD"
 DEST="$MOUNT_POINT/Backup_Sistema"
-SOURCES=("$HOME/Programmi"  "$HOME/librerie" "$HOME/myconfig" "$HOME/Documenti")
+SOURCES=("$HOME/progetti" "$HOME/ml/librerie" "$HOME/dotfiles" "$HOME/bin" "$HOME/Documenti")
 IGNORE_FILE="$HOME/backupMiniSSD/.backup_ignore"
 
 # --- 1. Controllo se il MiniSSD è collegato ---

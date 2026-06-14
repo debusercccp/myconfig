@@ -10,6 +10,7 @@ __pycache__/
 .git/objects/pack/
 .git/hooks/
 .git/logs/
+.git
 
 # Strumenti di sviluppo (Cursor, Aider, VSCode)
 .cursor/
@@ -40,9 +41,9 @@ datasets/PANTHER19.0_fasta
 /media/
 
 bin/
-usr/ 
-dev/ 
-etc/ 
-lib/ 
-lib64/ 
-proc/ 
+usr/
+dev/
+etc/
+lib/
+lib64/
+proc/
