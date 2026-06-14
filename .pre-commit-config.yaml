@@ -2,6 +2,10 @@
 # Per installare gli hook: pre-commit install
 # Per aggiornare i tool: pre-commit autoupdate
 
+# Escludi del tutto la cartella kernel/ dagli hook: contiene patch e defconfig
+# che NON devono essere modificati (es. trailing-whitespace corrompe i .patch).
+exclude: ^kernel/
+
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0 # Puoi aggiornare le versioni con `pre-commit autoupdate`
