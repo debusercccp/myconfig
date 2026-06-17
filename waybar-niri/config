@@ -45,8 +45,9 @@
 
     "custom/power": {
         "format": "⏻",
-        "on-click": "niri msg action quit",
-        "tooltip": false
+        "on-click": "~/.config/waybar/scripts/powermenu.sh",
+        "tooltip": true,
+        "tooltip-format": "Menù sessione"
     },
 
     "niri/workspaces": {
@@ -187,9 +188,11 @@
         "format-wifi": "󰤨",
         "format-ethernet": "󰈀",
         "format-disconnected": "󰤭",
-        "tooltip-format-wifi": "󰤨 {essid} ({signalStrength}%)\n󰩟 {ipaddr}/{cidr}",
-        "tooltip-format-ethernet": "󰈀 {ifname}\n󰩟 {ipaddr}/{cidr}",
-        "tooltip-format-disconnected": "Disconnesso",
+        "tooltip-format-wifi": "󰤨 {essid} ({signalStrength}%)\n󰩟 {ipaddr}/{cidr}\n Click: impostazioni Wi-Fi",
+        "tooltip-format-ethernet": "󰈀 {ifname}\n󰩟 {ipaddr}/{cidr}\n Click: impostazioni rete",
+        "tooltip-format-disconnected": "Disconnesso\n Click: impostazioni Wi-Fi",
+        "on-click": "kitty --class nmtui -e nmtui",
+        "on-click-right": "nmcli device wifi rescan",
         "max-length": 50
     },
 

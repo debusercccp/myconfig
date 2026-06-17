@@ -1,5 +1,5 @@
 /* ================================================
-   Niri Config 
+   Niri Config
    ================================================ */
 
 hotkey-overlay {
@@ -58,6 +58,11 @@ environment {
     QT_QPA_PLATFORM "wayland"
     XDG_CURRENT_DESKTOP "niri"
     XDG_SESSION_TYPE "wayland"
+    // Cursore coerente anche in app Xwayland/GTK
+    XCURSOR_THEME "Adwaita"
+    XCURSOR_SIZE "24"
+    // Display per le app X11 servite da xwayland-satellite
+    DISPLAY ":0"
 }
 
 /* ================================================
@@ -96,6 +101,14 @@ window-rule {
     open-floating true
 }
 
+/* nmtui (impostazioni Wi-Fi da Waybar) - finestra flottante centrata */
+window-rule {
+    match app-id="nmtui"
+    open-floating true
+    default-column-width { fixed 720; }
+    default-window-height { fixed 480; }
+}
+
 /* ================================================
    STARTUP COMMANDS - Avvio servizi e UI
    ================================================ */
@@ -120,6 +133,19 @@ spawn-at-startup "swaybg" "-i" "/home/noya/Immagini/blacklodge.jpg" "-m" "fill"
 /* Nightlight (filtro luce blu) */
 spawn-at-startup "/home/noya/.config/waybar/scripts/nightlight.sh" "toggle"
 
+/* Supporto app X11 (niri è Wayland-puro): server Xwayland on-demand su :0 */
+spawn-at-startup "xwayland-satellite"
+
+/* Agente PolicyKit: prompt grafici di autenticazione (montaggio dischi, ecc.) */
+spawn-at-startup "bash" "-c" "exec $(ls /usr/lib/*/libexec/polkit-kde-authentication-agent-1 /usr/lib/polkit-kde-authentication-agent-1 /usr/libexec/polkit-kde-authentication-agent-1 2>/dev/null | head -n1)"
+
+/* Idle: blocca a 5min, schermo off a 10min, blocco anche prima della sospensione */
+spawn-at-startup "swayidle" "-w" \
+    "timeout" "300" "swaylock -f" \
+    "timeout" "600" "niri msg action power-off-monitors" \
+    "resume" "niri msg action power-on-monitors" \
+    "before-sleep" "swaylock -f"
+
 /* Applet Bluetooth nel system tray */
 spawn-at-startup "blueman-applet"
 
@@ -138,25 +164,29 @@ binds {
     Mod+C { close-window; }
     Mod+R { spawn "fuzzel"; }
     Mod+Shift+E { quit; }
-    
+
     /* ---- Navigazione finestre ---- */
     Mod+Left  { focus-column-left; }
     Mod+Right { focus-column-right; }
     Mod+Up    { focus-window-or-workspace-up; }
     Mod+Down  { focus-window-or-workspace-down; }
-    
+
     /* ---- Spostamento finestre ---- */
     Mod+Ctrl+Left  { move-column-left; }
     Mod+Ctrl+Right { move-column-right; }
-    
+
     /* ---- Layout e dimensioni ---- */
     Mod+F { maximize-column; }
-    Mod+Shift+F { maximize-column; }
+    Mod+Shift+F { fullscreen-window; }
     Mod+Minus  { set-column-width "-10%"; }
     Mod+Plus   { set-column-width "+10%"; }
+    Mod+Shift+Minus { set-window-height "-10%"; }
+    Mod+Shift+Plus  { set-window-height "+10%"; }
+    "Mod+BracketRight" { expand-column-to-available-width; }
+    "Mod+Backslash" { center-column; }
     Mod+V { switch-focus-between-floating-and-tiling; }
     Mod+Shift+V { toggle-window-floating; }
-    
+
     // Premi Mod+V per aprire la lista degli appunti e incollare
     Mod+A { spawn "bash" "-c" "cliphist list | fuzzel --dmenu | cliphist decode | wl-copy"; }
 
@@ -165,36 +195,75 @@ binds {
     Mod+Page_Up   { focus-workspace-up; }
     Mod+U { focus-workspace-down; }
     Mod+I { focus-workspace-up; }
-    
+
     /* ---- Workspace movement ---- */
     Mod+Ctrl+Page_Down { move-column-to-workspace-down; }
     Mod+Ctrl+Page_Up   { move-column-to-workspace-up; }
-    
+
+    /* ---- Workspace numerati: Mod+N va al workspace, Mod+Ctrl+N ci sposta la finestra ---- */
+    Mod+1 { focus-workspace 1; }
+    Mod+2 { focus-workspace 2; }
+    Mod+3 { focus-workspace 3; }
+    Mod+4 { focus-workspace 4; }
+    Mod+5 { focus-workspace 5; }
+    Mod+6 { focus-workspace 6; }
+    Mod+7 { focus-workspace 7; }
+    Mod+8 { focus-workspace 8; }
+    Mod+9 { focus-workspace 9; }
+    Mod+Ctrl+1 { move-column-to-workspace 1; }
+    Mod+Ctrl+2 { move-column-to-workspace 2; }
+    Mod+Ctrl+3 { move-column-to-workspace 3; }
+    Mod+Ctrl+4 { move-column-to-workspace 4; }
+    Mod+Ctrl+5 { move-column-to-workspace 5; }
+    Mod+Ctrl+6 { move-column-to-workspace 6; }
+    Mod+Ctrl+7 { move-column-to-workspace 7; }
+    Mod+Ctrl+8 { move-column-to-workspace 8; }
+    Mod+Ctrl+9 { move-column-to-workspace 9; }
+
     /* ---- Column preset widths ---- */
     "Mod+BracketLeft" { switch-preset-column-width; }
     "Mod+Comma"  { consume-or-expel-window-left; }
     "Mod+Period" { consume-or-expel-window-right; }
-    
+
     /* ---- Overview e help ---- */
     "Mod+Tab" { toggle-overview; }
     "Mod+Shift+Slash" { show-hotkey-overlay; }
-    
+
     /* ---- Brightness control (Fn keys) ---- */
     "XF86MonBrightnessUp"   { spawn "brightnessctl" "set" "5%+"; }
     "XF86MonBrightnessDown" { spawn "brightnessctl" "set" "5%-" "-n" "1"; }
-    
+
     /* ---- File manager ---- */
     "Mod+E" { spawn "dolphin"; }
 
     XF86AudioRaiseVolume { spawn "wpctl" "set-volume" "-l" "1.0" "@DEFAULT_AUDIO_SINK@" "0.05+"; }
     XF86AudioLowerVolume { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.05-"; }
     XF86AudioMute allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"; }
+    XF86AudioMicMute allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle"; }
+
+    /* ---- Tasti multimediali (richiedono playerctl). Se la tua tastiera
+       non ha questi tasti, rimappabili su Mod+combo. ---- */
+    XF86AudioPlay allow-when-locked=true { spawn "playerctl" "play-pause"; }
+    XF86AudioPause allow-when-locked=true { spawn "playerctl" "play-pause"; }
+    XF86AudioNext allow-when-locked=true { spawn "playerctl" "next"; }
+    XF86AudioPrev allow-when-locked=true { spawn "playerctl" "previous"; }
     XF86HomePage { spawn "firefox"; }
     XF86Calculator { spawn "galculator"; }
     "Mod+L" allow-when-locked=true { spawn "swaylock"; }
     XF86MyComputer { spawn "dolphin" "/home/noya/MiniSSD"; }
-    
+
+    /* ---- Screenshot ---- */
+    // Regione selezionata -> file (comportamento originale)
     Print { spawn "sh" "-c" "grim -g \"$(slurp)\" ~/Immagini/Screenshots/$(date +%Y-%m-%d_%H-%M-%S).png"; }
+    // UI nativa di niri (regione + copia negli appunti)
+    "Mod+Print" { screenshot; }
+    // Schermo intero
+    "Ctrl+Print" { screenshot-screen; }
+    // Solo finestra a fuoco
+    "Alt+Print" { screenshot-window; }
+
+    /* ---- Menù sessione (blocca / logout / sospendi / riavvia / spegni) ---- */
+    "Mod+Shift+P" { spawn "/home/noya/.config/waybar/scripts/powermenu.sh"; }
 
 }
 
@@ -211,7 +280,7 @@ input {
     touchpad {
         tap // Abilita il tocco leggero per cliccare
         dwt // Disabilita il touchpad mentre scrivi (Disable-While-Typing)
-        
+
         // natural-scroll // Decommenta se preferisci lo scorrimento in stile smartphone
     }
 
@@ -219,4 +288,3 @@ input {
         // accel-profile "adaptive"
     }
 }
-
