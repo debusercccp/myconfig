@@ -179,6 +179,36 @@ sudo apt install \
   grim
 ```
 
+### Servizi di Sessione e Idle
+
+Questi pacchetti sono richiesti dagli `spawn-at-startup` e dai keybinding nel `config.kdl` attuale:
+
+```bash
+sudo apt install \
+  swayidle \
+  polkit-kde-agent-1 \
+  playerctl \
+  network-manager \
+  xwayland-satellite
+```
+
+**Dettagli:**
+- swayidle: gestione idle — blocca a 5 min (`swaylock -f`), spegne i monitor a 10 min, blocca prima della sospensione
+- polkit-kde-agent-1: agente PolicyKit, fornisce i prompt grafici di autenticazione (montaggio dischi, ecc.)
+- playerctl: controlli multimediali (`XF86AudioPlay/Pause/Next/Prev`)
+- network-manager: fornisce `nmtui`, richiamato dal modulo Wi-Fi di Waybar in una finestra flottante
+- xwayland-satellite: server Xwayland on-demand su `:0` per le app X11 (Niri è Wayland-puro)
+
+**Nota:** se `xwayland-satellite` non è nei repo, compilalo da sorgente:
+
+```bash
+cargo install xwayland-satellite
+```
+
+Inoltre il `config.kdl` lancia due script personalizzati in `~/.config/waybar/scripts/`:
+- `nightlight.sh` — filtro luce blu (toggle all'avvio)
+- `powermenu.sh` — menù sessione (`Mod+Shift+P`)
+
 ---
 
 ## Compilazione di Niri
@@ -249,26 +279,69 @@ window-rule {
     geometry-corner-radius 12
     clip-to-geometry true
 }
-// Keybindings
+// Keybindings (estratto — vedi la tabella completa sotto)
 binds {
     Mod+Q { spawn "kitty"; }
     Mod+C { close-window; }
     Mod+R { spawn "fuzzel"; }
     Mod+Shift+E { quit; }
-    // Navigazione tra colonne
     Mod+Left  { focus-column-left; }
     Mod+Right { focus-column-right; }
-    Mod+Up    { focus-window-or-workspace-up; }
-    Mod+Down  { focus-window-or-workspace-down; }
-    // Movimento finestre
     Mod+Ctrl+Left  { move-column-left; }
     Mod+Ctrl+Right { move-column-right; }
-    // Layout
     Mod+F { maximize-column; }
-    Mod+Comma  { consume-window-into-column; }
-    Mod+Period { expel-window-from-column; }
 }
 ```
+
+### Tabella Keybindings Completa
+
+| Combinazione | Azione |
+|--------------|--------|
+| `Mod+Q` | Apri terminale (kitty) |
+| `Mod+R` | Apri launcher (fuzzel) |
+| `Mod+C` | Chiudi finestra |
+| `Mod+E` | File manager (dolphin) |
+| `Mod+A` | History appunti (cliphist + fuzzel) |
+| `Mod+Shift+E` | Esci da Niri |
+| `Mod+L` | Blocca schermo (swaylock) |
+| `Mod+Shift+P` | Menù sessione (blocca/logout/sospendi/riavvia/spegni) |
+| **Navigazione** | |
+| `Mod+←/→` | Sposta focus tra colonne |
+| `Mod+↑/↓` | Sposta focus tra finestre/workspace |
+| `Mod+U` / `Mod+I` | Workspace giù / su |
+| `Mod+Page_Down` / `Mod+Page_Up` | Workspace giù / su |
+| `Mod+1..9` | Vai al workspace numerato |
+| `Mod+Tab` | Overview |
+| **Spostamento finestre** | |
+| `Mod+Ctrl+←/→` | Sposta colonna a sinistra/destra |
+| `Mod+Ctrl+Page_Down` / `Mod+Ctrl+Page_Up` | Sposta colonna al workspace giù/su |
+| `Mod+Ctrl+1..9` | Sposta colonna al workspace numerato |
+| `Mod+Comma` / `Mod+Period` | Assorbi/espelli finestra dalla colonna |
+| **Layout e dimensioni** | |
+| `Mod+F` | Massimizza colonna |
+| `Mod+Shift+F` | Fullscreen finestra |
+| `Mod+Minus` / `Mod+Plus` | Larghezza colonna -/+ 10% |
+| `Mod+Shift+Minus` / `Mod+Shift+Plus` | Altezza finestra -/+ 10% |
+| `Mod+BracketLeft` | Preset larghezza colonna |
+| `Mod+BracketRight` | Espandi colonna alla larghezza disponibile |
+| `Mod+Backslash` | Centra colonna |
+| `Mod+V` | Alterna focus floating/tiling |
+| `Mod+Shift+V` | Rendi finestra floating |
+| **Screenshot** | |
+| `Print` | Regione selezionata → file (grim + slurp) |
+| `Mod+Print` | UI nativa di Niri (regione + appunti) |
+| `Ctrl+Print` | Schermo intero |
+| `Alt+Print` | Solo finestra a fuoco |
+| **Tasti multimediali / Fn** | |
+| `XF86MonBrightnessUp/Down` | Luminosità +/- (brightnessctl) |
+| `XF86AudioRaise/LowerVolume` | Volume +/- (wpctl) |
+| `XF86AudioMute` / `XF86AudioMicMute` | Muta audio / microfono |
+| `XF86AudioPlay/Pause/Next/Prev` | Controlli player (playerctl) |
+| `XF86HomePage` | Browser (firefox) |
+| `XF86Calculator` | Calcolatrice (galculator) |
+| `XF86MyComputer` | dolphin su ~/MiniSSD |
+| **Aiuto** | |
+| `Mod+Shift+Slash` | Mostra hotkey overlay |
 
 ### Sintassi KDL Importante
 - **Stringhe**: Usa "doppi apici" per stringhe, non virgolette singole
@@ -638,7 +711,10 @@ sudo apt install -y \
   fonts-font-awesome libgtk-layer-shell0 \
   brightnessctl \
   wl-clipboard cliphist \
-  swaylock \
+  swaylock swayidle \
+  polkit-kde-agent-1 playerctl \
+  network-manager xwayland-satellite \
+  slurp grim \
   dolphin galculator firefox-esr \
   blueman
 ```
@@ -681,19 +757,5 @@ cp style.css ~/.config/waybar/style.css
 
 ---
 
-## Risorse Utili
-- **Niri GitHub**: https://github.com/YaLTeR/niri
-- **Waybar Wiki**: https://github.com/Alexays/Waybar/wiki
-- **KDL Language**: https://kdl.dev/
-- **Wayland Protocol**: https://wayland.freedesktop.org/
-- **xdg-desktop-portal**: https://github.com/flatpak/xdg-desktop-portal
-- **matugen**: https://github.com/InioX/matugen
----
-## Contatti e Feedback
-Se riscontri problemi non documentati qui:
-1. Controlla i log di Niri: journalctl -u niri (se installato come systemd service)
-2. Apri un issue su GitHub: https://github.com/YaLTeR/niri/issues
-3. Consulta la community: Discord Niri, forum Wayland
----
-**Ultima modifica**: Maggio 2026
+**Ultima modifica**: Giugno 2026
 **Testato su**: Debian Trixie (Testing), Niri 26.04, Waybar 0.12.0
