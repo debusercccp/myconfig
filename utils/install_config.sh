@@ -1,11 +1,17 @@
 #!/bin/bash
 
 # Installa i pacchetti del desktop (niri, waybar, dunst, fuzzel, cliphist,
-# swaylock, blueman, conky) e ripristina le configurazioni dal repository,
-# come utils/restore_config.sh.
+# swaylock, blueman, conky) e collega le configurazioni del repository in
+# ~/.config tramite symlink (stile GNU stow), così le modifiche fatte nel
+# repository sono immediatamente attive senza dover ricopiare nulla.
 
-# Cartella sorgente (il repository delle config)
-SRC="$HOME/myconfig"
+set -euo pipefail
+
+# Radice del repository, ricavata dalla posizione di questo script
+# (utils/ -> radice). Funziona ovunque sia clonato il repo.
+SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
+REPO="$(cd "$SCRIPT_DIR/.." && pwd)"
+STOW_DIR="$REPO/stow"
 
 # Colori per il terminale
 GREEN='\033[0;32m'
@@ -28,6 +34,7 @@ PACKAGES=(
     xwayland-satellite
 )
 
+echo -e "${GREEN}=== Repository: $REPO ===${NC}"
 echo -e "${GREEN}=== Installazione pacchetti ===${NC}"
 
 if ! command -v apt-get >/dev/null 2>&1; then
@@ -53,46 +60,47 @@ if [ ${#TO_INSTALL[@]} -gt 0 ]; then
     sudo apt-get install -y "${TO_INSTALL[@]}"
 fi
 
-echo -e "${GREEN}=== Ripristino configurazioni (README preservati) ===${NC}"
+echo -e "${GREEN}=== Collegamento configurazioni (symlink dal repository) ===${NC}"
 
-# Funzione per copiare i file preservando i file locali non presenti nella sorgente
-restore_folder() {
-    local repo_src=$1
-    local local_target=$2
+# Crea un symlink target -> src, facendo il backup di un'eventuale config reale.
+make_link() {
+    local src=$1      # sorgente nel repository (può essere essa stessa un symlink stow)
+    local target=$2   # destinazione in ~/.config
 
-    if [ -d "$repo_src" ]; then
-        # Crea la cartella di destinazione se non esiste
-        mkdir -p "$local_target"
-
-        # Copia tutto il contenuto del repository nella cartella locale .config
-        # --recursive: copia sottocartelle
-        # --update: copia solo se il file sorgente è più recente o mancante nella destinazione
-        cp -ru "$repo_src/." "$local_target/"
-        echo " Ripristinato: $local_target"
-    else
-        echo " Sorgente nel repository non trovata: $repo_src"
+    if [ -L "$target" ]; then
+        if [ "$(readlink -f "$target")" = "$(readlink -f "$src")" ]; then
+            echo " Già collegato: $target"
+            return
+        fi
+        rm "$target"
+    elif [ -e "$target" ]; then
+        local bak
+        bak="$target.pre-stow-bak-$(date +%Y%m%d-%H%M%S)"
+        mv "$target" "$bak"
+        echo -e "${YELLOW} Backup config esistente -> $bak${NC}"
     fi
+
+    mkdir -p "$(dirname "$target")"
+    ln -s "$src" "$target"
+    echo " Collegato: $target -> $src"
 }
 
-# 1. Niri
-restore_folder "$SRC/niri" "$HOME/.config/niri"
-
-# 2. Waybar (da waybar-niri alla cartella standard di waybar)
-restore_folder "$SRC/waybar-niri" "$HOME/.config/waybar"
-
-# 3. Dunst
-restore_folder "$SRC/dunst" "$HOME/.config/dunst"
-
-# 4. Fuzzel
-restore_folder "$SRC/fuzzel" "$HOME/.config/fuzzel"
-
-# 5. Swaylock
-restore_folder "$SRC/swaylock" "$HOME/.config/swaylock"
-
-# 6. Conky
-restore_folder "$SRC/conky" "$HOME/.config/conky"
-
-# Nota: cliphist e blueman non hanno cartelle di config nel repository.
+# Per ogni package in stow/, collega i suoi contenuti .config/* in ~/.config/.
+# La struttura stow/<pkg>/.config/<nome> codifica già la destinazione finale.
+if [ -d "$STOW_DIR" ]; then
+    for pkg_dir in "$STOW_DIR"/*/; do
+        [ -d "$pkg_dir" ] || continue
+        cfg_dir="$pkg_dir/.config"
+        [ -d "$cfg_dir" ] || continue
+        for src in "$cfg_dir"/*; do
+            [ -e "$src" ] || continue
+            name="$(basename "$src")"
+            make_link "$src" "$HOME/.config/$name"
+        done
+    done
+else
+    echo -e "${RED} Cartella stow/ non trovata in $REPO${NC}"
+fi
 
 echo -e "${GREEN}=== Servizi ===${NC}"
 
@@ -105,4 +113,4 @@ else
 fi
 
 echo -e "${GREEN}--------------------------------------------${NC}"
-echo -e "${GREEN}Installazione e ripristino completati!${NC}"
+echo -e "${GREEN}Installazione e collegamento completati!${NC}"

@@ -30,8 +30,7 @@ layout {
     // Il bordo della finestra attiva
     focus-ring {
         width 4
-        // Qui usiamo la variabile che Matugen scrive in colors.kdl
-        // Se colors.kdl contiene già il blocco layout, questo include basta!
+        // I colori della focus-ring arrivano da colors.kdl (incluso da config.kdl)
     }
 
     // Il bordo delle finestre non attive
@@ -121,7 +120,7 @@ spawn-at-startup "bash" "-c" "dbus-update-activation-environment --systemd WAYLA
 /* Riavvia i servizi XDG desktop portal */
 spawn-at-startup "bash" "-c" "sleep 3 && systemctl --user restart xdg-desktop-portal-gtk.service && sleep 1 && systemctl --user restart xdg-desktop-portal.service > /dev/null 2>&1"
 
-/* Avvia Waybar con i colori generati da Matugen */
+/* Avvia Waybar */
 spawn-at-startup "bash" "-c" "sleep 3 && waybar > /dev/null 2>&1"
 
 /* Notifiche desktop (Dunst) */

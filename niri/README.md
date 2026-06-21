@@ -144,30 +144,6 @@ sudo apt install \
 - firefox-esr: Browser; attivato con il tasto XF86HomePage
 **Nota:** firefox-esr è la versione disponibile nei repo Debian. Se preferisci Firefox stabile o nightly, scaricalo dal sito ufficiale Mozilla.
 
-### Matugen (Theming Dinamico)
-
-matugen non e' disponibile nei repo Debian e va installato separatamente. E' il motore che genera la palette colori da un wallpaper e la scrive in colors.kdl (incluso da config.kdl).
-**Installazione tramite Cargo:**
-
-```bash
-cargo install matugen
-```
-**O tramite release precompilata (GitHub):**
-
-```bash
-# Scarica l'ultimo binario da https://github.com/InioX/matugen/releases
-curl -L https://github.com/InioX/matugen/releases/latest/download/matugen-x86_64-unknown-linux-gnu.tar.gz | tar xz
-sudo install -D matugen /usr/local/bin/matugen
-```
-
-**Utilizzo nel config.kdl:**
-
-```kdl
-spawn-at-startup "matugen" "image" "/home/noya/Immagini/blacklodge.jpg"
-```
-
-Questo comando genera ~/.config/niri/colors.kdl con i valori della focus-ring ricavati dal wallpaper.
-
 ### Utility Optional (ma Consigliato)
 
 ```bash
@@ -726,19 +702,16 @@ git clone https://github.com/YaLTeR/niri.git
 cd niri
 cargo build --release
 sudo install -D target/release/niri /usr/local/bin/niri
-# 3. Installa matugen
-cargo install matugen
-# oppure scarica il binario precompilato da GitHub Releases
-# 4. Crea config.kdl
+# 3. Crea config.kdl
 mkdir -p ~/.config/niri
 # Copia il file config.kdl fornito
-# 5. Copia config Waybar
+# 4. Copia config Waybar
 mkdir -p ~/.config/waybar
 cp config ~/.config/waybar/config
 cp style.css ~/.config/waybar/style.css
-# 6. Avvia Niri
+# 5. Avvia Niri
 niri
-# 7. Da un terminale in Niri, testa Waybar
+# 6. Da un terminale in Niri, testa Waybar
 pkill waybar && waybar &
 ```
 

@@ -1,14 +1,23 @@
 #!/usr/bin/env bash
 
-# Cartella di destinazione del repository
-DEST="$HOME/myconfig"
+# Copia nel repository i file che NON sono collegati via symlink.
+# Le configurazioni in ~/.config (dunst, fuzzel, niri, waybar, kitty,
+# swaylock, conky, starship) sono symlink al repository, quindi sono già
+# allineate e non vanno sincronizzate. Restano da copiare i file di sistema
+# (backupHDD) e quelli fuori da ~/.config (es. .bashrc).
+
+set -euo pipefail
+
+# Radice del repository, ricavata dalla posizione di questo script.
+SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
+DEST="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 # Colori per il terminale
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
-echo -e "${GREEN}Sincronizzazione configurazioni (README preservati)...${NC}"
+echo -e "${GREEN}Sincronizzazione file non symlinkati nel repository...${NC}"
 
 # Funzione universale per cartelle e file singoli
 sync_item() {
@@ -16,13 +25,10 @@ sync_item() {
     local target=$2
 
     if [ -d "$src" ]; then
-        # Se la sorgente è una cartella, assicura che il target esista
         mkdir -p "$target"
-        # Copia ricorsiva aggiornata
         cp -ru "$src/." "$target/"
         echo -e " ${GREEN}󰉋 Cartella sincronizzata:${NC} $target"
     elif [ -f "$src" ]; then
-        # Se la sorgente è un file singolo, assicura che la cartella padre esista
         mkdir -p "$(dirname "$target")"
         cp -u "$src" "$target"
         echo -e " ${BLUE}󰈔 File sincronizzato:${NC} $target"
@@ -31,27 +37,12 @@ sync_item() {
     fi
 }
 
-# --- Sincronizzazione Cartelle ---
-sync_item "$HOME/.config/dunst"    "$DEST/dunst"
-sync_item "$HOME/.config/fuzzel"   "$DEST/fuzzel"
-sync_item "$HOME/.config/niri"     "$DEST/niri"
-sync_item "$HOME/.config/waybar"   "$DEST/waybar-niri"
-sync_item "$HOME/.config/kitty"    "$DEST/kitty"
-sync_item "$HOME/.config/swaylock" "$DEST/swaylock"
-sync_item "$HOME/.config/conky"     "$DEST/conky"
+# --- File di sistema del backup HDD ---
+sync_item "/usr/local/bin/backup_hdd.sh"            "$DEST/backupHDD/backup_hdd.sh"
+sync_item "/etc/udev/rules.d/99-backup-hdd.rules"   "$DEST/backupHDD/99-backup-hdd.rules"
+sync_item "/etc/systemd/system/backup-hdd@.service" "$DEST/backupHDD/backup-hdd@.service"
 
-sync_item "/usr/local/bin/backup_hdd.sh"                    "$DEST/backupHDD/backup_hdd.sh"
-sync_item "/etc/udev/rules.d/99-backup-hdd.rules"           "$DEST/backupHDD/99-backup-hdd.rules"
-sync_item "/etc/systemd/system/backup-hdd@.service"         "$DEST/backupHDD/backup-hdd@.service"
-
-# --- Sincronizzazione File Singoli (Configurazioni Shell) ---
-# Gestisce sia se hai una cartella starship sia se hai solo il file .toml diretto
-if [ -d "$HOME/.config/starship" ]; then
-    sync_item "$HOME/.config/starship" "$DEST/starship"
-elif [ -f "$HOME/.config/starship.toml" ]; then
-    sync_item "$HOME/.config/starship.toml" "$DEST/starship/starship.toml"
-fi
-
+# --- Configurazioni shell fuori da ~/.config ---
 sync_item "$HOME/.bashrc" "$DEST/deb/.bashrc"
 
 echo -e "${GREEN}--------------------------------------------${NC}"

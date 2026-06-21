@@ -18,7 +18,7 @@ window#waybar {
     color: @fg;
 }
 
-/* Container con bordi dinamici Matugen */
+/* Container con bordi colorati */
 .modules-left,
 .modules-center,
 .modules-right {
@@ -30,11 +30,18 @@ window#waybar {
 }
 
 /* Questo ridà spazio alle icone schiacciate */
-#custom-launcher, #custom-power, #custom-updates, #niri-workspaces, 
-#clock, #tray, #battery, #pulseaudio, #network, #cpu, #memory, 
-#disk, #temperature, #backlight, #bluetooth, #custom-nightlight, 
-#custom-mounts, #custom-backup {
+#custom-launcher, #custom-power, #custom-updates, #niri-workspaces,
+#clock, #tray, #battery, #pulseaudio, #network, #cpu, #memory,
+#disk, #temperature, #backlight, #bluetooth, #custom-nightlight,
+#custom-mounts, #custom-backup, #custom-calendar {
     padding: 0 10px;
+}
+
+/* Calendario un po' più grande del resto della barra */
+#custom-calendar {
+    color: @color-clock;
+    font-size: 16px;
+    padding: 0 12px;
 }
 
 /* ---- COLORI DINAMICI MODULI ---- */
@@ -78,4 +85,5 @@ tooltip {
 tooltip label {
     color: @fg;
     padding: 6px;
+    font-size: 16px;
 }

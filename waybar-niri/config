@@ -4,7 +4,7 @@
     "exclusive": true,
     "passthrough": false,
     "gtk-layer-shell": true,
-    "height": 40,           // Lascia solo questa
+    "height": 40,
     "margin-right": 5,
     "margin-left": 5,
     "output": "eDP-1",
@@ -16,12 +16,13 @@
     ],
 
     "modules-center": [
-        "clock"
+        "clock",
+        "custom/calendar"
     ],
 
     "modules-right": [
         "custom/mounts",
-        "custom/backup", // L'ho aggiunto qui così lo vedi quando parte!
+        "custom/backup",
         "tray",
         "custom/updates",
         "temperature",
@@ -32,6 +33,7 @@
         "bluetooth",
         "pulseaudio#microphone",
         "pulseaudio",
+        "custom/weather",
         "battery",
         "network",
         "custom/power"
@@ -78,7 +80,19 @@
         "timezone": "Europe/Rome",
         "format": "  {:%H:%M}",
         "tooltip": true,
-        "tooltip-format": "  {:%A, %d %B %Y}\n<tt><small>{calendar}</small></tt>"
+        "tooltip-format": "  {:%A, %d %B %Y}"
+    },
+
+    "custom/calendar": {
+        "format": "{}",
+        "return-type": "json",
+        "exec": "~/.config/waybar/scripts/calendar.sh status",
+        "interval": 60,
+        "on-click": "~/.config/waybar/scripts/calendar.sh next && pkill -RTMIN+9 waybar",
+        "on-click-right": "~/.config/waybar/scripts/calendar.sh prev && pkill -RTMIN+9 waybar",
+        "on-click-middle": "~/.config/waybar/scripts/calendar.sh reset && pkill -RTMIN+9 waybar",
+        "signal": 9,
+        "tooltip": true
     },
 
     "cpu": {
@@ -152,9 +166,6 @@
             "headphone": "󰋋",
             "hands-free": "󰋋",
             "headset": "󰋋",
-            "phone": "",
-            "portable": "",
-            "car": "",
             "default": ["󰕿", "󰖀", "󰕾"]
         },
         "tooltip": true,
@@ -198,18 +209,18 @@
 
     "custom/updates": {
         "format": "{}",
-        "exec": "apt list --upgradable 2>/dev/null | tail -n +2 | wc -l | xargs -I{} echo '{} 󰚰'",
+        "exec": "/home/noya/.config/waybar/scripts/update-sys",
         "interval": 3600,
-        "tooltip": true,
-        "tooltip-format": "Aggiornamenti disponibili"
+        "on-click": "/home/noya/.config/waybar/scripts/update-sys update",
+        "return-type": "json"
     },
 
     "custom/mounts": {
         "format": "{}",
-        "exec": "~/.config/waybar/scripts/mounts.sh waybar",
+        "exec": "/home/noya/.config/waybar/scripts/mounts.sh waybar",
         "return-type": "json",
         "interval": 10,
-        "on-click": "~/.config/waybar/scripts/mounts.sh toggle",
+        "on-click": "/home/noya/.config/waybar/scripts/mounts.sh toggle",
         "tooltip": true
     },
 
@@ -222,17 +233,24 @@
     "custom/nightlight": {
         "format": "{}",
         "return-type": "json",
-        // Usa il percorso assoluto reale se non si trova in ~/.config/waybar/
-        "exec": "$HOME/myconfig/waybar-niri/scripts/nightlight.sh status",
-        "on-click": "$HOME/myconfig/waybar-niri/scripts/nightlight.sh toggle",
-        "interval": 5
+        "interval": 2,
+        "exec": "/home/noya/.config/waybar/scripts/nightlight.sh status",
+        "on-click": "/home/noya/.config/waybar/scripts/nightlight.sh toggle"
     },
 
     "bluetooth": {
         "format": "󰂯",
         "format-disabled": "󰂲",
         "format-connected": "󰂱 {num_connections}",
-        "on-click": "/usr/sbin/rfkill toggle bluetooth", // <--- PERCORSO COMPLETO
+        "on-click": "rfkill toggle bluetooth",
         "on-click-right": "blueman-manager"
+    },
+
+    "custom/weather": {
+        "format": "{}",
+        "tooltip": true,
+        "interval": 3600,
+        "exec": "/home/noya/.config/waybar/scripts/wttr.py",
+        "return-type": "json"
     }
 }
