@@ -5,15 +5,31 @@
 # Click sinistro = mese successivo, click destro = mese precedente, click centrale = torna a oggi.
 
 STATE="${XDG_RUNTIME_DIR:-/tmp}/waybar-calendar-offset"
+TIMER="${XDG_RUNTIME_DIR:-/tmp}/waybar-calendar-timer"
+
+# Secondi di inattività dopo i quali il calendario torna da solo a oggi
+# (waybar non ha un evento "mouse uscito", quindi usiamo un timeout).
+IDLE_RESET=3
 
 # Offset = numero di mesi di scostamento rispetto al mese corrente (0 = oggi).
 read_offset() { [ -f "$STATE" ] && cat "$STATE" || echo 0; }
 write_offset() { echo "$1" > "$STATE"; }
 
+# Annulla l'eventuale timer di reset in corso.
+cancel_timer() { [ -f "$TIMER" ] && kill "$(cat "$TIMER")" 2>/dev/null; rm -f "$TIMER"; }
+
+# (Ri)avvia il timer: dopo IDLE_RESET secondi senza ulteriori click torna a oggi.
+# Ogni click annulla il timer precedente, ottenendo un effetto "debounce".
+arm_timer() {
+    cancel_timer
+    ( sleep "$IDLE_RESET"; echo 0 > "$STATE"; rm -f "$TIMER"; pkill -RTMIN+9 waybar ) &
+    echo $! > "$TIMER"
+}
+
 case "$1" in
-    next)  write_offset "$(( $(read_offset) + 1 ))" ;;
-    prev)  write_offset "$(( $(read_offset) - 1 ))" ;;
-    reset) write_offset 0 ;;
+    next)  write_offset "$(( $(read_offset) + 1 ))"; arm_timer ;;
+    prev)  write_offset "$(( $(read_offset) - 1 ))"; arm_timer ;;
+    reset) write_offset 0; cancel_timer ;;
 esac
 
 OFFSET=$(read_offset)
