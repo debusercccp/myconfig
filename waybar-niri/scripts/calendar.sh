@@ -26,10 +26,11 @@ arm_timer() {
     echo $! > "$TIMER"
 }
 
+# I click aggiornano solo lo stato ed escono: il JSON lo stampa solo "status".
 case "$1" in
-    next)  write_offset "$(( $(read_offset) + 1 ))"; arm_timer ;;
-    prev)  write_offset "$(( $(read_offset) - 1 ))"; arm_timer ;;
-    reset) write_offset 0; cancel_timer ;;
+    next)  write_offset "$(( $(read_offset) + 1 ))"; arm_timer; exit 0 ;;
+    prev)  write_offset "$(( $(read_offset) - 1 ))"; arm_timer; exit 0 ;;
+    reset) write_offset 0; cancel_timer; exit 0 ;;
 esac
 
 OFFSET=$(read_offset)
