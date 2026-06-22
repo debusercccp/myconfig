@@ -1,8 +1,9 @@
 #!/bin/bash
 # Script: ~/.config/waybar/scripts/calendar.sh
 # Calendario per Waybar, scritto interamente in Bash (nessuna dipendenza da `cal`).
-# Mostra la data nella barra; il tooltip disegna il mese corrente con oggi evidenziato.
-# Click sinistro = mese successivo, click destro = mese precedente, click centrale = torna a oggi.
+# Il tooltip disegna il mese con oggi (blu) e i giorni con eventi (giallo) evidenziati.
+# Scroll su/giu = mese precedente/successivo, click = apre il TUI interattivo.
+# Gli eventi arrivano da Google Calendar via iCal (vedi cal-sync.py / cal-tui.sh).
 
 STATE="${XDG_RUNTIME_DIR:-/tmp}/waybar-calendar-offset"
 TIMER="${XDG_RUNTIME_DIR:-/tmp}/waybar-calendar-timer"
@@ -40,6 +41,28 @@ VIEW_YM=$(date -d "$(date +%Y-%m-01) +${OFFSET} month" +%Y-%m)
 VIEW_Y=${VIEW_YM%-*}
 VIEW_M=${VIEW_YM#*-}
 
+# --- Eventi (cache prodotta da cal-sync.py) -------------------------------
+CACHE="$HOME/.cache/waybar-calendar/events.json"
+SYNC="$(dirname "$(readlink -f "$0")")/cal-sync.py"
+VENV_PY="$HOME/.config/waybar/.calvenv/bin/python"
+
+# Sincronizza in background se la cache manca o ha piu' di 10 minuti.
+if [ -x "$VENV_PY" ] && [ -f "$SYNC" ]; then
+    cache_age=$(( $(date +%s) - $(stat -c %Y "$CACHE" 2>/dev/null || echo 0) ))
+    if [ ! -f "$CACHE" ] || [ "$cache_age" -gt 600 ]; then
+        ( "$VENV_PY" "$SYNC" >/dev/null 2>&1; pkill -RTMIN+9 waybar ) &
+    fi
+fi
+
+# Giorni del mese visualizzato che hanno almeno un evento.
+declare -A HASEV
+if [ -f "$CACHE" ] && command -v jq >/dev/null; then
+    while read -r evd; do [ -n "$evd" ] && HASEV[$evd]=1; done < <(
+        jq -r --arg ym "$VIEW_YM" \
+            '.events[].start | select(startswith($ym)) | (.[8:10]|tonumber)' \
+            "$CACHE" 2>/dev/null)
+fi
+
 # Primo giorno della settimana del mese (1=lun .. 7=dom) e numero di giorni.
 first_dow=$(date -d "${VIEW_Y}-${VIEW_M}-01" +%u)
 days_in_month=$(date -d "${VIEW_Y}-${VIEW_M}-01 +1 month -1 day" +%d)
@@ -65,6 +88,9 @@ for ((d = 1; d <= days_in_month; d++)); do
     if [ "$d" = "$TODAY" ]; then
         # Oggi evidenziato con riquadro colorato (markup Pango, tooltip Waybar).
         cell=$(printf "<span background='#89b4fa' foreground='#1e1e2e'><b>%2d</b></span>" "$d")
+    elif [ -n "${HASEV[$d]:-}" ]; then
+        # Giorno con eventi: testo giallo.
+        cell=$(printf "<span foreground='#f9e2af'><b>%2d</b></span>" "$d")
     else
         cell=$(printf '%2d' "$d")
     fi
@@ -78,11 +104,20 @@ for ((d = 1; d <= days_in_month; d++)); do
 done
 [ -n "$week" ] && BODY+="${week% }"
 
-# Calendario completo per il tooltip (solo intestazione giorni + griglia).
-CAL=$(printf '<b>%s</b>\n%s' "$HEADER" "$BODY")
+# Calendario completo per il tooltip (intestazione + griglia + suggerimenti).
+CAL=$(printf '<b>%s</b>\n%s\n\n<i>Click: apri  ·  Scroll: cambia mese</i>' "$HEADER" "$BODY")
 
-# Testo mostrato nella barra: solo l'icona del calendario.
+# Conteggio eventi di oggi per la barra.
+TODAY_FULL=$(date +%F)
+TODAY_COUNT=0
+if [ -f "$CACHE" ] && command -v jq >/dev/null; then
+    TODAY_COUNT=$(jq -r --arg d "$TODAY_FULL" \
+        '[.events[]|select(.start[0:10]==$d)]|length' "$CACHE" 2>/dev/null)
+fi
+
+# Testo nella barra: icona, con il numero di eventi di oggi se presenti.
 BAR_TEXT='󰃭'
+[ "${TODAY_COUNT:-0}" -gt 0 ] && BAR_TEXT="󰃭 ${TODAY_COUNT}"
 
 # Escape per JSON (newline -> \n, doppi apici -> \").
 json_escape() {

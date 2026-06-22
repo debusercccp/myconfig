@@ -1,0 +1,14 @@
+# Configurazione del calendario Waybar / TUI.
+# Copia questo file in calendar.conf (stessa cartella) e inserisci uno o piu'
+# indirizzi segreti iCal di Google Calendar.
+#
+# Dove trovarlo:
+#   Google Calendar -> Impostazioni -> (scegli il calendario) ->
+#   "Integra il calendario" -> "Indirizzo segreto in formato iCal".
+#
+# ATTENZIONE: l'URL e' una credenziale (chiunque lo abbia vede i tuoi eventi).
+# calendar.conf e' escluso da git tramite .gitignore: non verra' committato.
+#
+# Puoi indicare piu' calendari ripetendo la riga ICS_URL=.
+
+ICS_URL=https://calendar.google.com/calendar/ical/xxxxxxxx%40group.calendar.google.com/private-xxxxxxxx/basic.ics

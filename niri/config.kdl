@@ -108,6 +108,14 @@ window-rule {
     default-window-height { fixed 480; }
 }
 
+/* Calendario TUI (click sull'icona calendario in Waybar) - flottante centrato */
+window-rule {
+    match app-id="cal-tui"
+    open-floating true
+    default-column-width { fixed 640; }
+    default-window-height { fixed 560; }
+}
+
 /* ================================================
    STARTUP COMMANDS - Avvio servizi e UI
    ================================================ */

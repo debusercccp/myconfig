@@ -13,3 +13,7 @@ __pycache__/
 
 # Secrets — never commit a password CSV (see utils/pwsearch.py)
 *.csv
+
+# Calendario: URL segreto iCal e virtualenv generato (vedi calendar.conf.example)
+waybar-niri/calendar.conf
+waybar-niri/.calvenv/
