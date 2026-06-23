@@ -11,8 +11,10 @@ a di stato) e risolvere i problemi comuni su **Debian Trixie**.
 3. [Compilazione di Niri](#compilazione-di-niri)
 4. [Configurazione Niri (config.kdl)](#configurazione-niri-configkdl)
 5. [Configurazione Waybar](#configurazione-waybar)
-6. [Troubleshooting Completo](#troubleshooting-completo)
-7. [Quick Start](#quick-start)
+6. [Calendario Google (Waybar + TUI)](#calendario-google-waybar--tui)
+7. [Compilare conky](#compilare-conky)
+8. [Troubleshooting Completo](#troubleshooting-completo)
+9. [Quick Start](#quick-start)
 
 ---
 
@@ -181,9 +183,25 @@ sudo apt install \
 cargo install xwayland-satellite
 ```
 
-Inoltre il `config.kdl` lancia due script personalizzati in `~/.config/waybar/scripts/`:
-- `nightlight.sh` — filtro luce blu (toggle all'avvio)
+Inoltre il `config.kdl` lancia diversi script personalizzati in `~/.config/waybar/scripts/`:
+- `nightlight.sh` — filtro luce blu (toggle all'avvio e dal modulo Waybar)
 - `powermenu.sh` — menù sessione (`Mod+Shift+P`)
+- `cal-sync.py` / `cal-tui.sh` / `calendar.sh` — calendario Google (vedi sezione dedicata)
+
+### Calendario Google (Waybar + TUI)
+
+Il modulo calendario sincronizza Google Calendar via indirizzo iCal e mostra un
+TUI interattivo. Richiede Python (virtualenv generato da `cal-setup.sh`), `kitty`,
+`nvim` per le note del giorno e `blueman` già installato sopra:
+
+```bash
+sudo apt install \
+  python3-venv \
+  nvim
+```
+
+Il virtualenv (`~/.config/waybar/.calvenv`) installa le librerie iCal
+(`icalendar`, `recurring-ical-events`); vedi [Calendario Google (Waybar + TUI)](#calendario-google-waybar--tui).
 
 ---
 
@@ -229,32 +247,105 @@ sudo apt install niri
 ## Configurazione Niri (config.kdl)
 ### File: ~/.config/niri/config.kdl
 
+La configurazione è divisa in due file:
+- `config.kdl` — configurazione principale (layout, regole finestre, startup, keybinding, input)
+- `colors.kdl` — palette (focus-ring/bordi, Dracula), incluso da `config.kdl` con `include "colors.kdl"`
+
 ```kdl
+// Salta l'overlay degli hotkey all'avvio
+hotkey-overlay { skip-at-startup }
+
+// Cursore esplicito (tema + dimensione)
+cursor {
+    xcursor-theme "Adwaita"
+    xcursor-size 24
+}
+
+// Su kernel modificati il piano cursore KMS può non renderizzare:
+// forza il compositing software del cursore.
+debug { disable-cursor-plane }
+
+include "colors.kdl"
+
 environment {
     GDK_BACKEND "wayland"
     QT_QPA_PLATFORM "wayland"
     XDG_CURRENT_DESKTOP "niri"
     XDG_SESSION_TYPE "wayland"
+    XCURSOR_THEME "Adwaita"
+    XCURSOR_SIZE "24"
+    DISPLAY ":0"            // per le app X11 servite da xwayland-satellite
 }
-// Propaga le variabili a D-Bus per xdg-desktop-portal
-spawn-at-startup "bash" "-c" "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE DISPLAY"
-// Riavvia i portal per garantire funzionamento
-spawn-at-startup "bash" "-c" "sleep 1 && systemctl --user restart xdg-desktop-portal-gtk.service && sleep 1 && systemctl --user restart xdg-desktop-portal.service"
-// Avvia Waybar (con delay di sicurezza)
-spawn-at-startup "bash" "-c" "sleep 3 && waybar"
-// Gestione notifiche
-spawn-at-startup "dunst"
-// Sfondo (opzionale, commenta se preferisci uno sfondo diverso)
-spawn-at-startup "swaybg" "-i" "/usr/share/desktop-base/active-theme/wallpaper/contents/images/1920x1080.svg" "-m" "fill"
-// Window rules
+
+// --- Layer rules ---
+// Sfondo (swaybg) dietro alle finestre
+layer-rule {
+    match namespace="^wallpaper$"
+    place-within-backdrop true
+}
+
+// --- Window rules ---
+window-rule {
+    geometry-corner-radius 12
+    clip-to-geometry true
+}
 window-rule {
     match app-id="waybar"
     draw-border-with-background false
 }
 window-rule {
-    geometry-corner-radius 12
-    clip-to-geometry true
+    match app-id="kitty"
+    geometry-corner-radius 8
+    draw-border-with-background false
+    opacity 0.80
 }
+window-rule {
+    match app-id="nmtui"        // impostazioni Wi-Fi da Waybar
+    open-floating true
+    default-column-width { fixed 720; }
+    default-window-height { fixed 480; }
+}
+window-rule {
+    match app-id="cal-tui"      // calendario TUI (click sull'icona Waybar)
+    open-floating true
+    default-column-width { proportion 0.6; }
+    default-window-height { proportion 0.75; }
+}
+window-rule {
+    match app-id="conky"
+    open-floating true
+}
+
+// --- Startup ---
+spawn-at-startup "bash" "-c" "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE DISPLAY > /dev/null 2>&1"
+spawn-at-startup "bash" "-c" "sleep 3 && systemctl --user restart xdg-desktop-portal-gtk.service && sleep 1 && systemctl --user restart xdg-desktop-portal.service > /dev/null 2>&1"
+spawn-at-startup "bash" "-c" "sleep 3 && waybar > /dev/null 2>&1"
+spawn-at-startup "dunst"
+spawn-at-startup "swaybg" "-i" "/home/noya/Immagini/blacklodge.jpg" "-m" "fill"
+spawn-at-startup "/home/noya/.config/waybar/scripts/nightlight.sh" "toggle"
+spawn-at-startup "xwayland-satellite"
+spawn-at-startup "swayidle" "-w" \
+    "timeout" "300" "swaylock -f" \
+    "timeout" "600" "niri msg action power-off-monitors" \
+    "resume" "niri msg action power-on-monitors" \
+    "before-sleep" "swaylock -f"
+spawn-at-startup "blueman-applet"
+spawn-at-startup "wl-paste" "--watch" "cliphist" "store"
+spawn-at-startup "bash" "-c" "sleep 5 && conky -c ~/.config/conky/conky.conf"
+
+// --- Input ---
+input {
+    keyboard {
+        xkb { layout "it" }     // layout tastiera italiano
+        repeat-delay 300
+        repeat-rate 40
+    }
+    touchpad {
+        tap                     // tap-to-click
+        dwt                     // disabilita il touchpad mentre scrivi
+    }
+}
+
 // Keybindings (estratto — vedi la tabella completa sotto)
 binds {
     Mod+Q { spawn "kitty"; }
@@ -268,6 +359,9 @@ binds {
     Mod+F { maximize-column; }
 }
 ```
+
+> **Nota:** `swaybg` punta a `/home/noya/Immagini/blacklodge.jpg`. Cambia il percorso
+> con il tuo sfondo. La finestra `kitty` usa opacità 0.80 e tema **Tokyo Night** (vedi `kitty.conf`).
 
 ### Tabella Keybindings Completa
 
@@ -344,13 +438,27 @@ Copia il file JSON fornito (waybar-niri/config). Punti chiave:
     "position": "top",
     "exclusive": true,
     "gtk-layer-shell": true,
-    "height": 36,
+    "height": 40,
     "output": "eDP-1",
     "modules-left": [ "custom/launcher", "niri/workspaces", "niri/window" ],
-    "modules-center": [ "clock" ],
-    "modules-right": [ "battery", "pulseaudio", "network", "custom/power" ]
+    "modules-center": [ "clock", "custom/calendar" ],
+    "modules-right": [
+        "custom/mounts", "custom/backup", "tray", "custom/updates",
+        "temperature", "cpu", "memory", "disk", "custom/nightlight",
+        "bluetooth", "pulseaudio#microphone", "pulseaudio",
+        "custom/weather", "battery", "network", "custom/power"
+    ]
 }
 ```
+
+**Moduli custom (script in `~/.config/waybar/scripts/`):**
+- `custom/calendar` — calendario Google (tooltip mese + click apre il TUI); vedi sezione dedicata
+- `custom/mounts` — dischi/partizioni montati (`mounts.sh`)
+- `custom/backup` — indicatore di backup `rsync` in corso
+- `custom/updates` — aggiornamenti di sistema disponibili (`update-sys`)
+- `custom/nightlight` — toggle filtro luce blu (`nightlight.sh`)
+- `custom/weather` — meteo via wttr.in (`wttr.py`)
+- `custom/launcher` / `custom/power` — icone per fuzzel e menù sessione
 
 **Parametri critici:**
 - layer: "top" — mette la barra sopra tutte le finestre
@@ -398,8 +506,57 @@ Se il tuo monitor si chiama diversamente (es. HDMI-1, DP-2), aggiorna il config 
 | temperature | SI | Temperatura sensori |
 | backlight | SI | Luminosita' schermo |
 | tray | SI | System tray |
+| bluetooth | SI | Stato Bluetooth (toggle / blueman-manager) |
+| custom/* | SI | Script personalizzati (calendario, meteo, mounts, ecc.) |
+---
 
-| custom/* | SI | Script personalizzati |
+## Calendario Google (Waybar + TUI)
+
+Il calendario integra **Google Calendar** in Waybar (modulo `custom/calendar`) e in un
+**TUI interattivo** aperto con un click. Funziona in sola lettura tramite l'indirizzo
+segreto **iCal** del calendario — nessuna autenticazione OAuth, nessun token.
+
+### Componenti
+
+| File (in `waybar-niri/`) | Ruolo |
+|--------------------------|-------|
+| `scripts/calendar.sh` | Modulo Waybar in Bash: testo + tooltip del mese (oggi in blu, giorni con eventi in giallo). Scroll = mese prec./succ., click centrale = reset a oggi |
+| `scripts/cal-tui.sh` | TUI a tutto schermo: griglia mensile, navigazione con frecce, `Tab`/`Shift+Tab` salta ai giorni con eventi, `Invio` apre le note del giorno in `nvim`, `t` = oggi, `q` = esci |
+| `scripts/cal-sync.py` | Scarica gli iCal, espande gli eventi ricorrenti e scrive la cache in `~/.cache/waybar-calendar/events.json` |
+| `scripts/cal-setup.sh` | Crea il virtualenv `~/.config/waybar/.calvenv` e installa `icalendar` + `recurring-ical-events` |
+| `cal-tui.conf` | Config `kitty` dedicata al TUI (tema Tokyo Night Storm, opacità 0.70, `app-id cal-tui`) |
+| `calendar.conf` | Elenco degli iCal da sincronizzare (`ICS_URL=...`) — **non versionato** |
+| `calendar.env` | Segreto reale (`GCAL_ICS_URL=...`) — **non versionato** |
+
+I file `calendar.conf` ed `calendar.env` sono in `.gitignore`: nel repo trovi solo i
+relativi `*.example`. Le note del giorno sono file Markdown in
+`~/.local/share/waybar-calendar/days/` (editabili in `nvim`, reso con `render-markdown`).
+
+### Setup
+
+```bash
+# 1. Crea il virtualenv e installa le librerie iCal (una tantum)
+~/.config/waybar/scripts/cal-setup.sh
+
+# 2. Trova l'indirizzo segreto iCal:
+#    Google Calendar -> Impostazioni -> (scegli il calendario) ->
+#    "Integra il calendario" -> "Indirizzo segreto in formato iCal"
+
+# 3. Inserisci il segreto: copia l'esempio e modifica calendar.env
+cp ~/.config/waybar/calendar.env.example ~/.config/waybar/calendar.env
+$EDITOR ~/.config/waybar/calendar.env        # GCAL_ICS_URL=https://.../basic.ics
+
+# 4. calendar.conf referenzia la variabile (creato in automatico da cal-setup.sh)
+#    ICS_URL=$GCAL_ICS_URL     (puoi ripetere la riga per piu' calendari)
+
+# 5. Primo sync di prova
+~/.config/waybar/.calvenv/bin/python ~/.config/waybar/scripts/cal-sync.py
+```
+
+> Il segreto **non** va scritto in `calendar.conf`: lì si mette solo il *nome* della
+> variabile (`$GCAL_ICS_URL`), il cui valore vive in `calendar.env` (caricato in
+> automatico da `cal-sync.py`). Così la configurazione resta versionabile senza esporre l'URL.
+
 ---
 
 ## Compilare conky
@@ -692,8 +849,12 @@ sudo apt install -y \
   network-manager xwayland-satellite \
   slurp grim \
   dolphin galculator firefox-esr \
-  blueman
+  blueman \
+  python3-venv nvim
 ```
+
+Per il calendario, dopo l'avvio esegui una volta `~/.config/waybar/scripts/cal-setup.sh`
+e configura `calendar.env` (vedi [Calendario Google](#calendario-google-waybar--tui)).
 
 # 2. Compila Niri (opzionale se usi il pacchetto)
 
@@ -718,15 +879,26 @@ pkill waybar && waybar &
 ---
 
 ## File Aggiuntivi
-I seguenti file sono forniti nella cartella waybar-niri/:
-- config — Config JSON per Waybar (moduli Niri, tema Dracula)
-- style.css — CSS con palette Dracula, colori semantici
-Copiali:
+I seguenti file sono forniti nella cartella `waybar-niri/`:
+- `config` — Config JSON per Waybar (moduli Niri + custom, tema Dracula)
+- `style.css` — CSS con palette Dracula, colori semantici
+- `colors.css` — variabili colore condivise
+- `cal-tui.conf` — config kitty per il calendario TUI (Tokyo Night)
+- `calendar.conf.example` / `calendar.env.example` — template per il calendario Google
+- `scripts/` — calendario (`calendar.sh`, `cal-tui.sh`, `cal-sync.py`, `cal-setup.sh`),
+  `nightlight.sh`, `powermenu.sh`, `mounts.sh`, `update-sys`, `wttr.py`
+
+Copiali (oppure usa `stow`):
 
 ```bash
 cp config ~/.config/waybar/config
 cp style.css ~/.config/waybar/style.css
+cp -r scripts ~/.config/waybar/scripts
 ```
+
+I file lato Niri stanno in `niri/`:
+- `config.kdl` — configurazione principale
+- `colors.kdl` — palette (incluso da `config.kdl`)
 
 ---
 
