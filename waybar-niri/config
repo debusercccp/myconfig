@@ -88,7 +88,7 @@
         "return-type": "json",
         "exec": "~/.config/waybar/scripts/calendar.sh status",
         "interval": 60,
-        "on-click": "kitty --app-id cal-tui -o background_opacity=0.85 -o window_padding_width=14 -o confirm_os_window_close=0 ~/.config/waybar/scripts/cal-tui.sh",
+        "on-click": "kitty --app-id cal-tui --config ~/.config/waybar/cal-tui.conf ~/.config/waybar/scripts/cal-tui.sh",
         "on-scroll-up": "~/.config/waybar/scripts/calendar.sh prev && pkill -RTMIN+9 waybar",
         "on-scroll-down": "~/.config/waybar/scripts/calendar.sh next && pkill -RTMIN+9 waybar",
         "on-click-middle": "~/.config/waybar/scripts/calendar.sh reset && pkill -RTMIN+9 waybar",

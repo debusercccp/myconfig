@@ -19,6 +19,7 @@ import icalendar
 import recurring_ical_events
 
 CONF = os.path.expanduser("~/.config/waybar/calendar.conf")
+ENVFILE = os.path.expanduser("~/.config/waybar/calendar.env")
 CACHE_DIR = os.path.expanduser("~/.cache/waybar-calendar")
 CACHE = os.path.join(CACHE_DIR, "events.json")
 
@@ -27,7 +28,25 @@ WINDOW_BACK = 31
 WINDOW_FWD = 366
 
 
+def load_env():
+    """Carica le variabili da calendar.env (righe KEY=VALUE) nell'ambiente,
+    cosi' il segreto puo' restare fuori da calendar.conf."""
+    if not os.path.exists(ENVFILE):
+        return
+    with open(ENVFILE, encoding="utf-8") as fh:
+        for line in fh:
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, val = line.split("=", 1)
+            os.environ.setdefault(key.strip(), val.strip())
+
+
 def read_urls():
+    """Legge gli ICS_URL da calendar.conf espandendo le variabili d'ambiente,
+    cosi' in calendar.conf puoi scrivere ICS_URL=$GCAL_ICS_URL e tenere il
+    valore reale in una variabile (es. in calendar.env o nel tuo profilo)."""
+    load_env()
     urls = []
     if not os.path.exists(CONF):
         return urls
@@ -38,7 +57,10 @@ def read_urls():
                 continue
             if line.startswith("ICS_URL="):
                 line = line.split("=", 1)[1].strip()
-            if line:
+            line = os.path.expandvars(line)
+            # Se una variabile non e' definita, expandvars la lascia com'e':
+            # in quel caso saltiamo la riga per non fare richieste a un URL fittizio.
+            if line and "$" not in line:
                 urls.append(line)
     return urls
 
