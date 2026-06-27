@@ -244,8 +244,7 @@
         "format-disabled": "󰂲",
         "format-connected": "󰂱 {num_connections}",
         "tooltip-format": "Bluetooth\n{num_connections} dispositivo/i connesso/i\nClick: menu dispositivi",
-        "on-click": "python3 /home/noya/.config/waybar/scripts/bluetooth-menu.py",
-        "on-click-right": "blueman-manager"
+        "on-click": "python3 /home/noya/.config/waybar/scripts/bluetooth-menu.py"
     },
 
     "custom/weather": {
@@ -254,6 +253,6 @@
         "interval": 3600,
         "exec": "/home/noya/.config/waybar/scripts/wttr.py",
         "return-type": "json",
-        "on-click": "kitty --app-id weather-tui -e bash -c 'curl -s wttr.in/Bari?lang=it; echo; read -p \"Premi Invio per chiudere…\"'"
+        "on-click": "fuzzel --dmenu --prompt 'Meteo  ' --width 58 --lines 40 < ~/.cache/waybar-weather-detail.txt"
     }
 }

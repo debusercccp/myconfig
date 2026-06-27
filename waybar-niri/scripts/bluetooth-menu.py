@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
-"""Menu Bluetooth completo con fuzzel: connessi, abbinati, vicini."""
+"""Menu Bluetooth completo in fuzzel: connessi, abbinati, vicini, impostazioni."""
 
 import subprocess
 import time
 
 
-def bt(args, timeout=6):
+def bt(args, stdin=None, timeout=8):
     r = subprocess.run(
-        ["bluetoothctl"] + args, capture_output=True, text=True, timeout=timeout
+        ["bluetoothctl"] + args,
+        input=stdin,
+        capture_output=True,
+        text=True,
+        timeout=timeout,
     )
     return r.stdout.strip()
 
@@ -24,7 +28,6 @@ def is_powered():
 
 
 def parse_devices(raw):
-    """Restituisce {mac: name} da output di 'bluetoothctl devices [filter]'."""
     result = {}
     for line in raw.splitlines():
         parts = line.split(" ", 2)
@@ -37,11 +40,22 @@ def get_state():
     all_devs = parse_devices(bt(["devices"]))
     paired = set(parse_devices(bt(["devices", "Paired"])).keys())
     connected = set(parse_devices(bt(["devices", "Connected"])).keys())
-    return all_devs, paired, connected
+    trusted = set()
+    for mac in all_devs:
+        info = bt(["info", mac])
+        if any("Trusted: yes" in line for line in info.splitlines()):
+            trusted.add(mac)
+    return all_devs, paired, connected, trusted
 
 
-def fuzzel(items, prompt="Bluetooth  "):
-    visible = [item for item in items if item is not None]
+def is_discoverable():
+    for line in bt(["show"]).splitlines():
+        if "Discoverable:" in line:
+            return "yes" in line
+    return False
+
+
+def fuzzel_pick(items, prompt="Bluetooth  "):
     r = subprocess.run(
         [
             "fuzzel",
@@ -49,42 +63,82 @@ def fuzzel(items, prompt="Bluetooth  "):
             "--prompt",
             prompt,
             "--width",
-            "42",
+            "44",
             "--lines",
-            str(len(visible)),
+            str(len(items)),
         ],
-        input="\n".join(visible),
+        input="\n".join(items),
         capture_output=True,
         text=True,
     )
     return r.stdout.strip()
 
 
-def open_pair_terminal(mac, name):
-    subprocess.Popen(
-        [
-            "kitty",
-            "--app-id",
-            "bt-pair",
-            "-e",
-            "bash",
-            "-c",
-            f'echo "Abbinamento con: {name}"; echo ""; '
-            f'bluetoothctl pair {mac}; echo ""; '
-            f'read -p "Premi Invio per chiudere…"',
-        ]
-    )
+def device_submenu(mac, name, kind, trusted):
+    """Sottomenu per un dispositivo specifico. Ritorna True se tornare al menu principale."""
+    options = [f"  {name}"]  # intestazione non azione
+    if kind == "connected":
+        options += ["  Disconnetti", "  Rimuovi dispositivo"]
+    elif kind == "paired":
+        options += ["  Connetti", "  Rimuovi dispositivo"]
+    elif kind == "nearby":
+        options += ["  Abbina"]
+
+    is_trusted = mac in trusted
+    options.append("  Rimuovi dai fidati" if is_trusted else "  Segna come fidato")
+    options.append("← Torna indietro")
+
+    choice = fuzzel_pick(options, prompt=f"{name}  ")
+
+    if not choice or choice == "← Torna indietro" or choice == f"  {name}":
+        return True  # torna al menu principale
+
+    if choice == "  Disconnetti":
+        notify(f"Disconnessione da {name}…")
+        bt(["disconnect", mac], timeout=12)
+
+    elif choice == "  Connetti":
+        notify(f"Connessione a {name}…")
+        r = bt(["connect", mac], timeout=15)
+        if "Failed" in r or "not available" in r:
+            notify(f"Errore: impossibile connettersi a {name}")
+        else:
+            notify(f"Connesso a {name}")
+
+    elif choice == "  Abbina":
+        notify(f"Abbinamento con {name}…")
+        r = bt(["pair", mac], stdin="yes\n", timeout=20)
+        if "Failed" in r or "not available" in r:
+            notify(f"Errore: abbinamento con {name} fallito")
+        else:
+            notify(f"Abbinato a {name}")
+            bt(["trust", mac])
+            bt(["connect", mac], timeout=10)
+
+    elif choice == "  Rimuovi dispositivo":
+        bt(["remove", mac])
+        notify(f"{name} rimosso")
+
+    elif choice == "  Segna come fidato":
+        bt(["trust", mac])
+        notify(f"{name} segnato come fidato")
+
+    elif choice == "  Rimuovi dai fidati":
+        bt(["untrust", mac])
+        notify(f"{name} rimosso dai fidati")
+
+    return False
 
 
 def main():
     if not is_powered():
-        choice = fuzzel(["  Attiva Bluetooth"], prompt="Bluetooth  ")
+        choice = fuzzel_pick(["  Attiva Bluetooth"])
         if choice:
             bt(["power", "on"])
             notify("Bluetooth attivato")
         return
 
-    # Scan breve in background per trovare dispositivi vicini
+    # Scan breve per trovare dispositivi vicini
     subprocess.Popen(
         ["bluetoothctl", "--timeout", "12", "scan", "on"],
         stdout=subprocess.DEVNULL,
@@ -92,18 +146,16 @@ def main():
     )
     time.sleep(2)
 
-    all_devs, paired, connected = get_state()
+    all_devs, paired, connected, trusted = get_state()
 
-    # Categorie
     connected_devs = {m: n for m, n in all_devs.items() if m in connected}
     paired_only = {
         m: n for m, n in all_devs.items() if m in paired and m not in connected
     }
     nearby = {m: n for m, n in all_devs.items() if m not in paired}
 
-    # Costruisci voci del menu
-    lines = []  # testo mostrato in fuzzel
-    actions = {}  # testo → (tipo, mac)
+    lines = []
+    actions = {}  # riga → (kind, mac, name)
 
     def add_section(label, devs, kind):
         if not devs:
@@ -114,7 +166,8 @@ def main():
             hint = {"connected": "connesso", "paired": "abbinato", "nearby": "vicino"}[
                 kind
             ]
-            entry = f"{icon}  {name}  ·  {hint}"
+            star = "  ★" if mac in trusted else ""
+            entry = f"{icon}  {name}  ·  {hint}{star}"
             lines.append(entry)
             actions[entry] = (kind, mac, name)
 
@@ -122,12 +175,15 @@ def main():
     add_section("Abbinati", paired_only, "paired")
     add_section("Vicini", nearby, "nearby")
 
-    # Separatore e azioni globali
-    lines.append("──────────────────────")
-    lines.append("󰂲  Disattiva Bluetooth")
-    lines.append("⚙   Impostazioni (blueman)")
+    disc = is_discoverable()
+    lines += [
+        "──────────────────────────────",
+        "󰂲  Disattiva Bluetooth",
+        "󰤷  Smetti di essere scopribile" if disc else "󰤴  Rendi scopribile",
+        "󰑐  Aggiorna lista",
+    ]
 
-    choice = fuzzel(lines)
+    choice = fuzzel_pick(lines)
     if not choice:
         return
 
@@ -136,30 +192,22 @@ def main():
         notify("Bluetooth disattivato")
         return
 
-    if choice == "⚙   Impostazioni (blueman)":
-        subprocess.Popen(["blueman-manager"])
+    if choice in ("󰤷  Smetti di essere scopribile", "󰤴  Rendi scopribile"):
+        bt(["discoverable", "off" if disc else "on"])
+        return
+
+    if choice == "󰑐  Aggiorna lista":
+        main()
         return
 
     action = actions.get(choice)
     if not action:
-        return  # separatore selezionato
+        return
 
     kind, mac, name = action
-
-    if kind == "connected":
-        notify(f"Disconnessione da {name}…")
-        bt(["disconnect", mac], timeout=10)
-
-    elif kind == "paired":
-        notify(f"Connessione a {name}…")
-        r = bt(["connect", mac], timeout=15)
-        if "Failed" in r or "not available" in r:
-            notify(f"Errore: impossibile connettersi a {name}")
-        else:
-            notify(f"Connesso a {name}")
-
-    elif kind == "nearby":
-        open_pair_terminal(mac, name)
+    back = device_submenu(mac, name, kind, trusted)
+    if back:
+        main()
 
 
 if __name__ == "__main__":
