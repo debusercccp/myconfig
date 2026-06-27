@@ -55,6 +55,9 @@ def is_discoverable():
     return False
 
 
+MAX_LINES = 14
+
+
 def fuzzel_pick(items, prompt="Bluetooth  "):
     r = subprocess.run(
         [
@@ -63,9 +66,9 @@ def fuzzel_pick(items, prompt="Bluetooth  "):
             "--prompt",
             prompt,
             "--width",
-            "44",
+            "40",
             "--lines",
-            str(len(items)),
+            str(min(len(items), MAX_LINES)),
         ],
         input="\n".join(items),
         capture_output=True,
@@ -75,8 +78,8 @@ def fuzzel_pick(items, prompt="Bluetooth  "):
 
 
 def device_submenu(mac, name, kind, trusted):
-    """Sottomenu per un dispositivo specifico. Ritorna True se tornare al menu principale."""
-    options = [f"  {name}"]  # intestazione non azione
+    """Sottomenu azioni per un dispositivo. Ritorna True per tornare al menu principale."""
+    options = ["← Torna indietro"]
     if kind == "connected":
         options += ["  Disconnetti", "  Rimuovi dispositivo"]
     elif kind == "paired":
@@ -86,12 +89,11 @@ def device_submenu(mac, name, kind, trusted):
 
     is_trusted = mac in trusted
     options.append("  Rimuovi dai fidati" if is_trusted else "  Segna come fidato")
-    options.append("← Torna indietro")
 
     choice = fuzzel_pick(options, prompt=f"{name}  ")
 
-    if not choice or choice == "← Torna indietro" or choice == f"  {name}":
-        return True  # torna al menu principale
+    if not choice or choice == "← Torna indietro":
+        return True
 
     if choice == "  Disconnetti":
         notify(f"Disconnessione da {name}…")
@@ -160,14 +162,13 @@ def main():
     def add_section(label, devs, kind):
         if not devs:
             return
-        lines.append(f"── {label} ──")
         for mac, name in devs.items():
             icon = {"connected": "󰂱", "paired": "󰂯", "nearby": "󰆢"}[kind]
             hint = {"connected": "connesso", "paired": "abbinato", "nearby": "vicino"}[
                 kind
             ]
-            star = "  ★" if mac in trusted else ""
-            entry = f"{icon}  {name}  ·  {hint}{star}"
+            star = " ★" if mac in trusted else ""
+            entry = f"{icon}  {name}  [{hint}{star}]"
             lines.append(entry)
             actions[entry] = (kind, mac, name)
 
@@ -177,7 +178,6 @@ def main():
 
     disc = is_discoverable()
     lines += [
-        "──────────────────────────────",
         "󰂲  Disattiva Bluetooth",
         "󰤷  Smetti di essere scopribile" if disc else "󰤴  Rendi scopribile",
         "󰑐  Aggiorna lista",
