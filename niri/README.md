@@ -944,5 +944,5 @@ I file lato Niri stanno in `niri/`:
 
 ---
 
-**Ultima modifica**: Giugno 2026
+**Ultima modifica**: 27 Giugno 2026
 **Testato su**: Debian Trixie (Testing), Niri 26.04, Waybar 0.12.0
