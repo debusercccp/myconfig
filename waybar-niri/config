@@ -30,7 +30,7 @@
         "memory",
         "disk",
         "custom/nightlight",
-        "bluetooth",
+        "custom/bluetooth",
         "pulseaudio#microphone",
         "pulseaudio",
         "custom/weather",
@@ -239,12 +239,13 @@
         "on-click": "/home/noya/.config/waybar/scripts/nightlight.sh toggle"
     },
 
-    "bluetooth": {
-        "format": "󰂯",
-        "format-disabled": "󰂲",
-        "format-connected": "󰂱 {num_connections}",
-        "tooltip-format": "Bluetooth\n{num_connections} dispositivo/i connesso/i\nClick: menu dispositivi",
-        "on-click": "python3 /home/noya/.config/waybar/scripts/bluetooth-menu.py"
+    "custom/bluetooth": {
+        "exec": "~/.config/waybar/scripts/bt-status.sh",
+        "interval": 5,
+        "return-type": "json",
+        "tooltip": true,
+        "on-click": "~/.config/waybar/scripts/bt-toggle.sh",
+        "on-click-right": "blueman-manager"
     },
 
     "custom/weather": {
