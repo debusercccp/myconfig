@@ -449,7 +449,7 @@ Copia il file JSON fornito (waybar-niri/config). Punti chiave:
     "modules-right": [
         "custom/mounts", "custom/backup", "tray", "custom/updates",
         "temperature", "cpu", "memory", "disk", "custom/nightlight",
-        "bluetooth", "pulseaudio#microphone", "pulseaudio",
+        "custom/bluetooth", "pulseaudio#microphone", "pulseaudio",
         "custom/weather", "battery", "network", "custom/power"
     ]
 }
@@ -510,7 +510,7 @@ Se il tuo monitor si chiama diversamente (es. HDMI-1, DP-2), aggiorna il config 
 | temperature | SI | Temperatura sensori |
 | backlight | SI | Luminosita' schermo |
 | tray | SI | System tray |
-| bluetooth | SI | Stato Bluetooth (toggle / blueman-manager) |
+| custom/bluetooth | SI | Stato Bluetooth via rfkill — click sinistro: on/off, click destro: blueman-manager |
 | custom/* | SI | Script personalizzati (calendario, meteo, mounts, ecc.) |
 ---
 
@@ -928,7 +928,8 @@ I seguenti file sono forniti nella cartella `waybar-niri/`:
 - `wifi-menu.py` — menu Wi-Fi con fuzzel (usa `wpa_cli`; vedi sezione dedicata)
 - `wifi-menu.sudoers` — regola sudoers per `wpa_cli` senza password (da installare con `sudo install`)
 - `scripts/` — calendario (`calendar.sh`, `cal-tui.sh`, `cal-sync.py`, `cal-setup.sh`),
-  `nightlight.sh`, `powermenu.sh`, `mounts.sh`, `update-sys`, `wttr.py`
+  `nightlight.sh`, `powermenu.sh`, `mounts.sh`, `update-sys`, `wttr.py`,
+  `bt-status.sh` (stato bluetooth per waybar), `bt-toggle.sh` (toggle rfkill + bluetoothctl)
 
 Copiali (oppure usa `stow`):
 

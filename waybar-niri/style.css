@@ -32,7 +32,7 @@ window#waybar {
 /* Questo ridà spazio alle icone schiacciate */
 #custom-launcher, #custom-power, #custom-updates, #niri-workspaces,
 #clock, #tray, #battery, #pulseaudio, #network, #cpu, #memory,
-#disk, #temperature, #backlight, #bluetooth, #custom-nightlight,
+#disk, #temperature, #backlight, #custom-bluetooth, #custom-nightlight,
 #custom-mounts, #custom-backup, #custom-calendar {
     padding: 0 10px;
 }
@@ -51,7 +51,7 @@ window#waybar {
 #cpu { color: @color-cpu; }
 #memory { color: @color-memory; }
 #disk { color: @color-disk; }
-#bluetooth { color: @color-bluetooth; }
+#custom-bluetooth { color: @color-bluetooth; font-size: 17px; padding: 0 14px; }
 #pulseaudio { color: @color-audio; }
 #custom-power { color: @color-power; }
 #custom-updates { color: @color-updates; }
