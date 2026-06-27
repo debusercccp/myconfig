@@ -17,6 +17,21 @@ def notify(msg):
     subprocess.run(["notify-send", "Wi-Fi", msg], check=False)
 
 
+def wait_connected(ssid, timeout=15):
+    for _ in range(timeout):
+        r = wpa_run(["status"])
+        state, connected_ssid = "", ""
+        for line in r.stdout.splitlines():
+            if line.startswith("wpa_state="):
+                state = line.split("=", 1)[1]
+            if line.startswith("ssid="):
+                connected_ssid = line.split("=", 1)[1]
+        if state == "COMPLETED" and connected_ssid == ssid:
+            return True
+        time.sleep(1)
+    return False
+
+
 def get_current_ssid():
     r = wpa_run(["status"])
     for line in r.stdout.splitlines():
@@ -186,6 +201,10 @@ def main():
         # Connetti con configurazione salvata
         notify(f'Connessione a "{ssid}"…')
         wpa_run(["select_network", net_id])
+        if wait_connected(ssid):
+            notify(f'Connesso a "{ssid}"')
+        else:
+            notify(f'Impossibile connettersi a "{ssid}"')
     else:
         # Rete nuova
         if secured:
@@ -210,7 +229,12 @@ def main():
         r = wpa_run(["enable_network", net_id])
         if r.returncode == 0:
             notify(f'Connessione a "{ssid}"…')
-            wpa_run(["save_config"])
+            if wait_connected(ssid):
+                notify(f'Connesso a "{ssid}"')
+                wpa_run(["save_config"])
+            else:
+                notify(f'Impossibile connettersi a "{ssid}" (password errata?)')
+                wpa_run(["remove_network", net_id])
         else:
             notify(f'Errore connessione a "{ssid}"')
             wpa_run(["remove_network", net_id])
