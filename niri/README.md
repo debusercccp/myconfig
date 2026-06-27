@@ -12,9 +12,10 @@ a di stato) e risolvere i problemi comuni su **Debian Trixie**.
 4. [Configurazione Niri (config.kdl)](#configurazione-niri-configkdl)
 5. [Configurazione Waybar](#configurazione-waybar)
 6. [Calendario Google (Waybar + TUI)](#calendario-google-waybar--tui)
-7. [Compilare conky](#compilare-conky)
-8. [Troubleshooting Completo](#troubleshooting-completo)
-9. [Quick Start](#quick-start)
+7. [Menu Wi-Fi (Waybar + wpa\_cli)](#menu-wi-fi-waybar--wpa_cli)
+8. [Compilare conky](#compilare-conky)
+9. [Troubleshooting Completo](#troubleshooting-completo)
+10. [Quick Start](#quick-start)
 
 ---
 
@@ -174,8 +175,11 @@ sudo apt install \
 - swayidle: gestione idle — blocca a 5 min (`swaylock -f`), spegne i monitor a 10 min, blocca prima della sospensione
 - polkit-kde-agent-1: agente PolicyKit, fornisce i prompt grafici di autenticazione (montaggio dischi, ecc.)
 - playerctl: controlli multimediali (`XF86AudioPlay/Pause/Next/Prev`)
-- network-manager: fornisce `nmtui`, richiamato dal modulo Wi-Fi di Waybar in una finestra flottante
 - xwayland-satellite: server Xwayland on-demand su `:0` per le app X11 (Niri è Wayland-puro)
+
+**Nota WiFi:** se il Wi-Fi è gestito da `wpa_supplicant` direttamente (non da NetworkManager),
+il modulo `network` di Waybar usa `wifi-menu.py` + `wpa_cli` invece di `nmtui`.
+Vedi la sezione [Menu Wi-Fi (Waybar + wpa_cli)](#menu-wi-fi-waybar--wpa_cli) per il setup.
 
 **Nota:** se `xwayland-satellite` non è nei repo, compilalo da sorgente:
 
@@ -559,6 +563,42 @@ $EDITOR ~/.config/waybar/calendar.env        # GCAL_ICS_URL=https://.../basic.ic
 
 ---
 
+## Menu Wi-Fi (Waybar + wpa\_cli)
+
+Il modulo `network` di Waybar apre un menu **fuzzel** con tutte le reti Wi-Fi disponibili
+quando il Wi-Fi è gestito da `wpa_supplicant` direttamente (non da NetworkManager).
+
+### Componenti
+
+| File (in `waybar-niri/`) | Ruolo |
+|--------------------------|-------|
+| `wifi-menu.py` | Script Python: scansiona via `wpa_cli`, mostra le reti in fuzzel, connette alle reti note o chiede la password per le nuove |
+| `wifi-menu.sudoers` | Regola sudoers da installare una tantum per permettere a `wpa_cli` di girare senza password |
+
+### Funzionamento
+
+- **Click sinistro** sul modulo Wi-Fi → apre il menu fuzzel con le reti trovate
+- La rete attiva è marcata con `●`; le reti protette mostrano 󰌾
+- **Rete nota** (già salvata in wpa_supplicant) → connessione immediata
+- **Rete nuova** → fuzzel chiede la password (nascosta con `--password`), poi connette e salva
+
+### Setup (una tantum)
+
+Il socket di `wpa_supplicant` (`/run/wpa_supplicant/wlp4s0`) è creato con gruppo `root`,
+non `netdev`, quindi `wpa_cli` ha bisogno di una regola sudoers senza password:
+
+```bash
+sudo install -m 440 ~/.config/waybar/wifi-menu.sudoers /etc/sudoers.d/wifi-menu
+# Verifica:
+sudo -l | grep wpa_cli
+# Deve comparire: NOPASSWD: /usr/sbin/wpa_cli -p /run/wpa_supplicant -i wlp4s0 *
+```
+
+> Se il nome dell'interfaccia non è `wlp4s0`, aggiorna sia `wifi-menu.py`
+> (variabile `WPA`) che `wifi-menu.sudoers` prima di installare.
+
+---
+
 ## Compilare conky
 
 ```bash
@@ -885,6 +925,8 @@ I seguenti file sono forniti nella cartella `waybar-niri/`:
 - `colors.css` — variabili colore condivise
 - `cal-tui.conf` — config kitty per il calendario TUI (Tokyo Night)
 - `calendar.conf.example` / `calendar.env.example` — template per il calendario Google
+- `wifi-menu.py` — menu Wi-Fi con fuzzel (usa `wpa_cli`; vedi sezione dedicata)
+- `wifi-menu.sudoers` — regola sudoers per `wpa_cli` senza password (da installare con `sudo install`)
 - `scripts/` — calendario (`calendar.sh`, `cal-tui.sh`, `cal-sync.py`, `cal-setup.sh`),
   `nightlight.sh`, `powermenu.sh`, `mounts.sh`, `update-sys`, `wttr.py`
 
