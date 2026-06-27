@@ -78,7 +78,7 @@ def scan_networks():
 
 
 def format_line(n, current_ssid):
-    marker = "● " if n["ssid"] == current_ssid else "  "
+    marker = "●" if n["ssid"] == current_ssid else "○"
     sig = n["signal"]
     bars = (
         "▂▄▆█"
@@ -90,7 +90,7 @@ def format_line(n, current_ssid):
         else "▂___"
     )
     lock = " 󰌾" if n["secured"] else ""
-    return f"{marker}{n['ssid']}  {bars} {sig}%{lock}"
+    return f"{marker} {n['ssid']}  {bars} {sig}%{lock}"
 
 
 def fuzzel_pick(items, prompt="Wi-Fi  "):
