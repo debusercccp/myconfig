@@ -253,6 +253,7 @@
         "tooltip": true,
         "interval": 3600,
         "exec": "/home/noya/.config/waybar/scripts/wttr.py",
-        "return-type": "json"
+        "return-type": "json",
+        "on-click": "kitty --app-id weather-tui -e bash -c 'curl -s wttr.in/Bari?lang=it; echo; read -p \"Premi Invio per chiudere…\"'"
     }
 }

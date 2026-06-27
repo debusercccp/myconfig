@@ -119,6 +119,28 @@ window-rule {
     draw-border-with-background false
 }
 
+/* Meteo TUI (click sull'icona meteo in Waybar) */
+window-rule {
+    match app-id="weather-tui"
+    open-floating true
+    default-column-width { fixed 860; }
+    default-window-height { fixed 420; }
+    geometry-corner-radius 12
+    clip-to-geometry true
+    draw-border-with-background false
+}
+
+/* Abbinamento Bluetooth */
+window-rule {
+    match app-id="bt-pair"
+    open-floating true
+    default-column-width { fixed 560; }
+    default-window-height { fixed 200; }
+    geometry-corner-radius 12
+    clip-to-geometry true
+    draw-border-with-background false
+}
+
 /* ================================================
    STARTUP COMMANDS - Avvio servizi e UI
    ================================================ */
