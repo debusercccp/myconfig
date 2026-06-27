@@ -23,7 +23,6 @@
     "modules-right": [
         "custom/mounts",
         "custom/backup",
-        "tray",
         "custom/updates",
         "temperature",
         "cpu",
