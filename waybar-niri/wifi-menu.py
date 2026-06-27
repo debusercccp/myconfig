@@ -93,6 +93,44 @@ def format_line(n, current_ssid):
     return f"{marker}{n['ssid']}  {bars} {sig}%{lock}"
 
 
+def fuzzel_pick(items, prompt="Wi-Fi  "):
+    r = subprocess.run(
+        [
+            "fuzzel",
+            "--dmenu",
+            "--prompt",
+            prompt,
+            "--width",
+            "40",
+            "--lines",
+            str(len(items)),
+        ],
+        input="\n".join(items),
+        capture_output=True,
+        text=True,
+    )
+    return r.stdout.strip()
+
+
+def ask_password(ssid):
+    r = subprocess.run(
+        [
+            "fuzzel",
+            "--dmenu",
+            "--prompt",
+            f"Password per {ssid}:  ",
+            "--width",
+            "40",
+            "--lines",
+            "0",
+            "--password",
+        ],
+        capture_output=True,
+        text=True,
+    )
+    return r.stdout.strip()
+
+
 def main():
     networks, err = scan_networks()
 
@@ -128,36 +166,35 @@ def main():
         sys.exit(0)
 
     ssid = selected["ssid"]
+    secured = selected["secured"]
 
     if ssid in known:
+        net_id = known[ssid]
+        if secured:
+            action = fuzzel_pick(
+                [f"  Connetti a «{ssid}»", f"  Nuova password per «{ssid}»..."],
+                prompt="Wi-Fi  ",
+            )
+            if not action:
+                sys.exit(0)
+            if "Nuova password" in action:
+                pwd = ask_password(ssid)
+                if not pwd:
+                    sys.exit(0)
+                wpa_run(["set_network", net_id, "psk", f'"{pwd}"'])
+                wpa_run(["save_config"])
+        # Connetti con configurazione salvata
         notify(f'Connessione a "{ssid}"…')
-        r = wpa_run(["select_network", known[ssid]])
-        if r.returncode == 0:
-            notify(f'Connesso a "{ssid}"')
-        else:
-            notify(f'Errore: impossibile connettersi a "{ssid}"')
+        wpa_run(["select_network", net_id])
     else:
-        # Rete nuova: chiedi password via fuzzel e connetti
-        pwd_result = subprocess.run(
-            [
-                "fuzzel",
-                "--dmenu",
-                "--prompt",
-                f"Password per {ssid}:  ",
-                "--width",
-                "40",
-                "--lines",
-                "0",
-                "--password",
-            ],
-            capture_output=True,
-            text=True,
-        )
-        pwd = pwd_result.stdout.strip()
-        if not pwd:
-            sys.exit(0)
+        # Rete nuova
+        if secured:
+            pwd = ask_password(ssid)
+            if not pwd:
+                sys.exit(0)
+        else:
+            pwd = None
 
-        # Aggiungi rete a wpa_supplicant
         r = wpa_run(["add_network"])
         net_id = r.stdout.strip().splitlines()[-1]
         if not net_id.isdigit():
@@ -165,7 +202,11 @@ def main():
             sys.exit(1)
 
         wpa_run(["set_network", net_id, "ssid", f'"{ssid}"'])
-        wpa_run(["set_network", net_id, "psk", f'"{pwd}"'])
+        if pwd:
+            wpa_run(["set_network", net_id, "psk", f'"{pwd}"'])
+        else:
+            wpa_run(["set_network", net_id, "key_mgmt", "NONE"])
+
         r = wpa_run(["enable_network", net_id])
         if r.returncode == 0:
             notify(f'Connessione a "{ssid}"…')
