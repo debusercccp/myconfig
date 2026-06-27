@@ -253,6 +253,6 @@
         "interval": 3600,
         "exec": "/home/noya/.config/waybar/scripts/wttr.py",
         "return-type": "json",
-        "on-click": "fuzzel --dmenu --prompt 'Meteo  ' --width 46 --lines 14 < ~/.cache/waybar-weather-detail.txt"
+        "on-click": "fuzzel --dmenu --prompt 'Meteo  ' --width 92 --lines 14 < ~/.cache/waybar-weather-detail.txt"
     }
 }

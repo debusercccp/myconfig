@@ -20,11 +20,30 @@ def notify(msg):
     subprocess.run(["notify-send", "Bluetooth", msg], check=False)
 
 
+def rfkill_blocked():
+    r = subprocess.run(["rfkill", "list", "bluetooth"], capture_output=True, text=True)
+    return "Soft blocked: yes" in r.stdout or "Hard blocked: yes" in r.stdout
+
+
 def is_powered():
+    if rfkill_blocked():
+        return False
     for line in bt(["show"]).splitlines():
         if "Powered:" in line:
             return "yes" in line
     return False
+
+
+def enable_bluetooth():
+    if rfkill_blocked():
+        subprocess.run(["rfkill", "unblock", "bluetooth"])
+        time.sleep(1)
+    bt(["power", "on"])
+
+
+def disable_bluetooth():
+    bt(["power", "off"])
+    subprocess.run(["rfkill", "block", "bluetooth"])
 
 
 def parse_devices(raw):
@@ -136,7 +155,7 @@ def main():
     if not is_powered():
         choice = fuzzel_pick(["  Attiva Bluetooth"])
         if choice:
-            bt(["power", "on"])
+            enable_bluetooth()
             notify("Bluetooth attivato")
         return
 
@@ -188,7 +207,7 @@ def main():
         return
 
     if choice == "󰂲  Disattiva Bluetooth":
-        bt(["power", "off"])
+        disable_bluetooth()
         notify("Bluetooth disattivato")
         return
 
