@@ -157,8 +157,8 @@ spawn-at-startup "swayidle" "-w" \
     "resume" "niri msg action power-on-monitors" \
     "before-sleep" "swaylock -f"
 
-/* Applet Bluetooth nel system tray */
-spawn-at-startup "blueman-applet"
+/* Applet Bluetooth nel system tray — delay per attendere StatusNotifierWatcher */
+spawn-at-startup "bash" "-c" "sleep 5 && blueman-applet"
 
 // Salva la history del copia-incolla
 spawn-at-startup "wl-paste" "--watch" "cliphist" "store"
