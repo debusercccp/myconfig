@@ -111,7 +111,7 @@ def main():
     parser = argparse.ArgumentParser(
         description="Cerca nel vault delle password.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="Esempi:\n  python3 pwsearch.py spotify\n  python3 pwsearch.py gmail --top 3\n  python3 pwsearch.py Disintegration03",
+        epilog="Esempi:\n  python3 pwsearch.py spotify\n  python3 pwsearch.py gmail --top 3",
     )
     parser.add_argument(
         "query", help="Testo da cercare (servizio, username, password o fonte)"
