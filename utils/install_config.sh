@@ -19,6 +19,23 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m'
 
+# Opzioni
+# --links-only / -l : collega solo le configurazioni (symlink), senza
+#   installare pacchetti né toccare i servizi. Utile per (ri)allineare
+#   ~/.config al repository su una macchina già configurata.
+LINKS_ONLY=0
+for arg in "$@"; do
+    case "$arg" in
+        -l|--links-only) LINKS_ONLY=1 ;;
+        -h|--help)
+            echo "Uso: $0 [--links-only]"
+            echo "  --links-only, -l   Collega solo le configurazioni (symlink),"
+            echo "                     senza installare pacchetti o abilitare servizi."
+            exit 0 ;;
+        *) echo -e "${RED}Opzione sconosciuta: $arg${NC}" >&2; exit 1 ;;
+    esac
+done
+
 # Pacchetti da installare (Debian)
 # wl-clipboard serve a cliphist; xwayland-satellite serve a niri per le app X11
 PACKAGES=(
@@ -35,6 +52,10 @@ PACKAGES=(
 )
 
 echo -e "${GREEN}=== Repository: $REPO ===${NC}"
+
+if [ "$LINKS_ONLY" -eq 1 ]; then
+    echo -e "${YELLOW}=== Modalità --links-only: salto installazione pacchetti ===${NC}"
+else
 echo -e "${GREEN}=== Installazione pacchetti ===${NC}"
 
 if ! command -v apt-get >/dev/null 2>&1; then
@@ -58,6 +79,7 @@ done
 if [ ${#TO_INSTALL[@]} -gt 0 ]; then
     echo " Installo: ${TO_INSTALL[*]}"
     sudo apt-get install -y "${TO_INSTALL[@]}"
+fi
 fi
 
 echo -e "${GREEN}=== Collegamento configurazioni (symlink dal repository) ===${NC}"
@@ -102,6 +124,7 @@ else
     echo -e "${RED} Cartella stow/ non trovata in $REPO${NC}"
 fi
 
+if [ "$LINKS_ONLY" -eq 0 ]; then
 echo -e "${GREEN}=== Servizi ===${NC}"
 
 # Bluetooth per blueman
@@ -110,6 +133,7 @@ if systemctl list-unit-files bluetooth.service >/dev/null 2>&1; then
     echo " Servizio bluetooth abilitato"
 else
     echo -e "${YELLOW} Servizio bluetooth non trovato (manca bluez?)${NC}"
+fi
 fi
 
 echo -e "${GREEN}--------------------------------------------${NC}"
