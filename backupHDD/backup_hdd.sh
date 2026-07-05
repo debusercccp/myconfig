@@ -32,7 +32,10 @@ if [[ -e "$LOCKFILE" ]]; then
     fi
 fi
 echo $$ > "$LOCKFILE"
-trap 'rm -f "$LOCKFILE"' INT TERM EXIT
+
+# File di progresso letto dal modulo custom/backup di waybar
+PROGRESS_FILE="/tmp/backup_hdd_progress"
+trap 'rm -f "$LOCKFILE" "$PROGRESS_FILE" "$PROGRESS_FILE.fase"' INT TERM EXIT
 
 # =========================================================================
 # IDENTIFICAZIONE DISPOSITIVO
@@ -67,6 +70,7 @@ fi
 case "$UUID_ATTUALE" in
     8476*) NOME_DISCO="Disco A (2 TB)" ;;
     6550*) NOME_DISCO="Disco B (500 GB)" ;;
+    d8c9*) NOME_DISCO="Disco C (WD 500 GB)" ;;
     *)     NOME_DISCO="Dispositivo volatile (${UUID_ATTUALE:0:8}…)" ;;
 esac
 
@@ -85,7 +89,8 @@ mkdir -p \
 # RSYNC — Mirror della home (esclusioni ottimizzate)
 # =========================================================================
 echo "Avvio rsync mirror..."
-rsync -avHS --delete --ignore-errors  \
+echo "Mirror home → $NOME_DISCO" > "$PROGRESS_FILE.fase"
+rsync -aHS --info=progress2 --delete --ignore-errors \
     --exclude="target/"               \
     --exclude="node_modules/"         \
     --exclude=".cache/"               \
@@ -110,20 +115,22 @@ rsync -avHS --delete --ignore-errors  \
     --exclude="/usb"                  \
     --exclude="noya_packs/"           \
     --exclude="Scaricati/"            \
-    "$SOURCE" "$TARGET/backup_automatico/"
+    "$SOURCE" "$TARGET/backup_automatico/" > "$PROGRESS_FILE"
 
 # =========================================================================
 # RSYNC — Archiviazione file pesanti (accumulo, senza --delete)
 # =========================================================================
 echo "Archiviazione file pesanti..."
 rsync_archivio() {
-    local src="$1" dst="$2"
-    [[ -d "$src" ]] && rsync -avHS "$src/" "$dst/"
+    local src="$1" dst="$2" nome="$3"
+    [[ -d "$src" ]] || return 0
+    echo "Archivio $nome → $NOME_DISCO" > "$PROGRESS_FILE.fase"
+    rsync -aHS --info=progress2 "$src/" "$dst/" > "$PROGRESS_FILE"
 }
 
-rsync_archivio "${SOURCE}datasets"   "$TARGET/Datasets_Archivio"
-rsync_archivio "${SOURCE}modelli"    "$TARGET/Modelli_Archivio"
-rsync_archivio "${SOURCE}noya_packs" "$TARGET/noya_packs_Archivio"
+rsync_archivio "${SOURCE}datasets"   "$TARGET/Datasets_Archivio"    "datasets"
+rsync_archivio "${SOURCE}modelli"    "$TARGET/Modelli_Archivio"     "modelli"
+rsync_archivio "${SOURCE}noya_packs" "$TARGET/noya_packs_Archivio"  "noya_packs"
 
 # =========================================================================
 # LINK SIMBOLICI — scorciatoie nella home

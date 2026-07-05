@@ -225,9 +225,10 @@
     },
 
     "custom/backup": {
-        "exec": "pgrep -x rsync > /dev/null && echo '󰁯 BACKUP' || echo ''",
-        "interval": 5,
-        "tooltip": false
+        "exec": "~/.config/waybar/scripts/backup-status.sh",
+        "return-type": "json",
+        "interval": 2,
+        "tooltip": true
     },
 
     "custom/nightlight": {
