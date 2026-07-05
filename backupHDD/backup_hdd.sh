@@ -52,7 +52,7 @@ fi
 # =========================================================================
 echo "Attendo montaggio di $DEVICE_NODE..."
 TARGET=""
-for ((i = 0; i < 60; i += 2)); do
+for ((i = 0; i < 300; i += 2)); do
     TARGET=$(lsblk -rn -o UUID,MOUNTPOINT \
         | awk -v uuid="$UUID_ATTUALE" '$1 == uuid {print $2}')
     [[ -n "$TARGET" ]] && mountpoint -q "$TARGET" && break
