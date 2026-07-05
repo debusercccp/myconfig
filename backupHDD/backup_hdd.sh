@@ -90,7 +90,9 @@ mkdir -p \
 # =========================================================================
 echo "Avvio rsync mirror..."
 echo "Mirror home → $NOME_DISCO" > "$PROGRESS_FILE.fase"
-rsync -aHS --info=progress2 --delete --ignore-errors \
+# --no-inc-recursive: scansione completa prima del trasferimento,
+# così la percentuale di progress2 è monotona (niente barra che torna indietro)
+rsync -aHS --info=progress2 --no-inc-recursive --delete --ignore-errors \
     --exclude="target/"               \
     --exclude="node_modules/"         \
     --exclude=".cache/"               \
@@ -125,7 +127,7 @@ rsync_archivio() {
     local src="$1" dst="$2" nome="$3"
     [[ -d "$src" ]] || return 0
     echo "Archivio $nome → $NOME_DISCO" > "$PROGRESS_FILE.fase"
-    rsync -aHS --info=progress2 "$src/" "$dst/" > "$PROGRESS_FILE"
+    rsync -aHS --info=progress2 --no-inc-recursive "$src/" "$dst/" > "$PROGRESS_FILE"
 }
 
 rsync_archivio "${SOURCE}datasets"   "$TARGET/Datasets_Archivio"    "datasets"
