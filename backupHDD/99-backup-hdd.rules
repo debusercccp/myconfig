@@ -1,3 +1,6 @@
+# Adattatore SATA-USB JMicron JMS578: niente autosuspend (mitigazione distacchi)
+ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="152d", ATTR{idProduct}=="0578", TEST=="power/control", ATTR{power/control}="on"
+
 # Regola per il Disco A (2 TB, 8476...)
 ACTION=="add", SUBSYSTEM=="block", ENV{DEVTYPE}=="partition", ENV{ID_FS_UUID}=="84763b78-b0dc-4593-ba3b-cebc88d54dda", TAG+="systemd", ENV{SYSTEMD_WANTS}="backup-hdd@84763b78-b0dc-4593-ba3b-cebc88d54dda.service"
 
