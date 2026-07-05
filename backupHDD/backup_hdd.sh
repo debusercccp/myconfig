@@ -143,4 +143,12 @@ ln -sfn "$TARGET/Datasets_Archivio"  "${SOURCE}TUTTI_I_DATASETS"
 ln -sfn "$TARGET/Modelli_Archivio"   "${SOURCE}TUTTI_I_MODELLI"
 ln -sfn "$TARGET/noya_packs_Archivio" "${SOURCE}TUTTI_I_PACKS"
 
-invia_notifica "Backup completato su $NOME_DISCO!" "emblem-ok-symbolic"
+# =========================================================================
+# SYNC FINALE — flush della cache su disco, così lo smontaggio è immediato
+# =========================================================================
+echo "Sincronizzazione dati su disco..."
+rm -f "$PROGRESS_FILE"
+echo "Sincronizzazione finale su $NOME_DISCO" > "$PROGRESS_FILE.fase"
+sync -f "$TARGET"
+
+invia_notifica "Backup completato su $NOME_DISCO! Ora puoi smontare e staccare il disco." "emblem-ok-symbolic"
