@@ -1,23 +1,38 @@
 #!/usr/bin/env bash
 
-USER="debusercccp"
-BASE_URL="https://github.com/${USER}"
+BASE_URL="https://github.com"
 
+# Formato "owner/repo"
 REPOS=(
-  "RFCellClassificator"
-  "convFqFa"
-  "BioToolKit"
-  "PantherTUI"
-  "serum_builder"
-  "Music-gen"
-  "ftui"
-  "sqlViewer"
-  "grrs"
-  "libNN"
-  "myconfig"
-  "raspyDisplay"
-  "raspyWeb"
-  "raspyVideo"
+  "debusercccp/niva"
+  "debusercccp/myconfig"
+  "debusercccp/debusercccp"
+  "debusercccp/ftui"
+  "debusercccp/BioToolKit"
+  "debusercccp/libNN"
+  "debusercccp/myconfig-nix"
+  "debusercccp/RFCellClassificator"
+  "debusercccp/libNNrs"
+  "debusercccp/Rolly303"
+  "debusercccp/PantherCLI"
+  "debusercccp/convFqFa"
+  "debusercccp/raspyWeb"
+  "debusercccp/BirdPatternClass"
+  "debusercccp/grrs"
+  "debusercccp/raspyDisplay"
+  "debusercccp/gigs"
+  "debusercccp/retropie-pi5-spi-tft"
+  "debusercccp/niva-trainer"
+  "debusercccp/nulla"
+  "debusercccp/aeroMessenger"
+  "debusercccp/raspyVideo"
+  "debusercccp/music-gen"
+  "debusercccp/niva-chronos"
+  "debusercccp/progetti-kb"
+  "debusercccp/serum_builder"
+  "debusercccp/bioinformatics-kb"
+  "debusercccp/ffmpeg-rs"
+  "debusercccp/linalg"
 )
 
 selected=()
@@ -119,7 +134,8 @@ clone_selected() {
 
   for repo in "${to_clone[@]}"; do
     local url="${BASE_URL}/${repo}.git"
-    local target="${dest}/${repo}"
+    local name="${repo##*/}"
+    local target="${dest}/${name}"
     if [[ -d "$target/.git" ]]; then
       echo -e "  ${YELLOW}⚠ ${repo}${RESET} already exists, skipping"
     else
