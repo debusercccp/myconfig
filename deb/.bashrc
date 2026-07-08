@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # ~/.bashrc: executed by bash(1) for non-login shells.
 # see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
 # for examples
@@ -103,6 +104,7 @@ alias pacchetti="aptitude search '!?origin (debian) ?installed'"
 # ~/.bash_aliases, instead of adding them here directly.
 # See /usr/share/doc/bash-doc/examples in the bash-doc package.
 
+# shellcheck disable=SC1090
 if [ -f ~/.bash_aliases ]; then
     . ~/.bash_aliases
 fi
@@ -126,6 +128,10 @@ export PATH="$HOME/.cargo/bin:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
 export PATH=$PATH:/usr/sbin
 #export PS1='\[\033[35m\]\t \[\033[37m\]\u\[\033[38;5;213m\]@\h \[\033[33m\]\w\[\033[0m\] '
+if [ -r ~/dotfiles/github/tokenGH.txt ]; then
+    GH_TOKEN="$(cat ~/dotfiles/github/tokenGH.txt)"
+    export GH_TOKEN
+fi
 
 export PS1='\[\033[35m\]\t \[\033[37m\]\u\[\033[38;5;213m\]@\h \[\033[33m\]\w\[\033[1;36m\]$(parse_git_branch)\[\033[0m\] '
 
