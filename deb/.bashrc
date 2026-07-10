@@ -136,9 +136,26 @@ fi
 export PS1='\[\033[35m\]\t \[\033[37m\]\u\[\033[38;5;213m\]@\h \[\033[33m\]\w\[\033[1;36m\]$(parse_git_branch)\[\033[0m\] '
 
 alias jarvis='OLLAMA_API_BASE=http://127.0.0.1:11434 nice -n 15 aider --model ollama/llama3.2:latest'
+alias jarvis-kb='cd ~/progetti/_kb && OLLAMA_API_BASE=http://127.0.0.1:11434 nice -n 15 aider --model ollama/llama3.2:latest'
 
 . "$HOME/.cargo/env"
 
 alias backup-ssd='/home/noya/backupMiniSSD/backup_to_minissd.sh'
 
 eval "$(starship init bash)"
+
+
+if [ -r ~/dotfiles/openrouter/key.txt ]; then
+    OPENROUTER_API_KEY="$(cat ~/dotfiles/openrouter/key.txt)"
+    export OPENROUTER_API_KEY
+fi
+
+export ANTHROPIC_BASE_URL="https://openrouter.ai/api"
+export ANTHROPIC_AUTH_TOKEN="$OPENROUTER_API_KEY"
+export ANTHROPIC_API_KEY=""
+
+export ANTHROPIC_DEFAULT_OPUS_MODEL="nvidia/nemotron-3-ultra-550b-a55b:free"
+export ANTHROPIC_DEFAULT_SONNET_MODEL="nvidia/nemotron-3-ultra-550b-a55b:free"
+export ANTHROPIC_DEFAULT_HAIKU_MODEL="nvidia/nemotron-3-nano-30b-a3b:free"
+export ANTHROPIC_DEFAULT_FABLE_MODEL="nvidia/nemotron-3-nano-30b-a3b:free"
+export CLAUDE_CODE_SUBAGENT_MODEL="nvidia/nemotron-3-nano-30b-a3b:free"

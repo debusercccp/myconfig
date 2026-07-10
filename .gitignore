@@ -22,3 +22,4 @@ waybar-niri/.calvenv/
 # Node (cache prettier / installazioni locali)
 node_modules/
 package-lock.json
+openrouter/
