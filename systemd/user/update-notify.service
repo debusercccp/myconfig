@@ -1,0 +1,13 @@
+[Unit]
+Description=Check for system updates and notify via dunst
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=%h/dotfiles/myconfig/scripts/check-updates.sh
+Environment=DISPLAY=:0
+Environment=DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/%U/bus
+# Ensure notify-send can reach dunst
+StandardOutput=journal
+StandardError=journal

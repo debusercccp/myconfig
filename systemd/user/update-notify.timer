@@ -1,0 +1,15 @@
+[Unit]
+Description=Check for system updates daily and notify
+Requires=update-notify.service
+
+[Timer]
+# Run daily at 10:00 AM (adjust as needed)
+OnCalendar=daily
+Persistent=true
+# Also run 5 minutes after boot if missed
+OnBootSec=5min
+OnUnitActiveSec=24h
+RandomizedDelaySec=30min
+
+[Install]
+WantedBy=timers.target
