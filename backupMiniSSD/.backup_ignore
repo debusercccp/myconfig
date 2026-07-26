@@ -31,6 +31,7 @@ datasets/PANTHER19.0_fasta
 *.log
 .direnv/
 .venv/
+node_modules/
 
 /home/noya/MiniSSD/
 /proc/
@@ -47,3 +48,38 @@ etc/
 lib/
 lib64/
 proc/
+
+# --- Cache generiche e Python ---
+.cache/
+Cache/
+.thumbnails/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.pytest_cache/
+.ruff_cache/
+.coverage*
+
+# --- Ambienti virtuali e dipendenze ---
+.venv*/
+node_modules/
+
+# --- Build, pacchetti e compilati (Rust, ecc.) ---
+target/
+*.egg-info/
+dist/
+
+# --- Strumenti di sviluppo ---
+.cursor/
+.aider.chat.history.md
+.aider.input.history
+.vscode/
+
+# --- Dataset pesanti e output ---
+results/
+datasets/PANTHER19.0_fasta
+
+# (Opzionale) Escludi file temporanei generici e log
+*.tmp
+*.log
+.direnv/
