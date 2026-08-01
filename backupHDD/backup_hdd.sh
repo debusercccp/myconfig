@@ -113,6 +113,7 @@ rsync -aHS --info=progress2 --no-inc-recursive --delete --ignore-errors \
     --exclude="/TUTTI_I_MODELLI"      \
     --exclude="/TUTTI_I_PACKS"        \
     --exclude="modelli/"              \
+    --exclude="docs_rag"              \
     --exclude=".mozilla/"             \
     --exclude="/usb"                  \
     --exclude="noya_packs/"           \
