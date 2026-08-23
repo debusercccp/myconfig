@@ -29,6 +29,7 @@
         "memory",
         "disk",
         "custom/nightlight",
+        "custom/caffeine",
         "custom/bluetooth",
         "pulseaudio#microphone",
         "pulseaudio",
@@ -58,6 +59,15 @@
             "active": "●",
             "default": "○"
         }
+    },
+
+    "custom/caffeine": {
+        "format": "{}",
+        "return-type": "json",
+        "interval": 5,
+        "exec": "~/.config/waybar/scripts/caffeine.sh status",
+        "on-click": "~/.config/waybar/scripts/caffeine.sh toggle && pkill -RTMIN+9 waybar",
+        "tooltip": true
     },
 
     "niri/window": {

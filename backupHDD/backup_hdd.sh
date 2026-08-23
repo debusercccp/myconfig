@@ -108,6 +108,7 @@ rsync -aHS --info=progress2 --no-inc-recursive --delete --ignore-errors \
     --exclude=".aider"                \
     --exclude="datasets/"             \
     --exclude="MiniSSD/"              \
+    --exclude="docs_rag"              \
     --exclude="/HDD_Attivo"           \
     --exclude="/TUTTI_I_DATASETS"     \
     --exclude="/TUTTI_I_MODELLI"      \
