@@ -23,4 +23,4 @@ waybar-niri/.calvenv/
 node_modules/
 package-lock.json
 openrouter/
-stow/nvim/.config/nvim/lazy.nvim/
+nvim/lazy.nvim/
