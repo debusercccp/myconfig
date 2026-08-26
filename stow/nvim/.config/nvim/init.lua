@@ -104,13 +104,48 @@ require("lazy").setup({
       heading = { sign = false },
       code = { sign = false },
     }
+  },
+
+  -- AUTOCOMPLETAMENTO (parole LSP, snippet, path, buffer) mentre scrivi
+  {
+    "saghen/blink.cmp",
+    dependencies = { "rafamadriz/friendly-snippets" },
+    version = "1.*",
+    opts = {
+      keymap = { preset = "default" }, -- <C-y> conferma, <C-n>/<C-p> naviga, <Tab> naviga snippet
+      appearance = { nerd_font_variant = "mono" },
+      completion = {
+        documentation = { auto_show = true },
+        menu = { auto_show = true },
+        list = { selection = { preselect = false } },
+        ghost_text = { enabled = true },
+      },
+      sources = {
+        default = { "lsp", "path", "snippets", "buffer" },
+      },
+      signature = { enabled = true },
+    },
+    opts_extend = { "sources.default" },
+  },
+
+  -- TERMINALE INTEGRATO (finestra in basso, come un vero IDE)
+  {
+    "akinsho/toggleterm.nvim",
+    version = "*",
+    opts = {
+      size = 15,
+      open_mapping = [[<c-\>]],
+      direction = "horizontal", -- finestra orizzontale in basso
+      shade_terminals = true,
+      start_in_insert = true,
+      persist_size = true,
+    }
   }
 })
 
 -- 4. CONFIGURAZIONE LSP (Dopo il setup dei plugin)
-local lspconfig = require("lspconfig")
 require("mason-lspconfig").setup({
-  -- Lista dei server da installare automaticamente
+  -- Lista dei server da installare e abilitare automaticamente
   ensure_installed = {
     "lua_ls",    -- Lua
     "pyright",   -- Python
@@ -119,20 +154,17 @@ require("mason-lspconfig").setup({
   }
 })
 
--- Funzione helper per attivare i server con impostazioni standard
-local servers = { "pyright", "rust_analyzer", "clangd", "r_language_server" }
-for _, lsp in ipairs(servers) do
-  lspconfig[lsp].setup({})
-end
-
 -- Setup specifico per Lua (toglie l'avviso di 'vim' globale sconosciuto)
-lspconfig.lua_ls.setup({
+vim.lsp.config("lua_ls", {
   settings = {
     Lua = {
       diagnostics = { globals = { "vim" } }
     }
   }
 })
+
+-- r_language_server non è gestito da mason, va abilitato manualmente
+vim.lsp.enable("r_language_server")
 
 -- 5. SCORCIATOIE (Keymaps)
 local keymap = vim.keymap.set
