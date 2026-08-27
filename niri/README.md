@@ -168,7 +168,9 @@ sudo apt install \
   polkit-kde-agent-1 \
   playerctl \
   network-manager \
-  xwayland-satellite
+  xwayland-satellite \
+  caffeine \
+  caffeine-indicator
 ```
 
 **Dettagli:**
