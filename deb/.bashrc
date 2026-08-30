@@ -124,6 +124,32 @@ parse_git_branch() {
      git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/ (\1)/'
 }
 
+cd() {
+    builtin cd "$@" || return $?
+
+    # Dichiarazione
+    local term_lines
+    local term_cols
+
+    # Assegnazione separata (risolve SC2155)
+    term_lines=$(tput lines 2>/dev/null || echo 24)
+    term_cols=$(tput cols 2>/dev/null || echo 80)
+
+    local reserved=5
+    local limit=$(( term_lines - reserved ))
+
+    [ "$limit" -lt 5 ] && limit=5
+
+    ls -aC --color=always -w "$term_cols" | awk -v max="$limit" '
+        NR <= max { print $0 }
+        END {
+            if (NR > max) {
+                print "\033[90m...e altre " (NR - max) " righe omesse\033[0m"
+            }
+        }
+    '
+}
+
 export PATH="$HOME/.cargo/bin:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
 export PATH=$PATH:/usr/sbin
