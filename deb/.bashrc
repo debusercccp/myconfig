@@ -121,7 +121,40 @@ if ! shopt -oq posix; then
 fi
 
 parse_git_branch() {
-     git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/ (\1)/'
+    # 1. Recupera il branch corrente. Se è vuoto (non è un repo Git), esci subito per eliminare l'overhead.
+    local branch
+    branch=$(git branch --show-current 2>/dev/null)
+    
+    if [[ -z "$branch" ]]; then
+        # Gestione del "detached HEAD" (quando fai checkout su un commit o tag specifico)
+        branch=$(git rev-parse --short HEAD 2>/dev/null)
+        [[ -z "$branch" ]] && return
+    fi
+
+    local status_info=""
+
+    # 2. Rilevamento delle modifiche locali
+    # --porcelain è il metodo più rapido e standardizzato per controllare file staged, modified o untracked
+    if [[ -n $(git status --porcelain 2>/dev/null) ]]; then
+        status_info+=" !"
+    fi
+
+    # 3. Controllo dello stato di tracciamento remoto (GitHub)
+    # rev-list è molto più veloce e oggettivo rispetto al parsing testuale di 'git status'
+    local upstream_counts
+    upstream_counts=$(git rev-list --left-right --count HEAD...@{upstream} 2>/dev/null)
+    
+    if [[ -n "$upstream_counts" ]]; then
+        local ahead behind
+        # Estrae efficientemente i contatori dalla stringa generata
+        read -r ahead behind <<< "$upstream_counts"
+        
+        [[ "$ahead" -gt 0 ]] && status_info+=" ⇡${ahead}"
+        [[ "$behind" -gt 0 ]] && status_info+=" ⇣${behind}"
+    fi
+
+    # 4. Restituisce il valore formattato con parentesi da passare a PS1
+    echo " ($branch$status_info)"
 }
 
 cd() {
@@ -150,6 +183,8 @@ cd() {
     '
 }
 
+export QT_QPA_PLATFORMTHEME=qt6ct
+
 export PATH="$HOME/.cargo/bin:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
 export PATH=$PATH:/usr/sbin
@@ -164,12 +199,9 @@ export PS1='\[\033[35m\]\t \[\033[37m\]\u\[\033[38;5;213m\]@\h \[\033[33m\]\w\[\
 alias jarvis='OLLAMA_API_BASE=http://127.0.0.1:11434 nice -n 15 aider --model ollama/llama3.2:latest'
 alias jarvis-kb='cd ~/progetti/_kb && OLLAMA_API_BASE=http://127.0.0.1:11434 nice -n 15 aider --model ollama/llama3.2:latest'
 
-. "$HOME/.cargo/env"
-
 alias backup-ssd='/home/noya/backupMiniSSD/backup_to_minissd.sh'
 
-eval "$(starship init bash)"
-
+#eval "$(starship init bash)"
 
 if [ -r ~/dotfiles/openrouter/key.txt ]; then
     OPENROUTER_API_KEY="$(cat ~/dotfiles/openrouter/key.txt)"
