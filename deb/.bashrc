@@ -99,6 +99,9 @@ alias cestino='sudo rm -rf ~/.local/share/Trash/*'
 alias activate='source ~/.venv/bin/activate'
 alias pacchetti="aptitude search '!?origin (debian) ?installed'"
 
+alias man='mandible'
+alias nonascii='LC_CTYPE=C grep --color='auto' -n -P '[\x80-\xFF]''
+
 # Alias definitions.
 # You may want to put all your additions into a separate file like
 # ~/.bash_aliases, instead of adding them here directly.
