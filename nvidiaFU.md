@@ -3,6 +3,14 @@ L'obiettivo era configurare l'architettura hardware ibrida per dedicare la GPU d
 * **Problema iniziale:** `nvidia-smi` non comunicava con il driver e la GPU rimaneva costantemente alimentata.
 * **Analisi:** I pacchetti CUDA e i driver proprietari erano già presenti. Tuttavia, la GPU rimaneva bloccata in stato prestazionale P3 (10W di assorbimento in idle) a causa del demone `nvidia-persistenced`, che la teneva costantemente sveglia.
 * **Workaround:** Abbiamo disabilitato il demone di persistenza, forzando il driver a rispettare le regole di power management (`NVreg_DynamicPowerManagement=0x02`) e le regole udev. Questo ha permesso al bus PCI di tagliare l'alimentazione (stato D3cold) quando non ci sono calcoli in corso.
+
+### 1.1. Risoluzione dei Crash ACPI e Isolamento del Compositor (Niri & GRUB)
+* **Problema:** Niri registrava un errore DRM all'avvio (`Operation not supported - os error 95`) tentando di caricare la GPU secondaria. Allo spegnimento o chiusura della sessione grafica, il sistema andava in kernel panic/freeze totale (hard reset manuale necessario) con log ACPI che riportavano un timeout irreversibile: `Aborting method \_SB.PCI0.PEG0.PEGP.NVPO due to previous error (AE_AML_LOOP_TIMEOUT)`.
+* **Analisi:** Di default, Niri esegue il probing di tutti i dispositivi in `/dev/dri/card*`. Il demone grafico e il kernel entravano in una *race condition* o in un conflitto di gestione energetica cercando di cambiare simultaneamente lo stato della GPU NVIDIA allo spegnimento. L'ACPI firmware del Lenovo andava in loop. Poiché l'accelerazione 3D della NVIDIA è usata esclusivamente per stack AI/ML (es. TensorFlow/PyTorch) e non per il display, l'interfaccia DRM è totalmente superflua.
+* **Fix definitivo (Due livelli):**
+  1. **Lato Compositor:** Istruito Niri ad agganciarsi esclusivamente alla GPU integrata Intel, ignorando la scansione automatica dei nodi DRM.
+  2. **Lato Kernel (GRUB):** Disabilitato il *modesetting* DRM di NVIDIA. Questo rende la GPU dedicata "invisibile" a Wayland e all'ambiente desktop (nessun nodo generato in `/dev/dri/`), mantenendo però intatti e funzionanti i moduli per il calcolo parallelo (`nvidia` e `nvidia-uvm`).
+
 ### 2. Il Failsafe Termico (Ventole fuori controllo)
 * **Problema:** Nonostante le temperature ottimali (CPU a 46°C, GPU a 45°C), la ventola principale girava costantemente a 2363 RPM. Il problema persisteva anche rimuovendo forzatamente i moduli NVIDIA dal kernel (`modprobe -r`).
 * **Analisi:** L'Embedded Controller (il chip Lenovo che gestisce l'hardware termico) possiede una logica di emergenza. Mandando in autosospensione profonda la GPU, il sensore termico NVIDIA si spegne. Il BIOS interpreta l'assenza di lettura come un potenziale danno catastrofico e attiva il failsafe termico, spingendo le ventole per precauzione.
@@ -143,3 +151,21 @@ sudo journalctl -b -u thinkfan --no-pager
 cat /sys/devices/system/cpu/cpu*/cpufreq/energy_performance_preference | sort | uniq -c
 sensors | grep -E "Package|pwm1"
 ```
+#### Configurazione Niri — `~/.config/niri/config.kdl`
+```kdl
+# Forza l'uso esclusivo della GPU Intel integrata per il rendering Wayland
+debug {
+    render-drm-device "/dev/dri/renderD128"
+}
+
+# Disabilita il modesetting per isolare NVIDIA dal display server
+GRUB_CMDLINE_LINUX_DEFAULT="quiet nvidia-drm.modeset=0"
+
+# 1. Verifica che il parametro modeset sia applicato nel kernel corrente
+cat /proc/cmdline | grep nvidia-drm.modeset=0
+
+# 2. Verifica i nodi DRM esposti (se il fix funziona, la scheda NVIDIA non deve apparire qui)
+ls -la /dev/dri/by-path/
+
+# 3. Verifica funzionamento CUDA/ML indipendente dal server grafico
+nvidia-smi

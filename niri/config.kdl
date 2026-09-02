@@ -17,6 +17,7 @@ cursor {
    niri a compositare il cursore via software. */
 debug {
     disable-cursor-plane
+    render-drm-device "/dev/dri/renderD128"
 }
 
 include "colors.kdl"
