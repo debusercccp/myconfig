@@ -138,7 +138,7 @@
     },
 
     "temperature": {
-        "thermal-zone": 1,
+        "hwmon-path": "/sys/class/hwmon/hwmon5/temp1_input",
         "format": "󰔏",
         "format-alt-click": "click-right",
         "format-alt": "󰔏 {temperatureC}°C",
