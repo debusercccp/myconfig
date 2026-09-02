@@ -7,46 +7,51 @@ L'obiettivo era configurare l'architettura hardware ibrida per dedicare la GPU d
 * **Problema:** Nonostante le temperature ottimali (CPU a 46°C, GPU a 45°C), la ventola principale girava costantemente a 2363 RPM. Il problema persisteva anche rimuovendo forzatamente i moduli NVIDIA dal kernel (`modprobe -r`).
 * **Analisi:** L'Embedded Controller (il chip Lenovo che gestisce l'hardware termico) possiede una logica di emergenza. Mandando in autosospensione profonda la GPU, il sensore termico NVIDIA si spegne. Il BIOS interpreta l'assenza di lettura come un potenziale danno catastrofico e attiva il failsafe termico, spingendo le ventole per precauzione.
 * **Workaround:** Abbiamo bypassato il controller hardware inviando il parametro `fan_control=1` al modulo `thinkpad_acpi`. Inviando direttamente il livello `0` al controller, abbiamo interrotto il loop di emergenza, trasferendo la gestione termica allo spazio utente (OS).
-### 3. Automazione Fault-Tolerant (Thinkfan)
-* **Problema:** Il demone user-space `thinkfan` andava in crash per due motivi: la mancata risoluzione dei collegamenti simbolici di Debian nella cartella `hwmon` e, successivamente, la sparizione dinamica del sensore NVIDIA (`hwmon8`) quando la scheda entrava correttamente in stato di sospensione D3cold.
-* **Workaround:** È stato sviluppato uno script di generazione YAML robusto. Utilizzando il globbing della shell per risolvere i percorsi e iniettando il parametro `optional: true` su ogni nodo termico, `thinkfan` ora ignora la temporanea indisponibilità del sensore hardware senza interrompere il servizio.
+### 3. Automazione Fault-Tolerant (Thinkfan) — Tentativi Iniziali
+* **Problema:** Il demone user-space `thinkfan` andava in crash o restava bloccato a `level 0` nonostante temperature elevate, con letture sentinella `-128(0)` mostrate da `thinkfan -q -v -n`.
+* **Ipotesi esplorate e poi escluse come causa primaria:** timing al boot rispetto a udev, rinumerazione dinamica degli indici hwmonN a runtime (osservata realmente accadere, ma non era la causa radice del problema di lettura), EPP della CPU (causa reale del *surriscaldamento*, sezione 5, ma indipendente dal bug di lettura di thinkfan).
+* **Causa radice reale, trovata con `strace`:** il campo `hwmon:` nel YAML, quando punta alla **directory** del chip (`/sys/class/hwmon/hwmonN`) in combinazione con `name:` per la risoluzione, in questa build di thinkfan (Debian 13/trixie, kernel `6.12.107+deb13`) causa una `read()` diretta sulla directory stessa invece che sul file `tempN_input` al suo interno — risultando in errore `EISDIR` internamente, mascherato dal fail-safe come lettura `-128`. Confermato con:
+  ```
+  openat(AT_FDCWD, "/sys/class/hwmon/hwmon5", O_RDONLY) = 5
+  read(5, ..., 8191) = -1 EISDIR (È una directory)
+  ```
+* **Fix definitivo:** puntare il campo `hwmon:` **direttamente al file `tempN_input`**, non alla directory del chip. Le label si trovano con:
+  ```bash
+  for f in /sys/class/hwmon/hwmonN/temp*_label; do echo "$f: $(cat $f)"; done
+  ```
+  Per `orion`: `coretemp` (hwmon5) → `temp1_input` = Package id 0; `thinkpad` (hwmon8) → `temp1_input` = CPU (via EC), `temp2_input` = GPU; `acpitz` (hwmon0) → `temp1_input` (unico sensore).
 
-### 4. Race Condition e Rinumerazione hwmon a Runtime (Fans a 0 RPM con CPU a 100°C)
-* **Problema:** Nonostante `thinkfan.yaml` correttamente configurato con `optional: true` su tutti i sensori, il servizio falliva sistematicamente all'avvio con `ERROR: /sys/class/hwmon/hwmonN/temp1_input: No such file or directory`. Anche dopo il fix del boot, il fan si fermava spontaneamente durante il normale funzionamento (non solo all'avvio) con la CPU a 90-100°C.
-* **Analisi (parte 1 — timing al boot):** `thinkfan` apre i file descriptor sui path hwmon una sola volta all'avvio del processo. Se `systemd` lo lancia prima che `udev` abbia finito di popolare completamente i nodi sysfs, il processo esce con `exit-code 1` e non si riavvia da solo.
-* **Analisi (parte 2 — causa più profonda, confermata sul campo):** l'indice hwmonN di `coretemp` **non è stabile a runtime**. È stato osservato spostarsi da `hwmon10` a `hwmon5` senza alcun reboot, con `hwmon10` riassegnato a `iwlwifi_1`. `thinkfan` tiene aperti i file descriptor sul path numerico aperto all'avvio; quando l'indice cambia sotto di lui, quel file descriptor punta a un device diverso — da qui le letture sentinella `-128(0)` viste con `thinkfan -q -v -n`, con fail-safe del demone che è `level 0`, l'opposto del comportamento desiderato in un guasto.
-* **Workaround (scartato):** aggancio via symlink udev stabile (`SYMLINK+="thinkfan-coretemp"` su `ATTR{name}=="coretemp"`) per rendere il path immune alla rinumerazione. Il match non si è mai risolto — l'attributo `name` non è affidabile come regola di matching udev nel momento in cui l'evento `add` viene processato per i device hwmon.
-* **Fix definitivo:** due meccanismi complementari.
-  1. Override systemd che fa attendere il completamento iniziale di udev prima dell'avvio del servizio (risolve il crash al boot).
-  2. Regola udev che triggera un `try-restart` di thinkfan ad ogni evento `add`/`remove` su un device hwmon, con un debounce di 2 secondi via `systemd-run --on-active=2` per evitare che il restart scatti nella finestra instabile tra remove e add dello stesso device (risolve la rinumerazione a runtime).
-* **Lezione:** in caso di crash imprevisto e prolungato di `thinkfan`, l'Embedded Controller riprende il controllo nativo del fan (comportamento firmware standard, non pericoloso ma non ottimale). Verificare sempre `pwm1` via `sensors` insieme alla temperatura effettiva prima di assumere che `0% MANUAL CONTROL` sia un guasto: può essere una decisione legittima del daemon se le temperature sono davvero sotto soglia.
+### 4. Rinumerazione hwmon a Runtime e Timing al Boot (problemi secondari, ancora validi)
+* **Problema:** oltre al bug di lettura risolto sopra, sono stati osservati due problemi realmente accaduti e distinti: (a) `thinkfan.service` falliva all'avvio con `No such file or directory` per race condition con udev non ancora completato; (b) l'indice hwmonN di `coretemp` si è spostato spontaneamente a runtime (es. da hwmon10 a hwmon5, senza reboot), rompendo qualunque binding basato su indice numerico fisso.
+* **Fix (a):** override systemd che attende `systemd-udev-settle.service` prima dell'avvio, con retry automatico.
+* **Fix (b):** regola udev che triggera un `try-restart` di thinkfan ad ogni evento `add`/`remove` su un device hwmon, con debounce di 2 secondi per evitare restart nella finestra instabile tra remove e add dello stesso device.
+* **Nota importante non ancora risolta:** poiché il fix definitivo della sezione 3 usa path con indice numerico esplicito (`hwmon5`, `hwmon8`, `hwmon0`), una rinumerazione a runtime rompe di nuovo il binding — il restart automatico via udev riavvia il processo ma non riscrive il file YAML con i nuovi indici. Se il problema si ripresenta, verificare prima di tutto se gli indici in `/etc/thinkfan.yaml` corrispondono ancora a quelli reali con `for h in /sys/class/hwmon/hwmon*; do echo "$h -> $(cat $h/name)"; done`.
 
-### 5. Causa Radice del Surriscaldamento: EPP Aggressivo (non hardware, non GPU, non thinkfan)
-* **Problema:** anche con `thinkfan` che finalmente pilotava il fan correttamente al massimo livello, il Package id 0 restava bloccato tra 90-100°C in condizioni apparentemente di idle (`ps`/`top` non mostravano alcun processo rilevante che consumasse CPU).
-* **Analisi:** `cat /proc/cpuinfo | grep MHz` mostrava quasi tutti i core sostenuti a 4.2-4.3GHz — turbo pieno, non idle. I C-states (`intel_idle`, fino a C10) erano tutti abilitati e funzionanti, quindi non era un problema di risparmio energetico mancante a livello di stati di sospensione della CPU. Il governor `scaling_governor` risultava già `powersave` su tutti i core — anche questa pista si è rivelata un vicolo cieco. La vera causa era l'**EPP (Energy Performance Preference)**: con `intel_pstate` in modalità `active` (HWP hardware-managed), è l'EPP a determinare l'aggressività del boost indipendentemente dal governor. Il sistema aveva `energy_performance_preference` impostato su `balance_performance` (12/12 core) — valore che spinge la CPU a salire aggressivamente al turbo anche per carichi minimi o transitori non visibili nei tool standard.
-* **Anche la GPU è stata verificata ed esclusa come causa**: `nvidia-persistenced` risultava correttamente `inactive (dead)` e `disabled`, nessun processo aveva file aperti su `/dev/nvidia*` (`lsof` vuoto), e `runtime_status` del device PCI restava `suspended` sia prima che dopo un'interrogazione `nvidia-smi` — la lettura P3/9W momentanea vista durante il test era solo l'effetto del comando stesso che risveglia brevemente la scheda per rispondere, comportamento normale e documentato del driver NVIDIA con runtime PM attivo.
+### 5. Causa Radice del Surriscaldamento Reale: EPP Aggressivo
+* **Problema:** anche a prescindere dai bug di thinkfan, il Package id 0 restava bloccato tra 90-100°C in condizioni apparentemente di idle (nessun processo rilevante in `ps`/`top`).
+* **Analisi:** `cat /proc/cpuinfo | grep MHz` mostrava quasi tutti i core sostenuti a 4.2-4.3GHz — turbo pieno, non idle. I C-states e il `scaling_governor` (già `powersave`) sono stati esclusi come causa. La causa reale era l'**EPP (Energy Performance Preference)**: con `intel_pstate` in modalità `active` (HWP), è l'EPP a determinare l'aggressività del boost indipendentemente dal governor. Il sistema aveva `energy_performance_preference` su `balance_performance` (12/12 core), che spinge il turbo anche per carichi minimi.
+* **GPU esclusa come causa:** `nvidia-persistenced` era correttamente `inactive`/`disabled`, nessun processo aveva file aperti su `/dev/nvidia*`, `runtime_status` del device PCI restava `suspended` a riposo — la lettura P3/9W vista durante un test era solo l'effetto momentaneo di `nvidia-smi` che risveglia brevemente la scheda per rispondere (comportamento normale del driver).
 * **Fix:**
   ```bash
   echo balance_power | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/energy_performance_preference
   ```
-  Risultato: crollo da 90-100°C a 58°C in idle nell'immediato. Reso persistente al boot con un service systemd dedicato (vedi sotto).
-* **Lezione:** su CPU Intel con `intel_pstate` in modalità `active`/HWP, il `scaling_governor` da solo non è sufficiente a diagnosticare o controllare il comportamento del boost — va sempre controllato anche `energy_performance_preference` per ogni core. Un EPP aggressivo lasciato di default (o resettato da un aggiornamento kernel/pacchetto) può mascherarsi da problema hardware (pasta termica, dissipazione) quando in realtà è puro software.
+  Risultato: crollo da 90-100°C a 58°C in idle nell'immediato. Persistito al boot con un service systemd dedicato.
+* **Lezione:** su CPU Intel con `intel_pstate` in modalità `active`/HWP, il `scaling_governor` da solo non basta a diagnosticare o controllare il boost — va sempre controllato anche `energy_performance_preference` per ogni core.
 
-L'infrastruttura è ora pronta: il sistema delega il display e Wayland alla GPU integrata, mantiene la GPU NVIDIA in autosospensione reale e verificata, applica un EPP bilanciato per evitare boost inutili in idle, e affida il controllo termico a `thinkfan` reso resiliente sia al timing di boot sia alla rinumerazione hwmon a runtime.
+L'infrastruttura è ora pronta e verificata end-to-end: il sistema delega il display e Wayland alla GPU integrata, mantiene la GPU NVIDIA in autosospensione reale, applica un EPP bilanciato per evitare boost inutili in idle, e affida il controllo termico a `thinkfan` con binding diretto ai file `tempN_input` corretti — confermato reagire in autonomia (72% pwm a 59-73°C) senza intervento manuale.
 
 #### Configurazione finale — `/etc/thinkfan.yaml`
 ```yaml
 fans:
   - tpacpi: /proc/acpi/ibm/fan
 sensors:
-  - hwmon: /sys/class/hwmon
-    name: coretemp
+  - hwmon: /sys/class/hwmon/hwmon5/temp1_input
     optional: true
-  - hwmon: /sys/class/hwmon
-    name: thinkpad
+  - hwmon: /sys/class/hwmon/hwmon8/temp1_input
     optional: true
-  - hwmon: /sys/class/hwmon
-    name: acpitz
+  - hwmon: /sys/class/hwmon/hwmon8/temp2_input
+    optional: true
+  - hwmon: /sys/class/hwmon/hwmon0/temp1_input
     optional: true
 levels:
   - [0, 0, 42]
@@ -56,6 +61,7 @@ levels:
   - [7, 60, 80]
   - ["level auto", 75, 32767]
 ```
+Nota: gli indici hwmon5/8/0 sono quelli osservati su `orion` al momento della scrittura — vanno riverificati con il comando della sezione 4 se il fan smette di reagire dopo un evento hwmon (sospensione GPU, dock USB-C, riavvio).
 
 #### Override systemd — `/etc/systemd/system/thinkfan.service.d/override.conf`
 ```ini
@@ -97,52 +103,43 @@ sudo systemctl enable --now cpu-epp.service
 # 1. Mitigazione immediata in caso di temperature critiche
 sudo bash -c 'echo level 7 > /proc/acpi/ibm/fan'
 
-# 2. Diagnosi thinkfan — stato del servizio e log storici
-systemctl status thinkfan
-sudo journalctl -u thinkfan
-sudo journalctl -b -u thinkfan
-
-# 3. Verifica mapping hwmon -> nome sensore (attenzione: può cambiare a runtime)
-for h in /sys/class/hwmon/hwmon*; do echo "$h -> $(cat $h/name)"; done
-
-# 4. Verifica che fan_control sia persistito
-cat /etc/modprobe.d/thinkpad_acpi.conf
-cat /sys/module/thinkpad_acpi/parameters/fan_control   # deve dare "Y"
-
-# 5. Test diretto in foreground (output non bufferizzato, su file, per vedere tutte le righe di polling)
+# 2. Verifica se thinkfan legge davvero (il test decisivo)
 sudo systemctl stop thinkfan
-sudo stdbuf -oL thinkfan -q -v -n > /tmp/thinkfan_test.log 2>&1 &
-sleep 8
-sudo kill -9 $(pgrep -f "thinkfan -q -v -n")
-cat /tmp/thinkfan_test.log
-sudo rm -f /run/thinkfan.pid
+sudo thinkfan -q -v -n -c /etc/thinkfan.yaml
+# Ctrl+C dopo 10-15s. Se vedi "Temperatures(bias): -128(0)...", NON e' un problema di
+# sensore assente: e' quasi certamente un binding sbagliato (directory invece di file).
+# Verifica con strace:
+sudo strace -e trace=openat,read -f thinkfan -q -v -n -c /etc/thinkfan.yaml 2>&1 | grep -B1 -A1 EISDIR
 sudo systemctl start thinkfan
 
-# 6. Diagnosi surriscaldamento senza causa apparente — controllare in quest'ordine:
-cat /proc/cpuinfo | grep MHz                                          # frequenze reali sostenute
-cat /sys/module/intel_idle/parameters/max_cstate                      # C-states disponibili
-cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor | sort | uniq -c
-cat /sys/devices/system/cpu/intel_pstate/status                       # active = HWP, EPP conta più del governor
+# 3. Trovare i path corretti (file, non directory!) per ogni sensore
+for h in /sys/class/hwmon/hwmon*; do echo "$h -> $(cat $h/name)"; done
+for f in /sys/class/hwmon/hwmonN/temp*_label; do echo "$f: $(cat $f)"; done  # sostituire N
+
+# 4. Verifica rinumerazione hwmon (se il fan smette di reagire dopo aver funzionato)
+for h in /sys/class/hwmon/hwmon*; do echo "$h -> $(cat $h/name)"; done
+# confrontare con gli indici scritti in /etc/thinkfan.yaml
+
+# 5. Diagnosi surriscaldamento senza causa apparente
+cat /proc/cpuinfo | grep MHz
+cat /sys/devices/system/cpu/intel_pstate/status
 cat /sys/devices/system/cpu/cpu*/cpufreq/energy_performance_preference | sort | uniq -c
 nvidia-smi --query-gpu=pstate,power.draw,temperature.gpu --format=csv
-cat /sys/bus/pci/devices/0000:01:00.0/power/runtime_status             # deve essere "suspended" a riposo
-sudo lsof /dev/nvidia* 2>/dev/null                                     # deve essere vuoto se la GPU non è in uso
+cat /sys/bus/pci/devices/0000:01:00.0/power/runtime_status
+sudo lsof /dev/nvidia* 2>/dev/null
 
-# 7. Fix EPP se energy_performance_preference risulta balance_performance o performance
+# 6. Fix EPP se energy_performance_preference risulta balance_performance o performance
 echo balance_power | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/energy_performance_preference
 
-# 8. Applicare tutto e verificare
-sudo systemctl daemon-reload
-sudo systemctl restart thinkfan
-systemctl status thinkfan --no-pager
-sensors | grep -E "Package|pwm1|fan1"
+# 7. Generare carico controllato per testare la curva fan (senza installare pacchetti)
+for i in $(seq 1 6); do yes > /dev/null & done
+watch -n1 'sensors | grep -E "Package|pwm1"'
+kill $(jobs -p)   # per fermare — attenzione a job multipli, usare $! se si lanciano altri processi nel mezzo
 
-# 9. Test finale — reboot completo per validare tutti i fix insieme
+# 8. Test finale — reboot completo per validare tutti i fix insieme
 sudo reboot
-# dopo il riavvio:
 systemctl status thinkfan --no-pager
 sudo journalctl -b -u thinkfan --no-pager
 cat /sys/devices/system/cpu/cpu*/cpufreq/energy_performance_preference | sort | uniq -c
 sensors | grep -E "Package|pwm1"
 ```
-
