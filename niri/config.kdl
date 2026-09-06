@@ -147,7 +147,7 @@ spawn-at-startup "swaybg" "-i" "/home/noya/Immagini/blacklodge.jpg" "-m" "fill"
 spawn-at-startup "/home/noya/.config/waybar/scripts/nightlight.sh" "toggle"
 
 /* Supporto app X11 (niri è Wayland-puro): server Xwayland on-demand su :0 */
-spawn-at-startup "xwayland-satellite"
+spawn-at-startup "/home/noya/.cargo/bin/xwayland-satellite"
 
 /* Agente PolicyKit: prompt grafici di autenticazione (montaggio dischi, ecc.) */
 spawn-at-startup "bash" "-c" "exec $(ls /usr/lib/*/libexec/polkit-kde-authentication-agent-1 /usr/lib/polkit-kde-authentication-agent-1 /usr/libexec/polkit-kde-authentication-agent-1 2>/dev/null | head -n1)"
