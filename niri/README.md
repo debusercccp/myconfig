@@ -179,9 +179,15 @@ sudo apt install \
 - playerctl: controlli multimediali (`XF86AudioPlay/Pause/Next/Prev`)
 - xwayland-satellite: server Xwayland on-demand su `:0` per le app X11 (Niri è Wayland-puro)
 
-**Nota WiFi:** se il Wi-Fi è gestito da `wpa_supplicant` direttamente (non da NetworkManager),
+#OBSOLETO
+
+```
+*Nota WiFi:** se il Wi-Fi è gestito da `wpa_supplicant` direttamente (non da NetworkManager),
 il modulo `network` di Waybar usa `wifi-menu.py` + `wpa_cli` invece di `nmtui`.
 Vedi la sezione [Menu Wi-Fi (Waybar + wpa_cli)](#menu-wi-fi-waybar--wpa_cli) per il setup.
+```
+
+Per il wifi,imposta iwd (iwctl) e usa Impala, da compilare e mettere in ~/rust/impala/...
 
 **Nota:** se `xwayland-satellite` non è nei repo, compilalo da sorgente:
 

@@ -209,11 +209,11 @@
         "format-wifi": "󰤨",
         "format-ethernet": "󰈀",
         "format-disconnected": "󰤭",
-        "tooltip-format-wifi": "󰤨 {essid} ({signalStrength}%)\n󰩟 {ipaddr}/{cidr}\n Click: reti disponibili",
-        "tooltip-format-ethernet": "󰈀 {ifname}\n󰩟 {ipaddr}/{cidr}\n Click: reti disponibili",
-        "tooltip-format-disconnected": "Disconnesso\n Click: reti disponibili",
-        "on-click": "python3 /home/noya/.config/waybar/wifi-menu.py",
-        "on-click-right": "nmcli device wifi rescan",
+        "tooltip-format-wifi": "󰤨 {essid} ({signalStrength}%)\n󰩟 {ipaddr}/{cidr}\n Click: gestione rete",
+        "tooltip-format-ethernet": "󰈀 {ifname}\n󰩟 {ipaddr}/{cidr}\n Click: gestione rete",
+        "tooltip-format-disconnected": "Disconnesso\n Click: gestione rete",
+        "on-click": "kitty --app-id impala -e /home/noya/rust/impala/target/release/impala",
+        "on-click-right": "iwctl station wlan0 scan",
         "max-length": 50
     },
 
