@@ -56,6 +56,25 @@ L'obiettivo era configurare l'architettura hardware ibrida per dedicare la GPU d
 * **Fix:** invece di affidarsi a un indice `thermal-zone` (soggetto alla stessa fragilità hwmon vista nelle sezioni precedenti), puntare direttamente il modulo al file hwmon di `coretemp` già verificato e usato da thinkfan, tramite il parametro `hwmon-path`.
 * **Nota:** questo binding in Waybar è a indice fisso, non dinamico per nome come in thinkfan (sezione 4.1) — soggetto quindi alla stessa fragilità di rinumerazione. Se la temperatura in Waybar torna a mostrare un valore fisso o sbagliato dopo un riavvio, riverificare l'indice hwmon corrente con il comando della sezione 4 e aggiornare `hwmon-path` di conseguenza.
 
+### 4.2. Breaking Change con thinkfan 2.0.0 (upgrade a Debian sid)
+* **Problema:** dopo l'upgrade del sistema da Debian stable/testing a **sid**, `thinkfan` è passato dalla versione **1.3.1 alla 2.0.0** (major upstream, changelog Debian: "New upstream version 2.0.0 — Fix build failure with CMake 4"). Il file `/etc/thinkfan.yaml` scritto per la 1.3.1 (sezione 4.1) ha smesso di funzionare, con il servizio in crash-loop continuo e ventole bloccate al massimo/non gestite.
+* **Errore specifico:**
+  ```
+  ERROR: /etc/thinkfan.yaml:12:
+    - hwmon: /sys/class/hwmon
+      ^
+  An optional hwmon sensor must have an 'indices' entry so thinkfan knows how many temperatures to expect.
+  ```
+* **Causa — breaking change della sintassi YAML:** nella 2.0.0, il campo `indices:` è diventato **obbligatorio per ogni sensore `hwmon:` marcato `optional: true`**, incluso il caso di un chip con un solo valore (come `acpitz`, che nella 1.3.1 poteva restare senza `indices:` perché ovvio). Il parser 2.0.0 è più severo: deve sapere in anticipo quante temperature aspettarsi da un sensore per gestire correttamente la sua eventuale assenza, e non lo deduce più implicitamente.
+* **Fix:** aggiungere `indices: [1]` anche ai blocchi sensore a singolo valore che nella 1.3.1 ne erano privi (nel caso di `orion`, il blocco `acpitz`). Il resto della sintassi per nome dinamico (`hwmon:` + `name:` + `indices:`, sezione 4.1) resta valido e compatibile tra le due major.
+* **Lezione generale sulle versioni:** `thinkfan` non garantisce piena retrocompatibilità della sintassi YAML tra major version. Dopo un upgrade di sistema che tocca `thinkfan` (specialmente passando a rami come sid/unstable dove le major version arrivano molto più rapidamente che su stable/testing), se il servizio smette di partire, il primo controllo da fare è **la versione attuale vs quella per cui il file era stato scritto**:
+  ```bash
+  thinkfan --version 2>/dev/null || dpkg -l thinkfan | grep ^ii
+  apt changelog thinkfan 2>&1 | head -30   # elenca i breaking change recenti
+  sudo journalctl -u thinkfan -n 15 --no-pager   # il messaggio di errore indica quasi sempre la riga e la causa esatta
+  ```
+  Il messaggio d'errore di thinkfan è generalmente molto esplicito (riga, campo, motivo) — non serve `strace` per questo tipo di rotture, a differenza del bug più subdolo della sezione 3.
+
 L'infrastruttura è ora pronta e verificata end-to-end: il sistema delega il display e Wayland alla GPU integrata, isola completamente NVIDIA dal nodo DRM evitando i kernel panic ACPI allo spegnimento, mantiene la GPU in autosospensione reale, applica un EPP bilanciato per evitare boost inutili in idle, e affida il controllo termico a `thinkfan` con binding dinamico per nome — risolto ad ogni avvio e mantenuto aggiornato dalla regola udev, resistente sia al timing di boot sia alla rinumerazione hwmon.
 
 #### Configurazione finale — `/etc/thinkfan.yaml`
@@ -73,6 +92,7 @@ sensors:
     optional: true
   - hwmon: /sys/class/hwmon
     name: acpitz
+    indices: [1]
     optional: true
 levels:
   - [0, 0, 42]
@@ -82,6 +102,7 @@ levels:
   - [7, 60, 80]
   - ["level auto", 75, 32767]
 ```
+Nota: `indices: [1]` su `acpitz` è **obbligatorio da thinkfan 2.0.0** in poi per ogni sensore `optional: true` (vedi sezione 4.2) — con la 1.3.1 poteva essere omesso su sensori a singolo valore.
 
 #### Override systemd — `/etc/systemd/system/thinkfan.service.d/override.conf`
 ```ini
