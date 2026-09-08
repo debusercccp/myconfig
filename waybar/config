@@ -21,9 +21,6 @@
     ],
 
     "modules-right": [
-        "custom/mounts",
-        "custom/backup",
-        "custom/updates",
         "temperature",
         "cpu",
         "memory",
@@ -212,33 +209,9 @@
         "tooltip-format-wifi": "󰤨 {essid} ({signalStrength}%)\n󰩟 {ipaddr}/{cidr}\n Click: gestione rete",
         "tooltip-format-ethernet": "󰈀 {ifname}\n󰩟 {ipaddr}/{cidr}\n Click: gestione rete",
         "tooltip-format-disconnected": "Disconnesso\n Click: gestione rete",
-        "on-click": "kitty --app-id impala -e /home/noya/rust/impala/target/release/impala",
+        "on-click": "kitty -e /home/noya/.cargo/bin/impala",
         "on-click-right": "iwctl station wlan0 scan",
         "max-length": 50
-    },
-
-    "custom/updates": {
-        "format": "{}",
-        "exec": "/home/noya/.config/waybar/scripts/update-sys",
-        "interval": 3600,
-        "on-click": "/home/noya/.config/waybar/scripts/update-sys update",
-        "return-type": "json"
-    },
-
-    "custom/mounts": {
-        "format": "{}",
-        "exec": "/home/noya/.config/waybar/scripts/mounts.sh waybar",
-        "return-type": "json",
-        "interval": 10,
-        "on-click": "/home/noya/.config/waybar/scripts/mounts.sh toggle",
-        "tooltip": true
-    },
-
-    "custom/backup": {
-        "exec": "~/.config/waybar/scripts/backup-status.sh",
-        "return-type": "json",
-        "interval": 2,
-        "tooltip": true
     },
 
     "custom/nightlight": {
