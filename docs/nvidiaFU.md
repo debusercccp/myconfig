@@ -75,6 +75,27 @@ L'obiettivo era configurare l'architettura hardware ibrida per dedicare la GPU d
   ```
   Il messaggio d'errore di thinkfan è generalmente molto esplicito (riga, campo, motivo) — non serve `strace` per questo tipo di rotture, a differenza del bug più subdolo della sezione 3.
 
+### 4.3. Crash-Loop Persistente da Pidfile Stantio (post thinkfan 2.0.0)
+* **Problema:** dopo il fix della sezione 4.2 (aggiunta di `indices:` obbligatorio), il servizio ha continuato in alcuni casi a restare in crash-loop (`restart counter` in continua salita), nonostante il file YAML fosse sintatticamente corretto e gli indici coerenti con l'hardware reale — verificato con `for f in /sys/class/hwmon/hwmon*/name; do echo "$f: $(cat $f)"; done` e conteggio dei `temp*_input` per chip.
+* **Causa:** un pidfile stantio in `/run/thinkfan.pid`, rimasto da una terminazione non pulita del processo precedente (es. il sistema spento durante un crash-loop, o un kill non gestito), impediva a qualunque nuova istanza — manuale o via systemd — di avviarsi, restituendo l'errore "already running" o simile anche a config corretta. Il log di `journalctl` in questi casi può essere fuorviante: mostra ancora il vecchio errore di sintassi (sezione 4.2) come ultima riga significativa, mascherando il problema di pidfile che si verifica *dopo* che il parsing YAML è già andato a buon fine.
+* **Diagnosi:** il test diretto in foreground (`sudo thinkfan -c /etc/thinkfan.yaml -n -v`) è più affidabile di `journalctl` in questo scenario, perché mostra l'errore reale non troncato invece dell'ultimo evento loggato dal servizio.
+* **Fix immediato:**
+  ```bash
+  sudo rm /run/thinkfan.pid
+  sudo systemctl restart thinkfan.service
+  systemctl status thinkfan.service   # deve restare "active (running)", non ripartire in loop
+  ```
+* **Fix permanente:** pulizia automatica del pidfile residuo ad ogni avvio del servizio, indipendentemente da come si è chiuso il processo precedente:
+  ```bash
+  sudo systemctl edit thinkfan.service
+  ```
+  ```ini
+  [Service]
+  ExecStartPre=-/usr/bin/rm -f /run/thinkfan.pid
+  ```
+  Il trattino iniziale (`-`) prima del comando fa sì che `ExecStartPre` non fallisca se il file non esiste già.
+* **Lezione:** dopo un crash-loop di thinkfan, non fermarsi al primo errore mostrato da `journalctl` — può essere lo storico di un problema già risolto (es. sezione 4.2) mentre la causa attuale è successiva nella catena di avvio. Verificare sempre con un run diretto in foreground (`-n -v`) prima di modificare ulteriormente il YAML.
+
 L'infrastruttura è ora pronta e verificata end-to-end: il sistema delega il display e Wayland alla GPU integrata, isola completamente NVIDIA dal nodo DRM evitando i kernel panic ACPI allo spegnimento, mantiene la GPU in autosospensione reale, applica un EPP bilanciato per evitare boost inutili in idle, e affida il controllo termico a `thinkfan` con binding dinamico per nome — risolto ad ogni avvio e mantenuto aggiornato dalla regola udev, resistente sia al timing di boot sia alla rinumerazione hwmon.
 
 #### Configurazione finale — `/etc/thinkfan.yaml`
