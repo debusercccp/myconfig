@@ -1,0 +1,13 @@
+[Unit]
+Description=Conky System Monitor
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/conky
+Restart=on-failure
+# Impone una terminazione immediata invece di aspettare il SIGTERM se l'app è nota per bloccarsi
+TimeoutStopSec=2 
+
+[Install]
+WantedBy=graphical-session.target
