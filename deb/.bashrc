@@ -102,6 +102,12 @@ alias pacchetti="aptitude search '!?origin (debian) ?installed'"
 alias man='mandible'
 alias nonascii='LC_CTYPE=C grep --color='auto' -n -P '[\x80-\xFF]''
 
+# Modalità silenziosa: disabilita il turbo e fissa la ventola al minimo
+alias fan-quiet='echo 1 | sudo tee /sys/devices/system/cpu/intel_pstate/no_turbo > /dev/null && echo level 1 | sudo tee /proc/acpi/ibm/fan > /dev/null'
+
+# Modalità automatica: riattiva il turbo e restituisce il controllo al BIOS
+alias fan-auto='echo 0 | sudo tee /sys/devices/system/cpu/intel_pstate/no_turbo > /dev/null && echo level auto | sudo tee /proc/acpi/ibm/fan > /dev/null'
+
 # Alias definitions.
 # You may want to put all your additions into a separate file like
 # ~/.bash_aliases, instead of adding them here directly.
