@@ -22,7 +22,7 @@ alias l='ls -CF'
 
 # --- Pacman equivalents of the old apt aliases ---
 alias aggiorna='sudo pacman -Syu'
-alias pulisci='sudo pacman -Sc && [[ -n $(pacman -Qdtq) ]] && sudo pacman -Rs $(pacman -Qdtq)'
+alias pulisci='sudo find /var/cache/pacman/pkg/ -mindepth 1 -maxdepth 1 -name "download-*" -exec rm -rf {} + && sudo pacman -Sc && { orphans=$(pacman -Qdtq); [[ -n "$orphans" ]] && sudo pacman -Rs $orphans; }'
 alias orphans='[[ -n $(pacman -Qdt) ]] && sudo pacman -Rs $(pacman -Qdtq) || echo "no orphans to remove"'
 alias pacchetti='pacman -Qe'
 alias cestino='sudo rm -rf ~/.local/share/Trash/*'

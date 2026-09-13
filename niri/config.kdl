@@ -246,7 +246,7 @@ binds {
     "XF86MonBrightnessDown" { spawn "brightnessctl" "set" "5%-" "-n" "1"; }
 
     /* ---- File manager ---- */
-    "Mod+E" { spawn "thunar"; }
+    "Mod+E" { spawn "dolphin"; }
 
     XF86AudioRaiseVolume { spawn "wpctl" "set-volume" "-l" "1.0" "@DEFAULT_AUDIO_SINK@" "0.05+"; }
     XF86AudioLowerVolume { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.05-"; }
