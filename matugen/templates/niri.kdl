@@ -36,8 +36,8 @@ layout {
 
     // Il bordo delle finestre non attive
     border {
-        width 1
-        inactive-color "#44475a" // Colore fisso Dracula per le finestre inattive
+        active-color "{{colors.primary.default.hex}}"
+        inactive-color "{{colors.surface_variant.default.hex}}" 
     }
 }
 
@@ -141,8 +141,7 @@ spawn-at-startup "bash" "-c" "sleep 3 && waybar > /dev/null 2>&1"
 spawn-at-startup "dunst"
 
 /* Sfondo desktop - swaybg con fill mode */
-// spawn-at-startup "swaybg" "-i" "/home/noya/Immagini/blacklodge.jpg" "-m" "fill"
-spawn-at-startup "sh" "-c" "[ -f ~/.cache/current_wallpaper ] && swaybg -i \"$(cat ~/.cache/current_wallpaper)\" -m fill"
+spawn-at-startup "swaybg" "-i" "/home/noya/Immagini/blacklodge.jpg" "-m" "fill"
 
 /* Nightlight (filtro luce blu) */
 spawn-at-startup "/home/noya/.config/waybar/scripts/nightlight.sh" "toggle"

@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+if [ -z "$1" ]; then
+    echo "Errore: Specifica il percorso del wallpaper."
+    exit 1
+fi
+
+WALLPAPER=$(realpath "$1")
+
+# 1. Salva lo stato per il prossimo riavvio
+mkdir -p ~/.cache
+echo "$WALLPAPER" > ~/.cache/current_wallpaper
+
+# 2. Gestione processi swaybg (come già impostato)
+OLD_PIDS=$(pgrep -x swaybg)
+swaybg -i "$WALLPAPER" -m fill > /dev/null 2>&1 &
+
+# 3. Rigenera i colori
+matugen image "$WALLPAPER"
+
+# 4. Cleanup vecchia istanza
+if [ -n "$OLD_PIDS" ]; then
+    sleep 0.5
+    kill $OLD_PIDS
+fi
+
+notify-send "Tema Aggiornato" "I colori sono stati sincronizzati." -a "Matugen"

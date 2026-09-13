@@ -9,6 +9,19 @@ vim.cmd([[syntax on]])
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
 
+local ok, matugen = pcall(require, "matugen_colors")
+-- Usa matugen.primary, matugen.background per fare l'override degli highlight
+
+if not ok then
+    -- Fallback sicuro se matugen non ha ancora generato il file
+    matugen = {
+        background = "#1a1b26",
+        foreground = "#c0caf5",
+        primary = "#7aa2f7",
+        error = "#f7768e",
+    }
+end
+
 -- 1. BOOTSTRAP (Scaricamento automatico di lazy.nvim)
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
@@ -28,13 +41,22 @@ vim.opt.cursorline = true       -- Evidenzia la riga corrente
 -- 3. PLUGIN (Gestiti da Lazy)
 require("lazy").setup({
 
-  -- TEMA (TokyoNight)
+-- TEMA (TokyoNight con override Matugen)
   {
     "folke/tokyonight.nvim",
     lazy = false,
     priority = 1000,
     config = function()
-      vim.cmd[[colorscheme tokyonight-storm]]
+      require("tokyonight").setup({
+        -- Sovrascrive la palette di Tokyonight con i colori di Matugen
+        on_colors = function(colors)
+          colors.bg = matugen.background
+          colors.fg = matugen.foreground
+          colors.blue = matugen.primary
+          colors.error = matugen.error
+        end,
+      })
+      vim.cmd[[colorscheme tokyonight]]
     end
   },
 

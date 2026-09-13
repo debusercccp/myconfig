@@ -1,0 +1,48 @@
+[config]
+reload_apps = true
+
+# ==========================================
+# TOOL CON SUPPORTO INCLUDE / DROP-IN
+# Generano solo un frammento con i colori
+# ==========================================
+
+[templates.kitty]
+input_path = "~/.config/matugen/templates/kitty.conf"
+output_path = "~/.config/kitty/matugen.conf"
+
+[templates.waybar]
+input_path = "~/.config/matugen/templates/waybar.css"
+output_path = "~/.config/waybar/matugen.css"
+post_hook = "killall -SIGUSR2 waybar" # Ricarica Waybar al volo
+
+[templates.fuzzel]
+input_path = "~/.config/matugen/templates/fuzzel.ini"
+output_path = "~/.config/fuzzel/matugen.ini"
+
+[templates.dunst]
+input_path = "~/.config/matugen/templates/dunst.conf"
+output_path = "~/.config/dunst/dunstrc.d/99-matugen.conf"
+post_hook = "killall dunst && dunst &"
+
+[templates.nvim]
+input_path = "~/.config/matugen/templates/nvim_colors.lua"
+output_path = "~/.config/nvim/lua/matugen_colors.lua"
+
+# ==========================================
+# TOOL SENZA SUPPORTO INCLUDE NATIVO
+# Il template *è* il file di configurazione
+# ==========================================
+
+[templates.niri]
+# Per Niri e Swaylock devi trasformare la tua config attuale in un template
+input_path = "~/.config/matugen/templates/niri.kdl"
+output_path = "~/.config/niri/config.kdl"
+# Niri ricarica la config automaticamente al salvataggio
+
+[templates.swaylock]
+input_path = "~/.config/matugen/templates/swaylock.conf"
+output_path = "~/.config/swaylock/config"
+
+[templates.conky]
+input_path = "~/.config/matugen/templates/conky.conf"
+output_path = "~/.config/conky/conky.conf"
