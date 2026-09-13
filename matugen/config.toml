@@ -32,12 +32,9 @@ output_path = "~/.config/nvim/lua/matugen_colors.lua"
 # TOOL SENZA SUPPORTO INCLUDE NATIVO
 # Il template *è* il file di configurazione
 # ==========================================
-
 [templates.niri]
-# Per Niri e Swaylock devi trasformare la tua config attuale in un template
-input_path = "~/.config/matugen/templates/niri.kdl"
-output_path = "~/.config/niri/config.kdl"
-# Niri ricarica la config automaticamente al salvataggio
+input_path = "~/.config/matugen/templates/niri-colors.kdl"
+output_path = "~/.config/niri/colors.kdl"
 
 [templates.swaylock]
 input_path = "~/.config/matugen/templates/swaylock.conf"

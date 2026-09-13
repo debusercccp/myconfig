@@ -20,24 +20,18 @@ debug {
     render-drm-device "/dev/dri/renderD128"
 }
 
-// include "colors.kdl"
+include "colors.kdl"
 
 layout {
     gaps 16
     background-color "transparent"
 
-    // Il bordo esterno (focus-ring)
     focus-ring {
-        width 2
-        active-color "#ffb2ba"
-        inactive-color "#524344"
+        width 4
     }
 
-    // Il bordo interno (border)
     border {
-        width 0
-        active-color "#e5bdc0"
-        inactive-color "#1a1112" 
+        width 2
     }
 }
 // Assegna swaybg al livello del backdrop

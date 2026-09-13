@@ -1,15 +1,10 @@
 layout {
     focus-ring {
-        width 3
-        active-color "#bb9af7"       // Violet
-        inactive-color "#2e3440"     // Dark
+        active-color "#ffb2ba"
+        inactive-color "#524344"
     }
-
     border {
-        width 1
-        inactive-color "#364458"     // Subtle border
+        active-color "#e5bdc0"
+        inactive-color "#1a1112" 
     }
-
-    gaps 16
-    background-color "transparent"
 }
