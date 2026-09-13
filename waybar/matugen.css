@@ -1,0 +1,29 @@
+/* ================================================
+   Matugen - Mapping per Waybar (GTK3 Safe)
+   ================================================ */
+
+/* Colori Base */
+@define-color fg #f0dedf;
+@define-color bg #1a1112;
+
+/* Trasparenze: Usiamo la variabile @bg di GTK, che il parser digerisce senza errori */
+@define-color bg-transparent alpha(@bg, 0.8);
+@define-color bg-semi alpha(@bg, 0.93);
+
+/* Accenti e Stati */
+@define-color accent #ffb2ba;
+@define-color secondary #e5bdc0;
+@define-color tertiary #e9bf8e;
+@define-color warning #ffb4ab;
+
+/* ---- COLORI MODULI SPECIFICI ---- */
+@define-color color-clock #ffb2ba;
+@define-color color-battery #e5bdc0;
+@define-color color-network #e9bf8e;
+@define-color color-cpu #ffb4ab;
+@define-color color-memory #72333c;
+@define-color color-disk #5c3f42;
+@define-color color-bluetooth #5d411b;
+@define-color color-audio #ffb2ba;
+@define-color color-power #ffb4ab;
+@define-color color-updates #e5bdc0;

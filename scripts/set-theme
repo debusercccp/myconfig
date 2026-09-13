@@ -16,7 +16,7 @@ OLD_PIDS=$(pgrep -x swaybg)
 swaybg -i "$WALLPAPER" -m fill > /dev/null 2>&1 &
 
 # 3. Rigenera i colori
-matugen image "$WALLPAPER"
+matugen image "$WALLPAPER" -m dark --prefer darkness
 
 # 4. Cleanup vecchia istanza
 if [ -n "$OLD_PIDS" ]; then

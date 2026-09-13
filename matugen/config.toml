@@ -13,7 +13,7 @@ output_path = "~/.config/kitty/matugen.conf"
 [templates.waybar]
 input_path = "~/.config/matugen/templates/waybar.css"
 output_path = "~/.config/waybar/matugen.css"
-post_hook = "killall -SIGUSR2 waybar" # Ricarica Waybar al volo
+post_hook = "killall -q -SIGUSR2 waybar || true"
 
 [templates.fuzzel]
 input_path = "~/.config/matugen/templates/fuzzel.ini"
@@ -22,7 +22,7 @@ output_path = "~/.config/fuzzel/matugen.ini"
 [templates.dunst]
 input_path = "~/.config/matugen/templates/dunst.conf"
 output_path = "~/.config/dunst/dunstrc.d/99-matugen.conf"
-post_hook = "dunstctl reload || true"
+post_hook = "killall dunst && dunst &"
 
 [templates.nvim]
 input_path = "~/.config/matugen/templates/nvim_colors.lua"

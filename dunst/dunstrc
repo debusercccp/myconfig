@@ -8,7 +8,7 @@
 
     # Geometria: [WIDTH]x[HEIGHT][+XOFF+YOFF]
     # Lascia vuoto per auto
-    geometry = "350x80+30+30"
+    # geometry = "350x80+30+30"
 
     # Dove posizionare le notifiche
     # top-left, top-center, top-right
@@ -17,10 +17,10 @@
     origin = top-right
 
     # Offset da bordi (px)
-    offset = 15x15
+    offset = (15, 15)
 
     # Spaziatura verticale fra notifiche
-    separation = 15
+    # separation = 15
 
     # Padding interno
     padding = 16
@@ -34,17 +34,17 @@
     line_height = 0
 
     # Markup: none, pango, full
-    markup = pango
+    markup = full
 
     # Modalità text: static, vertical, ellipsize
     text_icon_padding = 10
     icon_position = left
 
     # Larghezza icone (px)
-    icon_size = 48
+    # icon_size = 48
 
     # Max larghezza titolo
-    title_width = 0
+    # title_width = 0
 
     # Durata notifiche (ms)
     # timeout = 10000 (10 sec)
@@ -80,7 +80,7 @@
     # sound_name = /usr/share/sounds/freedesktop/stereo/complete.oga
 
     # Ignore transient messages (tipo notifiche flash)
-    ignore_transient = no
+    # ignore_transient = no
 
     # Stack duplicate notifications
     stack_duplicates = true

@@ -1,39 +1,25 @@
-# ==========================================
-# Configurazione Swaylock Standard (Black Lodge)
-# ==========================================
+# Configurazione Swaylock generata da Matugen
+indicator-radius=100
+indicator-thickness=10
+show-failed-attempts
 
-image=/home/noya/Immagini/blacklodge.jpg
-scaling=fill
+# Formato RRGGBB senza #
+color=1a1112
+inside-color=1a1112
+inside-clear-color=e5bdc0
+inside-ver-color=ffb2ba
+inside-wrong-color=ffb4ab
 
-# Colore di fallback
-color=000000
+ring-color=ffb2ba
+ring-clear-color=e5bdc0
+ring-ver-color=ffb2ba
+ring-wrong-color=ffb4ab
 
-# --- Indicatore ---
-indicator-radius=50
-indicator-thickness=5
+line-color=1a1112
+key-hl-color=ffb2ba
+bs-hl-color=ffb4ab
 
-# --- Colori dell'anello esterno ---
-ring-color=8a0303
-ring-clear-color=e0af68     # Giallo
-ring-ver-color=ffffff       # Bianco
-ring-wrong-color=ff0000     # Rosso acceso
-
-# --- Colori del cerchio interno ---
-inside-color=00000000
-inside-clear-color=00000000
-inside-ver-color=00000000
-inside-wrong-color=00000000
-
-# --- Linee e separatori ---
-line-uses-ring
-line-color=00000000
-
-# --- Testo ---
-text-color=ffffff
-text-clear-color=000000
-text-ver-color=000000
-text-wrong-color=ffffff
-
-# --- Feedback Tasti ---
-key-hl-color=ffffff
-bs-hl-color=ff0000
+text-color=f0dedf
+text-clear-color=1a1112
+text-ver-color=1a1112
+text-wrong-color=1a1112

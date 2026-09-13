@@ -20,26 +20,27 @@ debug {
     render-drm-device "/dev/dri/renderD128"
 }
 
-// include "colors.kdl"
+include "colors.kdl"
 
 layout {
+    // Spazio tra le finestre
     gaps 16
+
     background-color "transparent"
 
-    // Il bordo esterno (focus-ring)
+    // Il bordo della finestra attiva
     focus-ring {
         width 4
-        active-color "{{colors.primary.default.hex}}"
-        inactive-color "{{colors.surface_variant.default.hex}}"
+        // I colori della focus-ring arrivano da colors.kdl (incluso da config.kdl)
     }
 
-    // Il bordo interno (border)
+    // Il bordo delle finestre non attive
     border {
-        width 2
-        active-color "{{colors.secondary.default.hex}}"
-        inactive-color "{{colors.surface.default.hex}}" 
+        active-color "{{colors.primary.default.hex}}"
+        inactive-color "{{colors.surface_variant.default.hex}}" 
     }
 }
+
 // Assegna swaybg al livello del backdrop
 layer-rule {
     match namespace="^wallpaper$"
