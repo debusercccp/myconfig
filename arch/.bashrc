@@ -29,6 +29,8 @@ alias cestino='sudo rm -rf ~/.local/share/Trash/*'
 alias activate='source ~/.venv/bin/activate'
 alias nonascii='LC_CTYPE=C grep --color=auto -n -P "[\x80-\xFF]"'
 
+alias man='mandible'
+
 # Modalità silenziosa: disabilita il turbo e fissa la ventola al minimo
 alias fan-quiet='echo 1 | sudo tee /sys/devices/system/cpu/intel_pstate/no_turbo > /dev/null && echo level 1 | sudo tee /proc/acpi/ibm/fan > /dev/null'
 

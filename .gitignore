@@ -15,9 +15,9 @@ __pycache__/
 *.csv
 
 # Calendario: config, segreti e virtualenv generato (vedi *.example)
-waybar-niri/calendar.conf
-waybar-niri/calendar.env
-waybar-niri/.calvenv/
+waybar/calendar.conf
+waybar/calendar.env
+waybar/.calvenv/
 
 # Node (cache prettier / installazioni locali)
 node_modules/
