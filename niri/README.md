@@ -70,7 +70,6 @@ sudo apt install \
   waybar \
   fuzzel \
   dunst \
-  swaybg \
   kitty \
   konsole \
   xdg-desktop-portal \
@@ -84,11 +83,14 @@ sudo apt install \
   waybar \
   fuzzel \
   dunst \
-  swaybg \
   kitty \
   xdg-desktop-portal \
   xdg-desktop-portal-gtk
 ```
+
+> **Nota sfondo:** questa configurazione usa **swww** invece di `swaybg` per il wallpaper.
+> `swww` non è (ancora) sempre presente nei repo Debian/Arch: se `apt`/`pacman` non lo trovano,
+> vedi [Installare swww](#installare-swww) più sotto.
 
 ### Supporto Grafico e Icone
 ```bash
@@ -254,6 +256,27 @@ sudo apt install niri
 
 **Nota**: La versione nei repo Trixie potrebbe essere leggermente dietro la HEAD di GitHub, ma e' stabile.
 
+### Installare swww
+
+`swww` (Solid/animated Wayland WWallpaper and shader daemon) sostituisce `swaybg` in questa
+configurazione: permette transizioni animate tra sfondi ed è pilotabile a runtime (utile anche
+per cambiare wallpaper insieme al tema colori generato da matugen).
+
+```bash
+# Se disponibile nei repo (Arch/AUR: swww-git, alcune distro derivate):
+sudo pacman -S swww          # Arch
+# oppure, su Debian/Ubuntu dove non è pacchettizzato, via cargo:
+cargo install swww
+sudo install -D ~/.cargo/bin/swww /usr/local/bin/swww
+sudo install -D ~/.cargo/bin/swww-daemon /usr/local/bin/swww-daemon
+```
+
+Verifica:
+```bash
+swww-daemon --version
+swww --version
+```
+
 ---
 
 ## Configurazione Niri (config.kdl)
@@ -290,7 +313,7 @@ environment {
 }
 
 // --- Layer rules ---
-// Sfondo (swaybg) dietro alle finestre
+// Sfondo (swww) dietro alle finestre
 layer-rule {
     match namespace="^wallpaper$"
     place-within-backdrop true
@@ -333,7 +356,10 @@ spawn-at-startup "bash" "-c" "dbus-update-activation-environment --systemd WAYLA
 spawn-at-startup "bash" "-c" "sleep 3 && systemctl --user restart xdg-desktop-portal-gtk.service && sleep 1 && systemctl --user restart xdg-desktop-portal.service > /dev/null 2>&1"
 spawn-at-startup "bash" "-c" "sleep 3 && waybar > /dev/null 2>&1"
 spawn-at-startup "dunst"
-spawn-at-startup "swaybg" "-i" "/home/noya/Immagini/blacklodge.jpg" "-m" "fill"
+
+// Avvio del demone swww e impostazione dello sfondo con transizione
+spawn-at-startup "bash" "-c" "swww-daemon & sleep 1 && swww img /home/noya/Immagini/blacklodge.jpg --transition-type wipe --transition-fps 60"
+
 spawn-at-startup "/home/noya/.config/waybar/scripts/nightlight.sh" "toggle"
 spawn-at-startup "xwayland-satellite"
 spawn-at-startup "swayidle" "-w" \
@@ -372,8 +398,24 @@ binds {
 }
 ```
 
-> **Nota:** `swaybg` punta a `/home/noya/Immagini/blacklodge.jpg`. Cambia il percorso
-> con il tuo sfondo. La finestra `kitty` usa opacità 0.80 e tema **Tokyo Night** (vedi `kitty.conf`).
+> **Nota:** `swww` sostituisce `swaybg`. Cambia il percorso dell'immagine in
+> `swww img ...` con il tuo sfondo. Puoi anche cambiare wallpaper "a caldo" senza
+> riavviare Niri, semplicemente rilanciando `swww img <percorso>` — utile se lo
+> script di generazione palette (matugen) rigenera anche lo sfondo. La finestra
+> `kitty` usa opacità 0.80 e tema **Tokyo Night** (vedi `kitty.conf`).
+
+### Cambiare sfondo/transizione a runtime con swww
+
+```bash
+# Cambio immediato
+swww img ~/Immagini/nuovo-sfondo.jpg
+
+# Con transizione personalizzata (dissolvenza dal centro)
+swww img ~/Immagini/nuovo-sfondo.jpg --transition-type grow --transition-pos center --transition-fps 60
+
+# Query stato demone
+swww query
+```
 
 ### Tabella Keybindings Completa
 
@@ -878,6 +920,31 @@ sudo apt install wl-clipboard cliphist
 
 ---
 
+### Problema 11: swww-daemon non parte / "connection refused"
+**Sintomo:**
+
+Error: Failed to connect to swww daemon: Connection refused
+
+**Causa:** `swww img ...` è stato chiamato prima che `swww-daemon` fosse pronto (race
+condition allo startup), oppure il demone non è affatto in esecuzione.
+**Verifica:**
+
+```bash
+pgrep -a swww-daemon
+```
+
+**Soluzione:** assicurati che nello `spawn-at-startup` ci sia una piccola pausa tra
+l'avvio del demone e il primo comando `swww img`:
+
+```kdl
+spawn-at-startup "bash" "-c" "swww-daemon & sleep 1 && swww img /percorso/sfondo.jpg"
+```
+
+Se il problema persiste, aumenta il `sleep` (es. `sleep 2`) o lancia `swww-daemon`
+come servizio systemd `--user` separato con `Restart=on-failure`.
+
+---
+
 ## Quick Start
 ### Setup Veloce (5 minuti)
 # 1. Installa dipendenze
@@ -887,7 +954,7 @@ sudo apt install -y \
   build-essential pkg-config libwayland-dev libpango1.0-dev \
   libpipewire-0.3-dev libinput-dev libseat-dev libgbm-dev \
   libxkbcommon-dev libpixman-1-dev libudev-dev libdisplay-info-dev \
-  waybar fuzzel dunst swaybg kitty \
+  waybar fuzzel dunst kitty \
   xdg-desktop-portal xdg-desktop-portal-gtk \
   fonts-font-awesome libgtk-layer-shell0 \
   brightnessctl \
@@ -899,6 +966,8 @@ sudo apt install -y \
   dolphin galculator firefox-esr \
   blueman \
   python3-venv nvim
+# swww non è (quasi) mai nei repo apt: installalo via cargo (vedi sezione "Installare swww")
+cargo install swww
 ```
 
 Per il calendario, dopo l'avvio esegui una volta `~/.config/waybar/scripts/cal-setup.sh`
@@ -948,10 +1017,10 @@ cp -r scripts ~/.config/waybar/scripts
 ```
 
 I file lato Niri stanno in `niri/`:
-- `config.kdl` — configurazione principale
+- `config.kdl` — configurazione principale (usa `swww` per lo sfondo, non `swaybg`)
 - `colors.kdl` — palette (incluso da `config.kdl`)
 
 ---
 
-**Ultima modifica**: 27 Giugno 2026
-**Testato su**: Debian Trixie (Testing), Niri 26.04, Waybar 0.12.0
+**Ultima modifica**: 14 Settembre 2026
+**Testato su**: Debian Trixie (Testing), Niri 26.04, Waybar 0.12.0, swww
