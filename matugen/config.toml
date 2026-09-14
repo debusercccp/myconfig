@@ -43,3 +43,4 @@ output_path = "~/.config/swaylock/config"
 [templates.conky]
 input_path = "~/.config/matugen/templates/conky.conf"
 output_path = "~/.config/conky/conky.conf"
+post_hook = "systemctl --user restart conky.service"

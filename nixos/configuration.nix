@@ -141,7 +141,7 @@
     dunst           # Notification daemon
     waybar          # Status bar (often paired with Niri)
     wl-clipboard    # Clipboard manager for Wayland
-    swaybg          # Wallpaper setter for Wayland
+    swww          # Wallpaper setter for Wayland
     xwayland        # For running X11 apps inside Niri seamlessly
   ];
 

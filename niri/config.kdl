@@ -27,16 +27,16 @@ layout {
     background-color "transparent"
 
     focus-ring {
-        width 4
+        width 2
     }
 
     border {
-        width 2
+        width 0
     }
 }
-// Assegna swaybg al livello del backdrop
+
 layer-rule {
-    match namespace="^wallpaper$"
+    match namespace="^awww(-daemon)?$"
     place-within-backdrop true
 }
 
@@ -133,8 +133,9 @@ spawn-at-startup "bash" "-c" "sleep 3 && waybar > /dev/null 2>&1"
 /* Notifiche desktop (Dunst) */
 spawn-at-startup "dunst"
 
-/* Sfondo desktop - swaybg con fill mode */
-spawn-at-startup "swaybg" "-i" "/home/noya/Immagini/blacklodge.jpg" "-m" "fill"
+/* Sfondo desktop - awww daemon e wallpaper con resize fill */
+spawn-at-startup "sh" "-c" "awww-daemon & sleep 0.5 && awww img \"$(cat ~/.cache/current_wallpaper)\" --resize crop"
+spawn-at-startup "awww" "img" "/home/noya/Immagini/blacklodge.jpg" "--resize" "crop"
 
 /* Nightlight (filtro luce blu) */
 spawn-at-startup "/home/noya/.config/waybar/scripts/nightlight.sh" "toggle"
