@@ -5,6 +5,9 @@ import os
 import time
 from datetime import datetime
 import requests
+import urllib3
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 LOCATION = "Bari"
 CACHE_DETAIL = os.path.expanduser("~/.cache/waybar-weather-detail.txt")
@@ -75,6 +78,7 @@ CHANCES = {
 def fetch_weather():
     for _ in range(5):
         try:
+            verify=False
             r = requests.get(f"https://wttr.in/{LOCATION}?format=j1", timeout=5)
             if r.status_code == 200:
                 data = r.json()
