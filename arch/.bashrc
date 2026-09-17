@@ -30,6 +30,7 @@ alias activate='source ~/.venv/bin/activate'
 alias nonascii='LC_CTYPE=C grep --color=auto -n -P "[\x80-\xFF]"'
 
 alias man='mandible'
+alias spotify='flatpak run com.spotify.Client'
 
 # Modalità silenziosa: disabilita il turbo e fissa la ventola al minimo
 alias fan-quiet='echo 1 | sudo tee /sys/devices/system/cpu/intel_pstate/no_turbo > /dev/null && echo level 1 | sudo tee /proc/acpi/ibm/fan > /dev/null'
@@ -144,9 +145,6 @@ export ANTHROPIC_DEFAULT_SONNET_MODEL="nvidia/nemotron-3-ultra-550b-a55b:free"
 export ANTHROPIC_DEFAULT_HAIKU_MODEL="nvidia/nemotron-3-nano-30b-a3b:free"
 export ANTHROPIC_DEFAULT_FABLE_MODEL="nvidia/nemotron-3-nano-30b-a3b:free"
 export CLAUDE_CODE_SUBAGENT_MODEL="nvidia/nemotron-3-nano-30b-a3b:free"
-
-# --- Flatpak XDG data dirs ---
-export XDG_DATA_DIRS="$HOME/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:$XDG_DATA_DIRS"
 
 # --- Aider / Ollama ---
 alias jarvis='OLLAMA_API_BASE=http://127.0.0.1:11434 nice -n 15 aider --model ollama/llama3.2:latest'
