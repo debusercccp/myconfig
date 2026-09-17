@@ -10,17 +10,18 @@ Puoi passare a Stow quando vuoi, senza fretta.
 
 Ogni pacchetto qui dentro rispecchia la struttura di `$HOME`. I file _non sono
 duplicati_: ogni pacchetto è un symlink alla cartella canonica in cima al repo,
-quindi la singola fonte di verità resta `niri/`, `waybar-niri/`, ecc.
+quindi la singola fonte di verità resta `niri/`, `waybar/`, ecc.
 
-```
+```text
 stow/niri/.config/niri        -> ../../../niri
-stow/waybar/.config/waybar    -> ../../../waybar-niri   (rinominato in waybar)
+stow/waybar/.config/waybar    -> ../../../waybar
 stow/kitty/.config/kitty      -> ../../../kitty
 stow/fuzzel/.config/fuzzel    -> ../../../fuzzel
 stow/dunst/.config/dunst      -> ../../../dunst
 stow/swaylock/.config/swaylock-> ../../../swaylock
 stow/conky/.config/conky      -> ../../../conky
-stow/starship/.config/starship.toml -> ../../../starship/starship.toml
+stow/matugen/.config/matugen  -> ../../../matugen
+
 ```
 
 ## Uso
@@ -30,15 +31,17 @@ Installa stow:
 ```bash
 sudo apt install stow      # Debian/Ubuntu
 sudo pacman -S stow        # Arch
+
 ```
 
 Crea i symlink in `$HOME` (esegui dalla radice del repo):
 
 ```bash
-stow --dir=stow --target="$HOME" niri waybar kitty fuzzel dunst swaylock conky starship
+stow --dir=stow --target="$HOME" niri waybar kitty fuzzel dunst swaylock conky matugen
+
 ```
 
-Stow creerà p.es. `~/.config/niri -> ~/myconfig/stow/niri/.config/niri -> ~/myconfig/niri`.
+Stow creerà p.es. `~/.config/niri -> ~/dotfiles/myconfig/stow/niri/.config/niri -> ~/dotfiles/myconfig/niri`.
 Da quel momento modifichi i file direttamente nel repo e sono già attivi: niente
 passo di sincronizzazione.
 
@@ -46,15 +49,18 @@ Per rimuovere i link:
 
 ```bash
 stow --dir=stow --target="$HOME" -D niri waybar ...
+
 ```
 
 Per vedere cosa farebbe senza toccare nulla, aggiungi `-n -v`.
 
 ## Note
 
-- Se `~/.config/<app>` esiste già come cartella reale, spostala/eliminala prima di
-  fare stow (altrimenti stow rifiuta per non sovrascrivere).
-- I file `README.md`/`*.bak` presenti nelle cartelle vengono linkati anch'essi in
-  `~/.config/<app>`: sono innocui, le app li ignorano.
-- Path fuori da `$HOME` (`/usr/local/bin`, `/etc/...`, kernel) non sono gestiti da
-  Stow: restano coperti dagli script esistenti.
+* Se `~/.config/<app>` esiste già come cartella reale, spostala/eliminala prima di
+fare stow (altrimenti stow rifiuta per non sovrascrivere).
+* I file `README.md`/`*.bak` presenti nelle cartelle vengono linkati anch'essi in
+`~/.config/<app>`: sono innocui, le app li ignorano.
+* Path fuori da `$HOME` (`/usr/local/bin`, `/etc/...`, kernel) non sono gestiti da
+Stow: restano coperti dagli script esistenti.
+
+```
