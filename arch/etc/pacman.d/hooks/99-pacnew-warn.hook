@@ -1,0 +1,11 @@
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Operation = Remove
+Type = Package
+Target = *
+
+[Action]
+Description = Controllo presenza file .pacnew o .pacsave...
+When = PostTransaction
+Exec = /usr/bin/bash -c "if pacdiff -o > /dev/null 2>&1; then echo -e '\n\e[1;31m==> ATTENZIONE: Trovati file .pacnew o .pacsave non gestiti!\e[0m'; pacdiff -o; echo -e '\e[1;33mEsegui: sudo DIFFPROG=\"nvim -d\" pacdiff\e[0m\n'; fi"

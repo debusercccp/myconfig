@@ -2,6 +2,9 @@
 .ruff-cache/
 __pycache__/
 *.pyc
+*.py[cod]
+*$py.class
+
 
 # Editor / tooling
 .claude/
@@ -24,3 +27,23 @@ node_modules/
 package-lock.json
 openrouter/
 nvim/lazy.nvim/
+
+# File temporanei e di swap degli editor (Neovim)
+*.swp
+*.swo
+*~
+*.bak
+.netrwhist
+
+# Credenziali e database password (protezione per pwsearch)
+*.kdbx
+*.key
+*.pem
+id_rsa*
+.env
+secrets/
+.auth
+
+# File generati a runtime o log
+*.log
+.DS_Store

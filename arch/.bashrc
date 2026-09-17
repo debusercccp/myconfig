@@ -31,6 +31,8 @@ alias nonascii='LC_CTYPE=C grep --color=auto -n -P "[\x80-\xFF]"'
 
 alias man='mandible'
 alias spotify='flatpak run com.spotify.Client'
+export DIFFPROG="nvim -d"
+alias pacdiff="sudo -E DIFFPROG=\"$DIFFPROG\" pacdiff"
 
 # Modalità silenziosa: disabilita il turbo e fissa la ventola al minimo
 alias fan-quiet='echo 1 | sudo tee /sys/devices/system/cpu/intel_pstate/no_turbo > /dev/null && echo level 1 | sudo tee /proc/acpi/ibm/fan > /dev/null'

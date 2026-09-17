@@ -1,0 +1,69 @@
+
+# subvolume to snapshot
+SUBVOLUME="/"
+
+# filesystem type
+FSTYPE="btrfs"
+
+
+# btrfs qgroup for space aware cleanup algorithms
+QGROUP=""
+
+
+# fraction or absolute size of the filesystems space the snapshots may use
+SPACE_LIMIT="0.5"
+
+# fraction or absolute size of the filesystems space that should be free
+FREE_LIMIT="0.2"
+
+
+# Whether snapshot numbers should be all-time unique. If set to yes, snapshot
+# numbers are not reused even after snapshots are deleted.
+UNIQUE_NUMBERS="yes"
+
+
+# users and groups allowed to work with config
+ALLOW_USERS=""
+ALLOW_GROUPS=""
+
+# sync users and groups from ALLOW_USERS and ALLOW_GROUPS to .snapshots
+# directory
+SYNC_ACL="no"
+
+
+# start comparing pre- and post-snapshot in background after creating
+# post-snapshot
+BACKGROUND_COMPARISON="yes"
+
+
+# run hourly number cleanup
+NUMBER_CLEANUP="yes"
+
+# limit for number cleanup
+NUMBER_MIN_AGE="1209600"
+NUMBER_LIMIT="50"
+NUMBER_LIMIT_IMPORTANT="20"
+
+
+# create hourly snapshots
+TIMELINE_CREATE="yes"
+
+# cleanup hourly snapshots after some time
+TIMELINE_CLEANUP="yes"
+
+
+TIMELINE_MIN_AGE="1800"
+# limits for timeline cleanup
+TIMELINE_LIMIT_HOURLY="12"      # Tiene le ultime 12 ore della giornata corrente
+TIMELINE_LIMIT_DAILY="14"       # Tiene esattamente gli ultimi 14 giorni (2 settimane)
+TIMELINE_LIMIT_WEEKLY="0"       # Disabilita archiviazione settimanale oltre i 14 giorni
+TIMELINE_LIMIT_MONTHLY="0"      # Disabilita archiviazione mensile
+TIMELINE_LIMIT_YEARLY="0"       # Disabilita archiviazione annuale
+
+
+# cleanup empty pre-post-pairs
+EMPTY_PRE_POST_CLEANUP="yes"
+
+# limits for empty pre-post-pair cleanup
+EMPTY_PRE_POST_MIN_AGE="3600"
+
