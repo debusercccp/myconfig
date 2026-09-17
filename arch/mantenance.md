@@ -9,7 +9,7 @@ Lo stack `snapper` + `snap-pac` garantisce la creazione di snapshot automatici p
 
 ### Comandi utili
 * **Vedere tutti gli snapshot disponibili:**
-  ```bash
+```bash
   snapper -c root list
 
 ```
