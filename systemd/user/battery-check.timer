@@ -1,0 +1,9 @@
+[Unit]
+Description=Esegue il controllo della batteria ogni minuto
+
+[Timer]
+OnBootSec=1m
+OnUnitActiveSec=1m
+
+[Install]
+WantedBy=timers.target
