@@ -81,6 +81,76 @@ sudo reboot
 
 ```
 
+## Come Eseguire un Rollback del Sistema (Ripristino da Snapshot)
+
+Se un aggiornamento rompe il sistema (es. kernel panic, black screen o rimozione accidentale di pacchetti critici), la procedura più sicura su Arch Linux per tornare indietro è la **sostituzione manuale del subvolume radice (`@`)**.
+
+> **Nota bene:** Non usare il comando `snapper rollback` nativo, poiché entra in conflitto con il layout standard dei subvolumi di Arch Linux.
+
+### Procedura Passo-Passo
+
+Se il sistema non si avvia, usa il menu di GRUB ("Arch Linux snapshots") per avviare uno snapshot funzionante in sola lettura, poi apri un terminale e segui questi passaggi. Se il sistema si avvia ancora, puoi eseguirli direttamente.
+
+**1. Montare la vera radice del disco (Top-Level 5)**
+Il disco NVMe (o SSD) deve essere montato integralmente per poter gestire i subvolumi.
+```bash
+sudo mkdir -p /mnt/btrfs-root
+# Assicurati di usare il device corretto (es. /dev/nvme0n1p2 o /dev/sda2)
+sudo mount -o subvolid=5 /dev/nvme0n1p2 /mnt/btrfs-root
+
+```
+
+**2. Archiviare il sistema rotto/corrente**
+Invece di cancellare il sistema attuale, rinominalo in `@_bad`. In questo modo, se dovessi recuperare dei file personali recenti, potrai ancora accedervi in seguito.
+
+```bash
+sudo mv /mnt/btrfs-root/@ /mnt/btrfs-root/@_bad
+
+```
+
+**3. Clonare lo snapshot funzionante**
+Sostituisci `NUMERO_ID` con l'ID dello snapshot a cui vuoi tornare (es. `83` o l'ultimo numero noto prima del disastro).
+
+```bash
+sudo btrfs subvolume snapshot /mnt/btrfs-root/@snapshots/NUMERO_ID/snapshot /mnt/btrfs-root/@
+
+```
+
+**4. Smontare e riavviare**
+Ora il nuovo `@` è pronto. Pulisci e riavvia la macchina:
+
+```bash
+sudo umount /mnt/btrfs-root
+sudo rmdir /mnt/btrfs-root
+sudo reboot
+
+```
+
+### Manutenzione Post-Rollback
+
+Dopo il riavvio, verifica che il sistema funzioni perfettamente.
+Per recuperare spazio su disco (visto che `@_bad` conterrà tutti i file della versione danneggiata), ricordati di eliminarlo definitivamente con:
+
+```bash
+sudo btrfs subvolume delete /@_bad
+
+```
+
+---
+
+### Extra: Ripristinare un singolo file senza riavvio
+
+Se hai solo modificato un file per sbaglio (es. in `/etc/`) e non vuoi fare il rollback di tutto il sistema, puoi copiare il file direttamente dallo snapshot corrispondente:
+
+```bash
+# Esempio: recuperare pacman.conf dallo snapshot 83
+sudo cp /.snapshots/83/snapshot/etc/pacman.conf /etc/pacman.conf
+
+```
+
+```
+
+```
 
 
 ---
