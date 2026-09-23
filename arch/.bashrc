@@ -148,6 +148,8 @@ export ANTHROPIC_DEFAULT_HAIKU_MODEL="nvidia/nemotron-3-nano-30b-a3b:free"
 export ANTHROPIC_DEFAULT_FABLE_MODEL="nvidia/nemotron-3-nano-30b-a3b:free"
 export CLAUDE_CODE_SUBAGENT_MODEL="nvidia/nemotron-3-nano-30b-a3b:free"
 
+export VST_PATH="/usr/lib/vst:/usr/local/lib/vst"
+
 # --- Aider / Ollama ---
 alias jarvis='OLLAMA_API_BASE=http://127.0.0.1:11434 nice -n 15 aider --model ollama/llama3.2:latest'
 alias jarvis-kb='cd ~/progetti/_kb && OLLAMA_API_BASE=http://127.0.0.1:11434 nice -n 15 aider --model ollama/llama3.2:latest'
