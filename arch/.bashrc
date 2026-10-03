@@ -116,6 +116,7 @@ export PATH="$HOME/.cargo/bin:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="$HOME/.pyenv/bin:$PATH"
 export PATH=$PATH:/usr/sbin
+export PATH="$PATH:/home/noya/bin"
 
 # --- nvm ---
 export NVM_DIR="$HOME/.nvm"
