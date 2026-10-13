@@ -26,7 +26,7 @@ alias pulisci='sudo find /var/cache/pacman/pkg/ -mindepth 1 -maxdepth 1 -name "d
 alias orphans='[[ -n $(pacman -Qdt) ]] && sudo pacman -Rs $(pacman -Qdtq) || echo "no orphans to remove"'
 alias pacchetti='pacman -Qe'
 alias cestino='sudo rm -rf ~/.local/share/Trash/*'
-alias activate='source ~/.venv/bin/activate'
+alias activate='source .venv/bin/activate'
 alias nonascii='LC_CTYPE=C grep --color=auto -n -P "[\x80-\xFF]"'
 
 alias man='mandible'
@@ -117,6 +117,7 @@ export PATH="$HOME/.local/bin:$PATH"
 export PATH="$HOME/.pyenv/bin:$PATH"
 export PATH=$PATH:/usr/sbin
 export PATH="$PATH:/home/noya/bin"
+export DISPLAY=:0
 
 # --- nvm ---
 export NVM_DIR="$HOME/.nvm"
@@ -140,17 +141,17 @@ if [ -r ~/dotfiles/openrouter/key.txt ]; then
     OPENROUTER_API_KEY="$(cat ~/dotfiles/openrouter/key.txt)"
     export OPENROUTER_API_KEY
 fi
-export ANTHROPIC_BASE_URL="https://openrouter.ai/api"
-export ANTHROPIC_AUTH_TOKEN="$OPENROUTER_API_KEY"
-export ANTHROPIC_API_KEY=""
-export ANTHROPIC_DEFAULT_OPUS_MODEL="nvidia/nemotron-3-ultra-550b-a55b:free"
-export ANTHROPIC_DEFAULT_SONNET_MODEL="nvidia/nemotron-3-ultra-550b-a55b:free"
-export ANTHROPIC_DEFAULT_HAIKU_MODEL="nvidia/nemotron-3-nano-30b-a3b:free"
-export ANTHROPIC_DEFAULT_FABLE_MODEL="nvidia/nemotron-3-nano-30b-a3b:free"
-export CLAUDE_CODE_SUBAGENT_MODEL="nvidia/nemotron-3-nano-30b-a3b:free"
+#export ANTHROPIC_BASE_URL="https://openrouter.ai/api"
+#export ANTHROPIC_AUTH_TOKEN="$OPENROUTER_API_KEY"
+#export ANTHROPIC_API_KEY=""
+#export ANTHROPIC_DEFAULT_OPUS_MODEL="nvidia/nemotron-3-ultra-550b-a55b:free"
+#export ANTHROPIC_DEFAULT_SONNET_MODEL="nvidia/nemotron-3-ultra-550b-a55b:free"
+#export ANTHROPIC_DEFAULT_HAIKU_MODEL="nvidia/nemotron-3-nano-30b-a3b:free"
+#export ANTHROPIC_DEFAULT_FABLE_MODEL="nvidia/nemotron-3-nano-30b-a3b:free"
+#export CLAUDE_CODE_SUBAGENT_MODEL="nvidia/nemotron-3-nano-30b-a3b:free"
 
 export VST_PATH="/usr/lib/vst:/usr/local/lib/vst"
 
 # --- Aider / Ollama ---
-alias jarvis='OLLAMA_API_BASE=http://127.0.0.1:11434 nice -n 15 aider --model ollama/llama3.2:latest'
-alias jarvis-kb='cd ~/progetti/_kb && OLLAMA_API_BASE=http://127.0.0.1:11434 nice -n 15 aider --model ollama/llama3.2:latest'
+#alias jarvis='OLLAMA_API_BASE=http://127.0.0.1:11434 nice -n 15 aider --model ollama/llama3.2:latest'
+#alias jarvis-kb='cd ~/progetti/_kb && OLLAMA_API_BASE=http://127.0.0.1:11434 nice -n 15 aider --model ollama/llama3.2:latest'
