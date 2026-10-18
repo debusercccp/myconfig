@@ -46,6 +46,19 @@ layer-rule {
     // open-on-output serve se hai multi-monitor
 }
 
+window-rule {
+    match app-id="^conky$"
+    open-floating true
+    open-focused false
+    default-floating-position x=24 y=56 relative-to="top-right"
+    focus-ring {
+        off
+    }
+    border {
+        off
+    }
+}
+
 environment {
     GDK_BACKEND "wayland"
     QT_QPA_PLATFORM "wayland;xcb"
@@ -135,7 +148,7 @@ spawn-at-startup "dunst"
 
 /* Sfondo desktop - awww daemon e wallpaper con resize fill */
 spawn-at-startup "sh" "-c" "awww-daemon & sleep 0.5 && awww img \"$(cat ~/.cache/current_wallpaper)\" --resize crop"
-spawn-at-startup "awww" "img" "/home/noya/Immagini/blacklodge.jpg" "--resize" "crop"
+spawn-at-startup "awww" "img" "/home/noya/Immagini/flames.jpg" "--resize" "crop"
 
 /* Nightlight (filtro luce blu) */
 spawn-at-startup "/home/noya/.config/waybar/scripts/nightlight.sh" "toggle"
