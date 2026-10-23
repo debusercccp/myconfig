@@ -22,7 +22,7 @@ while IFS= read -r rel; do
     changed+=("$rel")
     echo -e "\e[1;33m==> $dst\e[0m"
     diff -u "$dst" "$SRC/$rel" 2>/dev/null | tail -n +3 || echo "(nuovo file)"
-done < <(cd "$SRC" && find . -type f -printf '%P\n' | sort)
+done < <(cd "$SRC" && find -L . -type f -printf '%P\n' | sort)  # -L: segue i link (es. ly -> ../../ly)
 
 [[ ${#changed[@]} -eq 0 ]] && { echo "Tutto già allineato."; exit 0; }
 [[ $DRY -eq 1 ]] && exit 0
@@ -42,4 +42,5 @@ printf '%s\n' "${changed[@]}" | grep -q '^udev/' && udevadm control --reload
 printf '%s\n' "${changed[@]}" | grep -q '^thinkfan.yaml$\|thinkfan.service' && systemctl restart thinkfan.service
 printf '%s\n' "${changed[@]}" | grep -q '^mkinitcpio.conf$\|^modprobe.d/' && mkinitcpio -P
 printf '%s\n' "${changed[@]}" | grep -q '^modprobe.d/' && echo "modprobe.d cambiato: serve un riavvio"
+printf '%s\n' "${changed[@]}" | grep -q '^ly/' && echo "ly cambiato: attivo dal prossimo login (non riavvio ly, chiuderebbe la sessione)"
 exit 0

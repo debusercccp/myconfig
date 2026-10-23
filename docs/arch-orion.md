@@ -65,3 +65,7 @@ device, che non cambia tra i boot:
 `~/.config/{niri,waybar,kitty,fuzzel,dunst,swaylock,conky,matugen,nvim}` e `~/.bashrc` sono
 symlink al repo (vedi `stow/README.md`): si modifica il repo e l'effetto è immediato.
 `/etc` invece è per copia via `arch/install-system.sh`.
+
+**ly:** `ly/config.ini` (differenze dal default: `animation = gameoflife`,
+`waylandsessions` con `/usr/local/share/wayland-sessions`). `arch/etc/ly` è un link a
+`../../ly`, quindi l'installer lo copia in `/etc/ly/`; attivo dal prossimo login.
