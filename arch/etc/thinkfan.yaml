@@ -1,0 +1,27 @@
+fans:
+  - tpacpi: /proc/acpi/ibm/fan
+sensors:
+  - hwmon: /sys/class/hwmon
+    name: coretemp
+    indices: [1]
+    optional: true
+  - hwmon: /sys/class/hwmon
+    name: thinkpad
+    indices: [1]
+    optional: true
+  # GPU via EC: only readable while the dGPU is awake (ML workloads)
+  - hwmon: /sys/class/hwmon
+    name: thinkpad
+    indices: [2]
+    optional: true
+  - hwmon: /sys/class/hwmon
+    name: acpitz
+    indices: [1]
+    optional: true
+levels:
+  - [0, 0, 42]
+  - [1, 38, 50]
+  - [2, 45, 58]
+  - [4, 52, 65]
+  - [7, 60, 80]
+  - ["level auto", 75, 32767]

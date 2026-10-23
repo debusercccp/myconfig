@@ -34,11 +34,14 @@ alias spotify='flatpak run com.spotify.Client'
 export DIFFPROG="nvim -d"
 alias pacdiff="sudo -E DIFFPROG=\"$DIFFPROG\" pacdiff"
 
-# Modalità silenziosa: disabilita il turbo e fissa la ventola al minimo
-alias fan-quiet='echo 1 | sudo tee /sys/devices/system/cpu/intel_pstate/no_turbo > /dev/null && echo level 1 | sudo tee /proc/acpi/ibm/fan > /dev/null'
+# Modalità silenziosa: disabilita il turbo, la ventola resta gestita da thinkfan
+alias fan-quiet='echo 1 | sudo tee /sys/devices/system/cpu/intel_pstate/no_turbo > /dev/null'
 
-# Modalità automatica: riattiva il turbo e restituisce il controllo al BIOS
-alias fan-auto='echo 0 | sudo tee /sys/devices/system/cpu/intel_pstate/no_turbo > /dev/null && echo level auto | sudo tee /proc/acpi/ibm/fan > /dev/null'
+# Modalità normale: riattiva il turbo, la ventola resta gestita da thinkfan
+alias fan-auto='echo 0 | sudo tee /sys/devices/system/cpu/intel_pstate/no_turbo > /dev/null'
+
+# Stato ventola e turbo
+alias fan-status='grep -E "^(speed|level):" /proc/acpi/ibm/fan; echo "turbo off: $(cat /sys/devices/system/cpu/intel_pstate/no_turbo)"'
 
 # ~/.bash_aliases, if present
 # shellcheck disable=SC1090
@@ -155,3 +158,12 @@ export VST_PATH="/usr/lib/vst:/usr/local/lib/vst"
 # --- Aider / Ollama ---
 #alias jarvis='OLLAMA_API_BASE=http://127.0.0.1:11434 nice -n 15 aider --model ollama/llama3.2:latest'
 #alias jarvis-kb='cd ~/progetti/_kb && OLLAMA_API_BASE=http://127.0.0.1:11434 nice -n 15 aider --model ollama/llama3.2:latest'
+
+# --- shell niceties ---
+command -v zoxide >/dev/null && eval "$(zoxide init bash)"
+command -v fzf >/dev/null && eval "$(fzf --bash)"
+[[ -f /usr/share/doc/pkgfile/command-not-found.bash ]] && source /usr/share/doc/pkgfile/command-not-found.bash
+if command -v eza >/dev/null; then
+  alias ls='eza --icons'
+  alias ll='eza -la --icons --git'
+fi

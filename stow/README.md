@@ -21,6 +21,8 @@ stow/dunst/.config/dunst      -> ../../../dunst
 stow/swaylock/.config/swaylock-> ../../../swaylock
 stow/conky/.config/conky      -> ../../../conky
 stow/matugen/.config/matugen  -> ../../../matugen
+stow/nvim/.config/nvim        -> ../../../nvim
+stow/bash/.bashrc             -> ../../arch/.bashrc
 
 ```
 
@@ -37,7 +39,7 @@ sudo pacman -S stow        # Arch
 Crea i symlink in `$HOME` (esegui dalla radice del repo):
 
 ```bash
-stow --dir=stow --target="$HOME" niri waybar kitty fuzzel dunst swaylock conky matugen
+stow --dir=stow --target="$HOME" niri waybar kitty fuzzel dunst swaylock conky matugen nvim bash
 
 ```
 
@@ -60,7 +62,12 @@ Per vedere cosa farebbe senza toccare nulla, aggiungi `-n -v`.
 fare stow (altrimenti stow rifiuta per non sovrascrivere).
 * I file `README.md`/`*.bak` presenti nelle cartelle vengono linkati anch'essi in
 `~/.config/<app>`: sono innocui, le app li ignorano.
-* Path fuori da `$HOME` (`/usr/local/bin`, `/etc/...`, kernel) non sono gestiti da
-Stow: restano coperti dagli script esistenti.
+* Path fuori da `$HOME` (`/etc/...`) non sono gestiti da Stow: i file di sistema
+Arch sono in `arch/etc/` e si installano **per copia** con
+`sudo bash arch/install-system.sh` (anteprima: `bash arch/install-system.sh -n`).
+Niente symlink in `/etc`: thinkfan, udev e systemd girano come root, e un link
+verso un file scrivibile dall'utente darebbe root a quell'utente.
+* Su `orion` (Arch) lo stow è attivo dal 2026-10-23; le vecchie cartelle reali sono
+in `~/.config-pre-stow-20261023/`.
 
 ```

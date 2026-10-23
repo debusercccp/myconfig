@@ -1,3 +1,5 @@
+> **Nota:** documento scritto su Debian. Per lo stato attuale su Arch (runtime D3 al posto di bbswitch, thinkfan 2.0, Waybar con path stabile, Stow) vedi [`arch-orion.md`](arch-orion.md).
+
 # Resoconto Architetturale: Gestione Ibrida e Termica su ThinkPad P53 (Linux/Wayland)
 
 L'obiettivo di questa configurazione era domare l'architettura ibrida del ThinkPad P53 (CPU Intel + GPU NVIDIA Quadro T2000), isolando la GPU dedicata per destinarla esclusivamente a carichi di Machine Learning on-demand, risolvendo contemporaneamente gravi anomalie termiche, loop di blocco ACPI allo spegnimento e hard freeze incontrollabili.

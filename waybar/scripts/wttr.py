@@ -9,7 +9,7 @@ import urllib3
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-LOCATION = "Bari"
+LOCATION = "Bologna"
 CACHE_DETAIL = os.path.expanduser("~/.cache/waybar-weather-detail.txt")
 
 ICONS = {

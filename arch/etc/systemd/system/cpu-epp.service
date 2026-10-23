@@ -1,0 +1,10 @@
+[Unit]
+Description=Set CPU EPP to balance_power
+After=power-profiles-daemon.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c 'echo balance_power | tee /sys/devices/system/cpu/cpu*/cpufreq/energy_performance_preference >/dev/null'
+
+[Install]
+WantedBy=multi-user.target

@@ -1,3 +1,5 @@
+> **Nota:** documento scritto su Debian. Per lo stato attuale su Arch (runtime D3 al posto di bbswitch, thinkfan 2.0, Waybar con path stabile, Stow) vedi [`arch-orion.md`](arch-orion.md).
+
 L'obiettivo era configurare l'architettura hardware ibrida per dedicare la GPU dedicata esclusivamente al Machine Learning, ma la gestione energetica ha richiesto la risoluzione di comportamenti anomali a livello di firmware.
 ### 1. Isolamento della GPU e Gestione Energetica
 * **Problema iniziale:** `nvidia-smi` non comunicava con il driver e la GPU rimaneva costantemente alimentata.
