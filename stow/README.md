@@ -70,7 +70,6 @@ verso un file scrivibile dall'utente darebbe root a quell'utente.
 * `ly/` (display manager) segue lo stesso schema: cartella canonica `ly/`, link
 `arch/etc/ly -> ../../ly`, installata per copia in `/etc/ly`. Il link sarebbe
 pericoloso: ly esegue come root `setup_cmd`, `start_cmd`, `shutdown_cmd`.
-* Su `orion` (Arch) lo stow è attivo dal 2026-10-23; le vecchie cartelle reali sono
-in `~/.config-pre-stow-20261023/`.
+* Su `orion` (Arch) lo stow è attivo dal 2026-10-23.
 
 ```
