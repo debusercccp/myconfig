@@ -7,7 +7,9 @@
 #   comando (prompt ":")   :q indietro (dalle notizie ai giornali, dai giornali esce), :qa esci, :o browser, ESC annulla
 set -euo pipefail
 
-SELF=$(realpath "$0")
+# fzf richiama lo script con il percorso assoluto, quindi per --tasto basta $0
+if [[ ${1:-} == --tasto ]]; then SELF=$0; else SELF=$(realpath "$0"); fi
+DIR=${SELF%/*}  # notizie-feed e notizie-leggi stanno accanto a questo script
 
 # Chiamato da fzf a ogni tasto: stampa le azioni fzf adatte alla modalità corrente.
 # $1 = tasto, $2 = lista (giornali|notizie); fzf passa la modalità in $FZF_PROMPT
@@ -18,7 +20,7 @@ tasto() {
 
   apri() {
     if [[ $lista == giornali ]]; then echo accept
-    else echo "execute:\"$HOME/bin/notizie-leggi\" {3}"; fi
+    else echo "execute:\"$DIR/notizie-leggi\" {3}"; fi
   }
 
   case $FZF_PROMPT in
@@ -89,7 +91,7 @@ export NOTIZIE_TMP=$TMP
 # Scarica un feed RSS; notizie-feed lo trasforma in "giornale<TAB>titolo<TAB>link<TAB>descrizione"
 leggi_feed() {
   local nome=$1 url=$2
-  curl -sL -A "Mozilla/5.0" --max-time 15 "$url" | "$HOME/bin/notizie-feed" "$nome" || true
+  curl -sL -A "Mozilla/5.0" --max-time 15 "$url" | "$DIR/notizie-feed" "$nome" || true
 }
 
 while true; do

@@ -1,0 +1,80 @@
+#!/usr/bin/env bash
+# notizie-leggi URL - mostra il testo di un articolo nel terminale
+url=$1
+curl -sL -A "Mozilla/5.0" --compressed --max-time 20 "$url" | python3 -I -c '
+import sys, html, re, json, textwrap, shutil
+from html.parser import HTMLParser
+
+SKIP = {"script","style","noscript","nav","footer","aside","form","svg","button","figure","header"}
+BLOCK = {"p","h1","h2","h3","h4","li","blockquote"}
+
+class P(HTMLParser):
+    def __init__(s):
+        super().__init__(convert_charrefs=True)
+        s.skip = 0; s.cur = None; s.blocks = []; s.title = ""; s.in_title = False
+        s.article = 0; s.art_blocks = []; s.ld = None; s.lds = []
+    def handle_starttag(s, t, a):
+        if t == "script" and dict(a).get("type") == "application/ld+json": s.ld = ""
+        if t in SKIP: s.skip += 1
+        elif t == "article": s.article += 1
+        elif t == "title": s.in_title = True
+        elif t in BLOCK and not s.skip: s.cur = [t, ""]
+        elif t == "br" and s.cur: s.cur[1] += " "
+    def handle_endtag(s, t):
+        if t == "script" and s.ld is not None: s.lds.append(s.ld); s.ld = None
+        if t in SKIP and s.skip: s.skip -= 1
+        elif t == "article" and s.article: s.article -= 1
+        elif t == "title": s.in_title = False
+        elif t in BLOCK and s.cur and s.cur[0] == t:
+            txt = re.sub(r"\s+", " ", s.cur[1]).strip()
+            if txt:
+                s.blocks.append((t, txt))
+                if s.article: s.art_blocks.append((t, txt))
+            s.cur = None
+    def handle_data(s, d):
+        if s.ld is not None: s.ld += d
+        elif s.in_title: s.title += d
+        elif s.cur and not s.skip: s.cur[1] += d
+
+def cerca(o, k):
+    """trova ricorsivamente il valore piu lungo della chiave k nel JSON-LD"""
+    best = ""
+    if isinstance(o, dict):
+        for kk, v in o.items():
+            if kk == k and isinstance(v, str) and len(v) > len(best): best = v
+            else: best = max(best, cerca(v, k), key=len)
+    elif isinstance(o, list):
+        for v in o: best = max(best, cerca(v, k), key=len)
+    return best
+
+raw = sys.stdin.buffer.read()
+try: doc = raw.decode("utf-8")
+except UnicodeDecodeError: doc = raw.decode("cp1252", "replace")
+p = P(); p.feed(doc)
+
+blocks = p.art_blocks if sum(len(b) for _, b in p.art_blocks) > 500 else p.blocks
+blocks = [(t, b) for t, b in blocks if t.startswith("h") or len(b) > 60]
+
+# testo dal JSON-LD, se piu completo dei paragrafi
+body = ""
+for s in p.lds:
+    try: body = max(body, cerca(json.loads(s, strict=False), "articleBody"), key=len)
+    except ValueError: pass
+body = re.sub(r"<[^>]+>", " ", html.unescape(body))
+if len(body) > sum(len(b) for t, b in blocks if t == "p"):
+    blocks = [("p", re.sub(r"[ \t]+", " ", x).strip()) for x in re.split(r"\n\s*\n|\n", body) if x.strip()]
+
+w = min(shutil.get_terminal_size((100, 20)).columns - 4, 90)
+B, D, R = "\033[1m", "\033[2m", "\033[0m"
+print(B + textwrap.fill(p.title.strip(), w) + R + "\n")
+seen = set()
+for t, b in blocks:
+    if b in seen or "cookie" in b.lower(): continue
+    seen.add(b)
+    if t.startswith("h"): print(B + textwrap.fill(b, w) + R + "\n")
+    elif t == "li": print(textwrap.fill(b, w, initial_indent="  • ", subsequent_indent="    "))
+    else: print(textwrap.fill(b, w) + "\n")
+if "paywall" in doc or "premium" in p.title.lower():
+    print(D + "(possibile articolo a pagamento: il testo potrebbe essere parziale)" + R)
+print(D + sys.argv[1] + R)
+' "$url" | less -R -Ps' j/k scorri · / cerca · \:q torna alla lista '

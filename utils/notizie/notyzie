@@ -1,0 +1,249 @@
+#!/usr/bin/env bash
+# notyzie - leggi i giornali italiani dal terminale (curl + python3 + fzf + less), tutto in un file
+# Tasti in stile vim:
+#   normale (prompt "> ")  j/k su/giù, g/G inizio/fine, l o INVIO apri, o browser, y copia link,
+#                          / cerca, i riprendi ricerca, : comando
+#   ricerca (prompt "/")   scrivi per filtrare, ESC o INVIO torna in normale
+#   comando (prompt ":")   :q indietro (dalle notizie ai giornali, dai giornali esce), :qa esci, :o browser, ESC annulla
+#   articolo (less)        j/k scorri, / cerca, :q torna alla lista
+# Uso interno: notyzie --tasto TASTO LISTA (chiamato da fzf), notyzie --leggi URL (lettore articolo)
+set -euo pipefail
+
+# fzf richiama lo script con il percorso assoluto, quindi per --tasto basta $0
+if [[ ${1:-} == --tasto ]]; then SELF=$0; else SELF=$(realpath "$0"); fi
+
+# Chiamato da fzf a ogni tasto: stampa le azioni fzf adatte alla modalità corrente.
+# $1 = tasto, $2 = lista (giornali|notizie); fzf passa la modalità in $FZF_PROMPT
+tasto() {
+  local k=$1 lista=$2
+  local normale="disable-search+change-prompt(> )"
+  local salvata="$NOTYZIE_TMP/query"
+
+  apri() {
+    if [[ $lista == giornali ]]; then echo accept
+    else echo "execute:\"$SELF\" --leggi {3}"; fi
+  }
+
+  case $FZF_PROMPT in
+    ':')
+      case $k in
+        esc) echo "$normale+change-query:$(cat "$salvata" 2>/dev/null)" ;;
+        enter)
+          local cmd=${FZF_QUERY//[()]/}
+          case $cmd in
+            # nelle notizie :q torna ai giornali (abort), :qa esce del tutto (stampa :qa e accetta)
+            q|q!|wq|x|quit) echo abort ;;
+            qa|qa!|exit) [[ $lista == notizie ]] && echo "print(:qa)+accept" || echo abort ;;
+            o) [[ $lista == notizie ]] && echo "$normale+execute-silent:xdg-open {3} >/dev/null 2>&1 &" \
+                 || echo "$normale+change-query:$(cat "$salvata" 2>/dev/null)" ;;
+            *) echo "$normale+change-header(E492: comando sconosciuto :$cmd — usa :q per uscire)+change-query:$(cat "$salvata" 2>/dev/null)" ;;
+          esac ;;
+        *) echo "put:$k" ;;
+      esac ;;
+    '/')
+      case $k in
+        esc|enter) echo "$normale" ;;
+        *) echo "put:$k" ;;
+      esac ;;
+    *)  # modalità normale
+      case $k in
+        j) echo down ;;
+        k) echo up ;;
+        g) echo first ;;
+        G) echo last ;;
+        l|enter) apri ;;
+        o) [[ $lista == notizie ]] && echo "execute-silent:xdg-open {3} >/dev/null 2>&1 &" || echo ignore ;;
+        y) [[ $lista == notizie ]] && echo "execute-silent:printf %s {3} | (wl-copy 2>/dev/null || xclip -sel clip 2>/dev/null)" || echo ignore ;;
+        /) echo "enable-search+change-prompt(/)+clear-query" ;;
+        i) echo "enable-search+change-prompt(/)" ;;
+        :) printf %s "$FZF_QUERY" > "$salvata"; echo "change-prompt(:)+clear-query" ;;
+        *) echo ignore ;;
+      esac ;;
+  esac
+}
+
+# esce subito: a ogni tasto non serve caricare il codice Python
+[[ ${1:-} == --tasto ]] && { tasto "$2" "$3"; exit; }
+
+# Legge un feed RSS da stdin e stampa: NOME<TAB>titolo<TAB>link<TAB>descrizione
+IFS= read -r -d '' PY_FEED <<'PY' || true
+import html
+import re
+import sys
+import xml.etree.ElementTree as ET
+
+
+def pulisci(testo):
+    testo = html.unescape(re.sub(r"<[^>]+>", " ", testo or ""))
+    testo = re.sub(r"\s+", " ", testo)  # anche tab e a capo, che romperebbero il TSV
+    testo = re.sub(r" The post .* first appeared on .*", "", testo).strip()
+    # alcuni feed (Corriere) ripetono lo stesso sommario più volte di seguito
+    ripetuto = re.fullmatch(r"(.{20,}?)(?: ?\1)+", testo)
+    return ripetuto.group(1).strip() if ripetuto else testo
+
+
+def items_xml(dati):
+    root = ET.fromstring(dati)
+    for item in root.iter("item"):
+        yield (item.findtext("title"), item.findtext("link"), item.findtext("description"))
+
+
+def items_regex(dati):
+    # ripiego per feed con XML non valido
+    testo = dati.decode("utf-8", "replace")
+    for item in re.findall(r"<item\b.*?</item>", testo, re.S):
+        def campo(nome):
+            m = re.search(rf"<{nome}\b[^>]*>(.*?)</{nome}>", item, re.S)
+            return re.sub(r"<!\[CDATA\[(.*?)\]\]>", r"\1", m.group(1), flags=re.S) if m else ""
+        yield (campo("title"), campo("link"), campo("description"))
+
+
+nome = sys.argv[1]
+dati = sys.stdin.buffer.read()
+try:
+    items = list(items_xml(dati))
+except ET.ParseError:
+    items = list(items_regex(dati))
+for titolo, link, descr in items:
+    titolo, link = pulisci(titolo), pulisci(link)
+    if titolo and link:
+        print(f"{nome}\t{titolo}\t{link}\t{pulisci(descr)}")
+PY
+
+# Legge una pagina HTML da stdin e stampa il testo dell'articolo (argomento: URL)
+IFS= read -r -d '' PY_LEGGI <<'PY' || true
+import sys, html, re, json, textwrap, shutil
+from html.parser import HTMLParser
+
+SKIP = {"script","style","noscript","nav","footer","aside","form","svg","button","figure","header"}
+BLOCK = {"p","h1","h2","h3","h4","li","blockquote"}
+
+class P(HTMLParser):
+    def __init__(s):
+        super().__init__(convert_charrefs=True)
+        s.skip = 0; s.cur = None; s.blocks = []; s.title = ""; s.in_title = False
+        s.article = 0; s.art_blocks = []; s.ld = None; s.lds = []
+    def handle_starttag(s, t, a):
+        if t == "script" and dict(a).get("type") == "application/ld+json": s.ld = ""
+        if t in SKIP: s.skip += 1
+        elif t == "article": s.article += 1
+        elif t == "title": s.in_title = True
+        elif t in BLOCK and not s.skip: s.cur = [t, ""]
+        elif t == "br" and s.cur: s.cur[1] += " "
+    def handle_endtag(s, t):
+        if t == "script" and s.ld is not None: s.lds.append(s.ld); s.ld = None
+        if t in SKIP and s.skip: s.skip -= 1
+        elif t == "article" and s.article: s.article -= 1
+        elif t == "title": s.in_title = False
+        elif t in BLOCK and s.cur and s.cur[0] == t:
+            txt = re.sub(r"\s+", " ", s.cur[1]).strip()
+            if txt:
+                s.blocks.append((t, txt))
+                if s.article: s.art_blocks.append((t, txt))
+            s.cur = None
+    def handle_data(s, d):
+        if s.ld is not None: s.ld += d
+        elif s.in_title: s.title += d
+        elif s.cur and not s.skip: s.cur[1] += d
+
+def cerca(o, k):
+    """trova ricorsivamente il valore piu lungo della chiave k nel JSON-LD"""
+    best = ""
+    if isinstance(o, dict):
+        for kk, v in o.items():
+            if kk == k and isinstance(v, str) and len(v) > len(best): best = v
+            else: best = max(best, cerca(v, k), key=len)
+    elif isinstance(o, list):
+        for v in o: best = max(best, cerca(v, k), key=len)
+    return best
+
+raw = sys.stdin.buffer.read()
+try: doc = raw.decode("utf-8")
+except UnicodeDecodeError: doc = raw.decode("cp1252", "replace")
+p = P(); p.feed(doc)
+
+blocks = p.art_blocks if sum(len(b) for _, b in p.art_blocks) > 500 else p.blocks
+blocks = [(t, b) for t, b in blocks if t.startswith("h") or len(b) > 60]
+
+# testo dal JSON-LD, se piu completo dei paragrafi
+body = ""
+for s in p.lds:
+    try: body = max(body, cerca(json.loads(s, strict=False), "articleBody"), key=len)
+    except ValueError: pass
+body = re.sub(r"<[^>]+>", " ", html.unescape(body))
+if len(body) > sum(len(b) for t, b in blocks if t == "p"):
+    blocks = [("p", re.sub(r"[ \t]+", " ", x).strip()) for x in re.split(r"\n\s*\n|\n", body) if x.strip()]
+
+w = min(shutil.get_terminal_size((100, 20)).columns - 4, 90)
+B, D, R = "\033[1m", "\033[2m", "\033[0m"
+print(B + textwrap.fill(p.title.strip(), w) + R + "\n")
+seen = set()
+for t, b in blocks:
+    if b in seen or "cookie" in b.lower(): continue
+    seen.add(b)
+    if t.startswith("h"): print(B + textwrap.fill(b, w) + R + "\n")
+    elif t == "li": print(textwrap.fill(b, w, initial_indent="  • ", subsequent_indent="    "))
+    else: print(textwrap.fill(b, w) + "\n")
+if "paywall" in doc or "premium" in p.title.lower():
+    print(D + "(possibile articolo a pagamento: il testo potrebbe essere parziale)" + R)
+print(D + sys.argv[1] + R)
+PY
+
+# Mostra un articolo nel terminale
+leggi() {
+  curl -sL -A "Mozilla/5.0" --compressed --max-time 20 "$1" | python3 -I -c "$PY_LEGGI" "$1" \
+    | less -R -Ps' j/k scorri · / cerca · \:q torna alla lista '
+}
+
+[[ ${1:-} == --leggi ]] && { leggi "$2"; exit; }
+
+# Opzioni fzf comuni alle due liste: si parte in modalità normale, come vim
+vim_fzf() {
+  local lista=$1; shift
+  local binds=()
+  # tutte le lettere e cifre passano da tasto(), così in modalità normale non finiscono nella query
+  for k in {a..z} {A..Z} {0..9} / : esc enter; do
+    binds+=(--bind "$k:transform:\"$SELF\" --tasto '$k' $lista")
+  done
+  # --exact: la ricerca trova la parola intera, non le lettere sparse
+  fzf --exact --disabled --prompt="> " "${binds[@]}" "$@"
+}
+
+declare -A FEEDS=(
+  [ANSA]="https://www.ansa.it/sito/notizie/topnews/topnews_rss.xml"
+  [Repubblica]="https://www.repubblica.it/rss/homepage/rss2.0.xml"
+  [Corriere]="https://xml2.corriereobjects.it/rss/homepage.xml"
+  [Sole24Ore]="https://www.ilsole24ore.com/rss/italia.xml"
+  [FattoQuotidiano]="https://www.ilfattoquotidiano.it/feed/"
+  [LaStampa]="https://www.lastampa.it/rss/copertina.xml"
+  [Manifesto]="https://ilmanifesto.it/feed"
+)
+
+TMP=$(mktemp -d); trap 'rm -rf "$TMP"' EXIT
+export NOTYZIE_TMP=$TMP
+
+# Scarica un feed RSS e lo trasforma in "giornale<TAB>titolo<TAB>link<TAB>descrizione"
+leggi_feed() {
+  local nome=$1 url=$2
+  curl -sL -A "Mozilla/5.0" --max-time 15 "$url" | python3 -I -c "$PY_FEED" "$nome" || true
+}
+
+while true; do
+  # 1) scegli i giornali (TAB per selezionarne più di uno)
+  scelti=$(printf '%s\n' "${!FEEDS[@]}" | sort \
+    | vim_fzf giornali --multi --height=40% \
+        --header="j/k muovi | TAB seleziona | l o INVIO conferma | / cerca | :q esci") || exit 0
+
+  # 2) scarica i feed in parallelo
+  rm -f "$TMP"/*.tsv
+  while read -r g; do leggi_feed "$g" "${FEEDS[$g]}" > "$TMP/$g.tsv" & done <<< "$scelti"
+  wait
+
+  # 3) scegli le notizie: l o INVIO legge nel terminale (:q in less per tornare alla lista)
+  #    :q torna ai giornali, :qa esce
+  esito=$(cat "$TMP"/*.tsv | vim_fzf notizie --multi --delimiter=$'\t' --with-nth=1,2 \
+      --header="j/k muovi | l o INVIO leggi (:q per tornare) | o browser | y copia link | / cerca | ESC normale | :q giornali | :qa esci" \
+      --preview='printf "\033[1m%s\033[0m\n\n%s\n\n\033[2m%s\033[0m\n" {2} {4} {3}' \
+      --preview-window=down,35%,wrap) || true
+  [[ $esito == :qa* ]] && exit 0
+done

@@ -1,0 +1,52 @@
+#!/usr/bin/env -S python3 -I
+"""notizie-feed NOME < feed.xml
+
+Legge un feed RSS da stdin e stampa una riga per notizia:
+NOME<TAB>titolo<TAB>link<TAB>descrizione
+"""
+import html
+import re
+import sys
+import xml.etree.ElementTree as ET
+
+
+def pulisci(testo):
+    testo = html.unescape(re.sub(r"<[^>]+>", " ", testo or ""))
+    testo = re.sub(r"\s+", " ", testo)  # anche tab e a capo, che romperebbero il TSV
+    testo = re.sub(r" The post .* first appeared on .*", "", testo).strip()
+    # alcuni feed (Corriere) ripetono lo stesso sommario più volte di seguito
+    ripetuto = re.fullmatch(r"(.{20,}?)(?: ?\1)+", testo)
+    return ripetuto.group(1).strip() if ripetuto else testo
+
+
+def items_xml(dati):
+    root = ET.fromstring(dati)
+    for item in root.iter("item"):
+        yield (item.findtext("title"), item.findtext("link"), item.findtext("description"))
+
+
+def items_regex(dati):
+    # ripiego per feed con XML non valido
+    testo = dati.decode("utf-8", "replace")
+    for item in re.findall(r"<item\b.*?</item>", testo, re.S):
+        def campo(nome):
+            m = re.search(rf"<{nome}\b[^>]*>(.*?)</{nome}>", item, re.S)
+            return re.sub(r"<!\[CDATA\[(.*?)\]\]>", r"\1", m.group(1), flags=re.S) if m else ""
+        yield (campo("title"), campo("link"), campo("description"))
+
+
+def main():
+    nome = sys.argv[1]
+    dati = sys.stdin.buffer.read()
+    try:
+        items = list(items_xml(dati))
+    except ET.ParseError:
+        items = list(items_regex(dati))
+    for titolo, link, descr in items:
+        titolo, link = pulisci(titolo), pulisci(link)
+        if titolo and link:
+            print(f"{nome}\t{titolo}\t{link}\t{pulisci(descr)}")
+
+
+if __name__ == "__main__":
+    main()
