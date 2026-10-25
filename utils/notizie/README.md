@@ -35,11 +35,15 @@ fatta sia in `notizie-feed`/`notizie-leggi` sia in `notyzie`.
 
 ## Dipendenze
 
-- `bash`, `curl`, `fzf`, `python3` (solo libreria standard), `less`
+- `bash` 5 o più recente, `curl`, `fzf`, `python3` (solo libreria standard), `less`
+- `stat` e `date` di GNU coreutils (per l'età della cache)
 - `xdg-open` per aprire il link nel browser (opzionale)
 - `wl-copy` (Wayland) o `xclip` (X11) per copiare il link (opzionale)
 
-`make check` le controlla.
+`make check` le controlla, tranne le versioni. L'aggiornamento in background
+della lista usa `fzf --listen` su un socket Unix e `curl --unix-socket`: con un
+`fzf` troppo vecchio la lista si vede lo stesso, ma non si aggiorna da sola
+(basta `:e`).
 
 ## Installazione
 
@@ -79,8 +83,9 @@ bash, `~/.profile` per le altre. Si può scegliere con `RC=~/.altro_file`.
 ## Uso
 
 1. Scegli uno o più giornali (`TAB` per selezionarne più di uno) e conferma con `l` o `INVIO`.
-2. I feed vengono scaricati in parallelo e compare la lista delle notizie, con
-   titolo, descrizione e link nell'anteprima in basso.
+2. Compare la lista delle notizie, con titolo, descrizione e link nell'anteprima
+   in basso. I feed vengono presi dalla cache, se è recente, o scaricati in
+   parallelo (vedi [Cache](#cache)).
 3. Apri una notizia con `l` o `INVIO`: il testo compare in `less`. Con `:q` torni
    alla lista, poi ai giornali; con `:qa` esci.
 
@@ -103,12 +108,37 @@ Si parte in modalità normale, come in vim. Il prompt indica la modalità.
 | comando | `:` | `:q` | indietro: dalle notizie ai giornali, dai giornali esce |
 | | | `:qa` | esci |
 | | | `:o` | apri la notizia nel browser |
+| | | `:e` | nelle notizie: riscarica subito i feed, ignorando la cache |
 | | | `ESC` | annulla |
 | articolo | `less` | `j` / `k` | scorri |
 | | | `/` | cerca nel testo |
 | | | `:q` | torna alla lista |
 
 Un comando sconosciuto mostra `E492` nell'intestazione.
+
+## Cache
+
+Le notizie scaricate vengono salvate in `~/.cache/notizie/<giornale>.tsv`
+(o in `$XDG_CACHE_HOME/notizie`), condivisa tra `notizie` e `notyzie`.
+
+| Cache del giornale | Cosa succede |
+|---|---|
+| non c'è | lo scarica subito, scrivendo `Scarico …` |
+| più recente di 10 minuti | mostra la lista subito, senza scaricare |
+| più vecchia | mostra subito la lista dalla cache e la riscarica in background; quando arriva, la lista si aggiorna da sola |
+
+L'intestazione indica l'ora della cache più vecchia tra i giornali scelti
+(`Notizie delle 20:31`). Durante l'aggiornamento in background aggiunge i
+giornali che sta scaricando (`· aggiorno ANSA Corriere…`) e alla fine diventa
+`Aggiornate alle …`. Se torni ai giornali prima che finisca, i download già
+partiti completano comunque la cache. Se un download fallisce,
+resta la cache vecchia. `:e` riscarica tutto subito.
+
+La durata si cambia con `NOTIZIE_TTL` (secondi, predefinito 600):
+
+```bash
+NOTIZIE_TTL=3600 notizie   # riscarica solo se la cache ha più di un'ora
+```
 
 ## Giornali
 
@@ -139,6 +169,12 @@ chiama `realpath` (fzf passa già il percorso assoluto) e, in `notyzie`, non
 carica il codice Python. Costa circa 4-5 ms per tasto. Quando entri in modalità comando, la query della
 ricerca viene salvata in un file temporaneo e ripristinata quando annulli. La
 directory temporanea viene cancellata all'uscita.
+
+L'aggiornamento in background usa `fzf --listen` su un socket Unix nella
+directory temporanea: finito il download, manda a fzf `reload-sync` con la cache
+nuova. Ogni lista ha il suo socket, così un aggiornamento in ritardo non finisce
+nella lista successiva. I file della cache si scrivono prima con un nome
+temporaneo e poi si rinominano, così una lista non legge mai un file a metà.
 
 Il lettore degli articoli prende titolo e paragrafi dalla pagina e scarta menu,
 script e banner dei cookie. Se la pagina contiene il testo completo nel JSON-LD

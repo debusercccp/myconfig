@@ -4,7 +4,9 @@
 #   normale (prompt "> ")  j/k su/giù, g/G inizio/fine, l o INVIO apri, o browser, y copia link,
 #                          / cerca, i riprendi ricerca, : comando
 #   ricerca (prompt "/")   scrivi per filtrare, ESC o INVIO torna in normale
-#   comando (prompt ":")   :q indietro (dalle notizie ai giornali, dai giornali esce), :qa esci, :o browser, ESC annulla
+#   comando (prompt ":")   :q indietro (dalle notizie ai giornali, dai giornali esce), :qa esci, :o browser,
+#                          :e riscarica i feed, ESC annulla
+# Cache dei feed in ~/.cache/notizie, riscaricata dopo NOTIZIE_TTL secondi (predefinito 600)
 #   articolo (less)        j/k scorri, / cerca, :q torna alla lista
 # Uso interno: notyzie --tasto TASTO LISTA (chiamato da fzf), notyzie --leggi URL (lettore articolo)
 set -euo pipefail
@@ -34,6 +36,9 @@ tasto() {
             # nelle notizie :q torna ai giornali (abort), :qa esce del tutto (stampa :qa e accetta)
             q|q!|wq|x|quit) echo abort ;;
             qa|qa!|exit) [[ $lista == notizie ]] && echo "print(:qa)+accept" || echo abort ;;
+            # :e riscarica i feed (come riaprire il file in vim)
+            e|e!|edit) [[ $lista == notizie ]] && echo "print(:e)+accept" \
+                 || echo "$normale+change-query:$(cat "$salvata" 2>/dev/null)" ;;
             o) [[ $lista == notizie ]] && echo "$normale+execute-silent:xdg-open {3} >/dev/null 2>&1 &" \
                  || echo "$normale+change-query:$(cat "$salvata" 2>/dev/null)" ;;
             *) echo "$normale+change-header(E492: comando sconosciuto :$cmd — usa :q per uscire)+change-query:$(cat "$salvata" 2>/dev/null)" ;;
@@ -228,22 +233,79 @@ leggi_feed() {
   curl -sL -A "Mozilla/5.0" --max-time 15 "$url" | python3 -I -c "$PY_FEED" "$nome" || true
 }
 
+CACHE=${XDG_CACHE_HOME:-$HOME/.cache}/notizie
+TTL=${NOTIZIE_TTL:-600}  # secondi dopo cui la cache di un giornale viene riscaricata
+mkdir -p "$CACHE"
+
+# Riscarica un giornale nella cache; se il download fallisce resta la cache vecchia
+aggiorna() {
+  local g=$1 nuovo="$CACHE/$1.tsv.$$.$BASHPID"
+  leggi_feed "$g" "${FEEDS[$g]}" > "$nuovo"
+  if [[ -s $nuovo ]]; then mv "$nuovo" "$CACHE/$g.tsv"; else rm -f "$nuovo"; fi
+}
+
+# Riscarica in parallelo i giornali passati come argomenti
+aggiorna_tutti() {
+  local pids=() g
+  for g in "$@"; do aggiorna "$g" & pids+=($!); done
+  wait "${pids[@]}"
+}
+
+TASTI="j/k muovi | l o INVIO leggi (:q per tornare) | o browser | y copia link | / cerca | ESC normale | :e aggiorna | :q giornali | :qa esci"
+n=0
+
 while true; do
   # 1) scegli i giornali (TAB per selezionarne più di uno)
   scelti=$(printf '%s\n' "${!FEEDS[@]}" | sort \
     | vim_fzf giornali --multi --height=40% \
         --header="j/k muovi | TAB seleziona | l o INVIO conferma | / cerca | :q esci") || exit 0
 
-  # 2) scarica i feed in parallelo
-  rm -f "$TMP"/*.tsv
-  while read -r g; do leggi_feed "$g" "${FEEDS[$g]}" > "$TMP/$g.tsv" & done <<< "$scelti"
-  wait
+  forza=0
+  while true; do
+    # 2) cache: si scarica subito solo ciò che manca (o tutto con :e);
+    #    i giornali con cache vecchia si mostrano subito e si aggiornano in background
+    subito=() dopo=() file=()
+    while read -r g; do
+      f=$CACHE/$g.tsv; file+=("$f")
+      if [[ ! -s $f || $forza == 1 ]]; then subito+=("$g")
+      elif (( EPOCHSECONDS - $(stat -c %Y "$f") > TTL )); then dopo+=("$g"); fi
+    done <<< "$scelti"
+    forza=0
 
-  # 3) scegli le notizie: l o INVIO legge nel terminale (:q in less per tornare alla lista)
-  #    :q torna ai giornali, :qa esce
-  esito=$(cat "$TMP"/*.tsv | vim_fzf notizie --multi --delimiter=$'\t' --with-nth=1,2 \
-      --header="j/k muovi | l o INVIO leggi (:q per tornare) | o browser | y copia link | / cerca | ESC normale | :q giornali | :qa esci" \
-      --preview='printf "\033[1m%s\033[0m\n\n%s\n\n\033[2m%s\033[0m\n" {2} {4} {3}' \
-      --preview-window=down,35%,wrap) || true
-  [[ $esito == :qa* ]] && exit 0
+    if (( ${#subito[@]} )); then
+      echo "Scarico ${subito[*]}…" >&2
+      aggiorna_tutti "${subito[@]}"
+    fi
+
+    printf -v ricarica ' %q' "${file[@]}"; ricarica="cat$ricarica 2>/dev/null"
+    vecchia=$(stat -c %Y "${file[@]}" 2>/dev/null | sort -n | head -1)
+    ora=$(date -d "@${vecchia:-$EPOCHSECONDS}" +%H:%M)
+    sock=$TMP/fzf-$((n++)).sock  # un socket per lista, così un aggiornamento in ritardo non finisce nella lista successiva
+    bg=
+    if (( ${#dopo[@]} )); then
+      stato="Notizie delle $ora · aggiorno ${dopo[*]}…"
+      # finito il download, chiede a fzf (via --listen) di ricaricare la lista
+      ( aggiorna_tutti "${dopo[@]}"
+        for _ in {1..50}; do [[ -S $sock ]] && break; sleep 0.1; done
+        curl -s --unix-socket "$sock" http://fzf \
+          -d "change-header[Aggiornate alle $(date +%H:%M)"$'\n'"$TASTI]+reload-sync:$ricarica" ) >/dev/null 2>&1 &
+      bg=$!
+    else
+      stato="Notizie delle $ora"
+    fi
+
+    # 3) scegli le notizie: l o INVIO legge nel terminale (:q in less per tornare alla lista)
+    #    :q torna ai giornali, :qa esce, :e riscarica
+    esito=$(eval "$ricarica" | vim_fzf notizie --multi --delimiter=$'\t' --with-nth=1,2 \
+        --listen="$sock" --header="$stato"$'\n'"$TASTI" \
+        --preview='printf "\033[1m%s\033[0m\n\n%s\n\n\033[2m%s\033[0m\n" {2} {4} {3}' \
+        --preview-window=down,35%,wrap) || true
+    [[ -n $bg ]] && kill "$bg" 2>/dev/null || true  # i download già partiti finiscono e aggiornano la cache
+
+    case $esito in
+      :qa*) exit 0 ;;
+      :e*) forza=1 ;;
+      *) break ;;
+    esac
+  done
 done
