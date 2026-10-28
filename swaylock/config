@@ -4,22 +4,22 @@ indicator-thickness=10
 show-failed-attempts
 
 # Formato RRGGBB senza #
-color=1a1112
-inside-color=1a1112
-inside-clear-color=e5bdc0
-inside-ver-color=ffb2ba
+color=14140c
+inside-color=14140c
+inside-clear-color=cac8a5
+inside-ver-color=cbcb77
 inside-wrong-color=ffb4ab
 
-ring-color=ffb2ba
-ring-clear-color=e5bdc0
-ring-ver-color=ffb2ba
+ring-color=cbcb77
+ring-clear-color=cac8a5
+ring-ver-color=cbcb77
 ring-wrong-color=ffb4ab
 
-line-color=1a1112
-key-hl-color=ffb2ba
+line-color=14140c
+key-hl-color=cbcb77
 bs-hl-color=ffb4ab
 
-text-color=f0dedf
-text-clear-color=1a1112
-text-ver-color=1a1112
-text-wrong-color=1a1112
+text-color=e6e3d5
+text-clear-color=14140c
+text-ver-color=14140c
+text-wrong-color=14140c

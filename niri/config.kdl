@@ -148,7 +148,7 @@ spawn-at-startup "dunst"
 
 /* Sfondo desktop - awww daemon e wallpaper con resize fill */
 spawn-at-startup "sh" "-c" "awww-daemon & sleep 0.5 && awww img \"$(cat ~/.cache/current_wallpaper)\" --resize crop"
-spawn-at-startup "awww" "img" "/home/noya/Immagini/flames.jpg" "--resize" "crop"
+spawn-at-startup "awww" "img" "/home/noya/Immagini/DSC04030.JPG" "--resize" "crop"
 
 /* Nightlight (filtro luce blu) */
 spawn-at-startup "/home/noya/.config/waybar/scripts/nightlight.sh" "toggle"
