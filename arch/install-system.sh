@@ -11,12 +11,8 @@ SRC="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)/etc"
 DRY=0; [[ ${1:-} == "-n" ]] && DRY=1
 [[ $DRY -eq 1 || $EUID -eq 0 ]] || { echo "Esegui con sudo (oppure -n per l'anteprima)"; exit 1; }
 
-# snapper: le config sono gestite da 'snapper create-config', non sovrascriverle
-EXCLUDE='^snapper/'
-
 changed=()
 while IFS= read -r rel; do
-    [[ $rel =~ $EXCLUDE ]] && continue
     dst="/etc/$rel"
     if [[ -f $dst ]] && cmp -s "$SRC/$rel" "$dst"; then continue; fi
     changed+=("$rel")

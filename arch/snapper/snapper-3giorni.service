@@ -1,0 +1,6 @@
+[Unit]
+Description=Snapshot snapper ogni 3 giorni (root e home)
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/snapper-3giorni

@@ -1,0 +1,34 @@
+# Valori desiderati per /etc/snapper/configs/home.
+# NON copiare questo file in /etc: install.sh applica ogni chiave con
+# 'snapper -c home set-config' (SUBVOLUME e FSTYPE vengono ignorati).
+
+SUBVOLUME="/home"
+FSTYPE="btrfs"
+QGROUP=""
+SPACE_LIMIT="0.5"
+FREE_LIMIT="0.2"
+ALLOW_USERS="noya"
+ALLOW_GROUPS=""
+SYNC_ACL="yes"
+BACKGROUND_COMPARISON="yes"
+
+# snapshot numerati (manuali)
+NUMBER_CLEANUP="yes"
+NUMBER_MIN_AGE="3600"
+NUMBER_LIMIT="50"
+NUMBER_LIMIT_IMPORTANT="10"
+
+# Timeline: niente orari, solo gli snapshot "ogni-3-giorni" creati dal timer.
+# Ognuno cade in un giorno diverso -> DAILY=10 = tiene gli ultimi 10 (~1 mese)
+TIMELINE_CREATE="no"
+TIMELINE_CLEANUP="yes"
+TIMELINE_MIN_AGE="3600"
+TIMELINE_LIMIT_HOURLY="0"
+TIMELINE_LIMIT_DAILY="10"
+TIMELINE_LIMIT_WEEKLY="0"
+TIMELINE_LIMIT_MONTHLY="0"
+TIMELINE_LIMIT_QUARTERLY="0"
+TIMELINE_LIMIT_YEARLY="0"
+
+EMPTY_PRE_POST_CLEANUP="yes"
+EMPTY_PRE_POST_MIN_AGE="3600"

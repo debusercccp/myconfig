@@ -1,0 +1,10 @@
+[Unit]
+Description=Controllo giornaliero per snapshot snapper ogni 3 giorni
+
+[Timer]
+OnCalendar=daily
+RandomizedDelaySec=30min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

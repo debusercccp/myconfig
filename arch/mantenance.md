@@ -7,6 +7,8 @@ Questo documento raccoglie le configurazioni e i comandi essenziali per mantener
 ## 1. Btrfs e Snapper (Gestione Snapshot)
 Lo stack `snapper` + `snap-pac` garantisce la creazione di snapshot automatici prima e dopo ogni operazione di `pacman` e la manutenzione temporale del sistema. Il filesystem è strutturato con un subvolume dedicato `@snapshots` montato in `/.snapshots`.
 
+Config, timer "ogni 3 giorni" e installazione: vedi [`snapper/README.md`](snapper/README.md).
+
 ### Comandi utili
 * **Vedere tutti gli snapshot disponibili:**
 ```bash

@@ -1,0 +1,21 @@
+#!/bin/bash
+# Crea uno snapshot snapper ogni 3 giorni per le config root e home.
+# Viene lanciato ogni giorno dal timer: crea lo snapshot solo se l'ultimo
+# "ogni-3-giorni" ha almeno 3 giorni (o se non ce n'e' nessuno).
+# La pulizia (ultimi 10) la fa snapper-cleanup tramite l'algoritmo "timeline".
+set -euo pipefail
+
+DESC="ogni-3-giorni"
+INTERVAL=$((3 * 24 * 3600 - 3600))   # 3 giorni meno 1h di tolleranza
+now=$(date +%s)
+
+for cfg in root home; do
+    last=$(snapper --iso --csvout -c "$cfg" list --columns date,description \
+           | awk -F, -v d="$DESC" '$2 == d { last = $1 } END { print last }')
+    if [[ -n "$last" ]] && (( now - $(date -d "$last" +%s) < INTERVAL )); then
+        echo "$cfg: ultimo snapshot del $last, niente da fare"
+        continue
+    fi
+    snapper -c "$cfg" create --cleanup-algorithm timeline --description "$DESC"
+    echo "$cfg: snapshot creato"
+done
