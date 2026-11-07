@@ -178,6 +178,9 @@ spawn-at-startup "systemctl" "--user" "start" "conky.service"
 binds {
     /* ---- Finestre di base ---- */
     Mod+Q { spawn "kitty"; }
+    /* Uscita sempre attiva: riprende le scorciatoie quando un'app (QEMU, VM, desktop remoto)
+       le ha catturate. allow-inhibiting=false: non può essere bloccata. */
+    Mod+Escape allow-inhibiting=false { toggle-keyboard-shortcuts-inhibit; }
     Mod+C { close-window; }
     Mod+R { spawn "fuzzel"; }
     Mod+Shift+E { quit; }
