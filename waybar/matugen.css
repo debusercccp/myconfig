@@ -3,27 +3,27 @@
    ================================================ */
 
 /* Colori Base */
-@define-color fg #e5e1e9;
-@define-color bg #131318;
+@define-color fg #f1dfda;
+@define-color bg #1a110f;
 
 /* Trasparenze: Usiamo la variabile @bg di GTK, che il parser digerisce senza errori */
 @define-color bg-transparent alpha(@bg, 0.8);
 @define-color bg-semi alpha(@bg, 0.93);
 
 /* Accenti e Stati */
-@define-color accent #c5c0ff;
-@define-color secondary #c8c4dc;
-@define-color tertiary #ebb8d0;
+@define-color accent #ffb59f;
+@define-color secondary #e7bdb1;
+@define-color tertiary #d8c68d;
 @define-color warning #ffb4ab;
 
 /* ---- COLORI MODULI SPECIFICI ---- */
-@define-color color-clock #c5c0ff;
-@define-color color-battery #c8c4dc;
-@define-color color-network #ebb8d0;
+@define-color color-clock #ffb59f;
+@define-color color-battery #e7bdb1;
+@define-color color-network #d8c68d;
 @define-color color-cpu #ffb4ab;
-@define-color color-memory #444078;
-@define-color color-disk #474559;
-@define-color color-bluetooth #613b4e;
-@define-color color-audio #c5c0ff;
+@define-color color-memory #723522;
+@define-color color-disk #5d4037;
+@define-color color-bluetooth #524619;
+@define-color color-audio #ffb59f;
 @define-color color-power #ffb4ab;
-@define-color color-updates #c8c4dc;
+@define-color color-updates #e7bdb1;

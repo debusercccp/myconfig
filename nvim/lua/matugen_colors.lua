@@ -1,6 +1,6 @@
 return {
-    background = "#131318",
-    foreground = "#e5e1e9",
-    primary = "#c5c0ff",
+    background = "#1a110f",
+    foreground = "#f1dfda",
+    primary = "#ffb59f",
     error = "#ffb4ab",
 }
